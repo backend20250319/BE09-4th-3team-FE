@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🛠️ 프로젝트 사용 가이드
 
-## Getting Started
+## 1. 레포지토리 클론
 
-First, run the development server:
+    git clone <레포지토리 URL>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 2. 프로젝트 설치 및 실행
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+    cd <프로젝트 폴더>
+    npm install     # Next.js 서버 실행을 위한 node_modules 설치
+    npm run dev     # 개발 서버 실행
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 3. 브랜치 전략
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 브랜치는 **기능별로 나누지 않고**, 혼동을 줄이기 위해 **각자 이름 브랜치로 통일**합니다.
+- `main` 브랜치에서 개인 브랜치를 생성한 후 작업을 진행해주세요.
 
-## Learn More
+| 이름   | 브랜치명 | 브랜치 생성 명령어         |
+| ------ | -------- | -------------------------- |
+| 임나연 | nayeon   | `git checkout -b nayeon`   |
+| 조석근 | seokgeun | `git checkout -b seokgeun` |
+| 박준범 | junbem   | `git checkout -b junbem`   |
+| 이석진 | seokjin  | `git checkout -b seokjin`  |
+| 지정호 | jungho   | `git checkout -b jungho`   |
 
-To learn more about Next.js, take a look at the following resources:
+> 🔁 브랜치 생성 명령어 실행 전 `main` 브랜치에서 시작했는지 꼭 확인하세요!
+>
+> ```bash
+> git checkout main
+> git pull origin main
+> git checkout -b <브랜치명>
+> ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 4. 작업 디렉토리
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+각자 이름으로 된 폴더 내에서 작업 진행
 
-## Deploy on Vercel
+    📁 nayeon
+    📁 seokgeun
+    📁 junbem
+    📁 seokjin
+    📁 jungho
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📌 참고사항
+
+- 현재 프로젝트는 **기본 틀만 구성된 상태**입니다.
+- 메인 페이지, 헤더, 푸터 등은 아직 구현되지 않았습니다.
+- 각자 담당 파트를 나누어 작업을 시작해주세요.
