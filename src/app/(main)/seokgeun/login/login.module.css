@@ -1,0 +1,75 @@
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.leftPanel {
+  flex: 1;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10rem;
+}
+
+.loginBox {
+  max-width: 320px;
+  width: 100%;
+}
+
+.logoContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* 👉 오른쪽 정렬 */
+  margin-right: 17rem;
+  margin-bottom: 8rem;
+}
+
+/* 좌측 상단에 로고 고정 */
+.logo {
+  position: absolute;
+  top: 0.5rem;
+  left: 1rem;
+  z-index: 50;
+  margin: 0;
+}
+
+.description {
+  font-size: 20px;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.kakaoButton {
+  width: 100%;
+  background-color: #29d612;
+  color: #000;
+  padding: 0.75rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.signup {
+  text-align: center;
+  font-size: 13px;
+  margin-top: 1rem;
+}
+
+.rightPanel {
+  flex: 1;
+  background-size: cover;
+  background-position: center;
+  margin-right: 15px;
+}
