@@ -18,23 +18,6 @@
   width: 100%;
 }
 
-.logoContainer {
-  width: 100%;
-  display: flex;
-  justify-content: center; /* 👉 오른쪽 정렬 */
-  margin-right: 17rem;
-  margin-bottom: 8rem;
-}
-
-/* 좌측 상단에 로고 고정 */
-.logo {
-  position: absolute;
-  top: 0.5rem;
-  left: 1rem;
-  z-index: 50;
-  margin: 0;
-}
-
 .description {
   font-size: 20px;
   text-align: center;

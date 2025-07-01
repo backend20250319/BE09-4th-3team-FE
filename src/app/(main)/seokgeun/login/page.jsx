@@ -29,13 +29,7 @@ export default function LoginPage() {
       {/* 좌측 로그인 박스 */}
       <div className={styles.leftPanel}>
         {/* 🔥 좌측 상단 로고 고정 */}
-        <div className={styles.logoContainer}>
-          <img
-            src="/login_register/favicon.png"
-            alt="logo"
-            width={50}
-            height={50}
-          />
+        <div className={styles.logoContainer}> 
         </div>
 
         <div className={styles.loginBox}>
