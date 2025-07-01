@@ -18,7 +18,7 @@ export default function Main() {
           <Link href="/seokjin">이석진</Link>
         </li>
         <li className="hover:text-[#8446ff]">
-          <Link href="/jungho">지정호</Link>
+          <Link href="/project">지정호</Link>
         </li>
       </ul>
     </>
