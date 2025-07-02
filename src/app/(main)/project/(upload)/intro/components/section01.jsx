@@ -11,7 +11,7 @@ export default function Section01() {
         </h2>
         <p className="mt-5 text-[#6d6d6d] text-center">취향이 모여 세상을 바꾸는 텀블벅에서</p>
         <div className="flex justify-center gap-3 mt-9">
-          <Link href="#" className="py-[11px] px-6 bg-[#f86453] cursor-pointer text-white text-[14px]">
+          <Link href="/project/main" className="py-[11px] px-6 bg-[#f86453] cursor-pointer text-white text-[14px]">
             지금 시작하기
           </Link>
           <Link href="#" className="py-[11px] px-6 border border-[#e4e4e4] bg-white text-[14px] text-[#3d3d3d]">
