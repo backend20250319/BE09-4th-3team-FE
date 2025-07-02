@@ -1,0 +1,46 @@
+/* adminheader.css */
+@import "tailwindcss";
+
+.admin-header {
+    @apply w-full flex items-center justify-between px-6 py-4 border-b shadow-sm bg-white;
+}
+
+.admin-left {
+    @apply flex items-center gap-2;
+}
+
+.admin-left span {
+    @apply font-semibold text-black underline;
+}
+
+.admin-nav {
+    @apply flex gap-6 text-gray-500;
+}
+
+.admin-nav a {
+    @apply hover:text-black;
+}
+
+.admin-search-container {
+    @apply relative;
+}
+
+.admin-search-input {
+    @apply pl-8 pr-4 py-2 rounded-md border border-gray-300 bg-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300;
+}
+
+.admin-search-icon {
+    @apply absolute left-2 top-1/2 -translate-y-1/2 text-gray-400;
+}
+
+.admin-right {
+    @apply flex items-center gap-4;
+}
+
+.admin-icon-button {
+    @apply p-2 rounded-full hover:bg-gray-100;
+}
+
+.admin-profile {
+    @apply w-9 h-9 rounded-full bg-gray-100;
+}
