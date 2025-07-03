@@ -1,5 +1,12 @@
-import React from "react";
+import Link from "next/link";
 
 export default function Page() {
-  return <>프론트 작성 ㄱㄱ 화이팅~</>;
+  return (
+    <>
+      <Link href="/nayeon/notification">알림 페이지 이동</Link>
+      <br />
+      <br />
+      <Link href="/nayeon/review">리뷰 작성 페이지 이동</Link>
+    </>
+  );
 }
