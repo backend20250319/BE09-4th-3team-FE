@@ -157,3 +157,60 @@
 .deleteButton:hover {
   color: #357abd;
 }
+
+/* ----------------- 페이징 관련 스타일 ----------------- */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 18px;
+  user-select: none;
+}
+
+.pageButton {
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666666;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  min-width: 28px;
+  text-align: center;
+  border-radius: 0;
+}
+
+.pageButton:hover {
+  color: #ff6b35;
+}
+
+.activePage {
+  font-weight: 700;
+  color: #ff6b35;
+  border-bottom: 2px solid #ff6b35;
+  cursor: default;
+}
+
+.pageNavButton {
+  padding: 6px 8px;
+  background: transparent;
+  border: none;
+  color: #999999;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.2s;
+  user-select: none;
+}
+
+.pageNavButton:hover:not(:disabled) {
+  color: #ff6b35;
+}
+
+.pageNavButton:disabled {
+  color: #ddd;
+  cursor: default;
+}

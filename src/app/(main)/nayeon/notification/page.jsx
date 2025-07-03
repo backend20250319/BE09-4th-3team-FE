@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import styles from "./notification.module.css";
 
@@ -12,50 +11,51 @@ const tabs = [
 
 export default function NotificationPage() {
   const [currentTab, setCurrentTab] = useState("all");
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState([]); // 알림 리스트
+  const [page, setPage] = useState(0); // 현재 페이지
+  const [totalPages, setTotalPages] = useState(0); // 총 페이지 수
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const userNo = 8; // 실제로는 로그인한 유저 번호를 넣으세요
 
   useEffect(() => {
     setLoading(true);
     setError(null);
-
-    const token = localStorage.getItem("accessToken"); // 로그인 시 저장된 토큰 꺼냄
-
-    // let url = "http://localhost:8888/notifications";
-    // if (currentTab !== "all") {
-    //   url += `?type=${currentTab}`;
-    // }
-
-    const userNo = 8;
-
-    let url = `http://localhost:8888/notifications?userNo=${userNo}`;
+    const token = localStorage.getItem("accessToken");
+    let url = `http://localhost:8888/notifications?userNo=${userNo}&page=${page}&size=5`;
     if (currentTab !== "all") {
       url += `&type=${currentTab}`;
     }
 
+    console.log("요청 URL:", url); // 디버깅용
+    console.log("현재 탭:", currentTab); // 디버깅용
+
     fetch(url, {
       headers: {
-        Authorization: `Bearer ${token}`, // JWT 토큰 헤더에 포함
+        Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => {
-        if (!res.ok) {
-          throw new Error("네트워크 응답에 문제가 있습니다.");
-        }
+        if (!res.ok) throw new Error("네트워크 응답에 문제가 있습니다.");
         return res.json();
       })
       .then((data) => {
-        setNotifications(data);
+        console.log("받은 데이터:", data); // 디버깅용
+        setNotifications(data.content);
+        setTotalPages(data.totalPages);
       })
       .catch((err) => {
         setError(err.message);
         setNotifications([]);
       })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [currentTab]);
+      .finally(() => setLoading(false));
+  }, [currentTab, page]);
+
+  const handleTabClick = (tabId) => {
+    setCurrentTab(tabId);
+    setPage(0);
+  };
 
   return (
     <div className={styles.container}>
@@ -65,7 +65,7 @@ export default function NotificationPage() {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setCurrentTab(tab.id)}
+            onClick={() => handleTabClick(tab.id)}
             className={`${styles.tabButton} ${
               currentTab === tab.id ? styles.activeTab : ""
             }`}
@@ -109,6 +109,40 @@ export default function NotificationPage() {
               </div>
             </div>
           ))}
+      </div>
+
+      {/* 페이징 버튼 */}
+      <div className={styles.pagination}>
+        <button
+          className={styles.pageNavButton}
+          onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+          disabled={page === 0}
+          aria-label="이전 페이지"
+        >
+          &#8592;
+        </button>
+
+        {Array.from({ length: totalPages }, (_, i) => (
+          <button
+            key={i}
+            className={`${styles.pageButton} ${
+              page === i ? styles.activePage : ""
+            }`}
+            onClick={() => setPage(i)}
+            aria-current={page === i ? "page" : undefined}
+          >
+            {i + 1}
+          </button>
+        ))}
+
+        <button
+          className={styles.pageNavButton}
+          onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
+          disabled={page === totalPages - 1 || totalPages === 0}
+          aria-label="다음 페이지"
+        >
+          &#8594;
+        </button>
       </div>
     </div>
   );
