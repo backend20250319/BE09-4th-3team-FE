@@ -1,0 +1,63 @@
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.leftPanel {
+  flex: 1;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10rem;
+}
+
+.description {
+  font-size: 20px;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.kakaoButton {
+  width: 100%;
+  background-color: #fee500;
+  color: #000;
+  padding: 0.75rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.googleButton {
+  width: 100%;
+  background-color: #0a89f183; /* 구글 버튼 색상 */
+  color: #fff;
+  padding: 0.75rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.signup {
+  text-align: center;
+  font-size: 13px;
+  margin-top: 1rem;
+}
+
+.loginLink {
+  text-align: center;
+  font-size: 13px;
+  margin-top: 1rem;
+}
+
+.rightPanel {
+  flex: 1;
+  background-size: cover;
+  background-position: center;
+  margin-right: 15px;
+}
