@@ -46,7 +46,7 @@
 .activeTab {
   color: #000000;
   font-weight: 600;
-  border-bottom: none; /* 기본 border-bottom 제거 */
+  border-bottom: none;
   position: relative;
 }
 
@@ -57,10 +57,10 @@
   left: 50%;
   transform: translateX(-50%);
   width: fit-content;
-  min-width: 50%; /* 최소 너비 설정 */
+  min-width: 50%;
   height: 2px;
   background-color: #ff6b35;
-  width: calc(100% - 35px); /* 좌우 패딩 16px씩 제외 */
+  width: calc(100% - 35px);
 }
 
 .notificationList {
@@ -69,6 +69,10 @@
   border-radius: 4px;
   margin-top: 20px;
   overflow: hidden;
+}
+
+.notificationList.loading {
+  border: none;
 }
 
 .notificationItem {
