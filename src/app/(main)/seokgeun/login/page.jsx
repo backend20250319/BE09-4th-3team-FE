@@ -1,5 +1,6 @@
 "use client";
 
+import Header from "@/components/header/Header";
 import Image from "next/image";
 import React, { useState } from "react";
 import styles from "./login.module.css";

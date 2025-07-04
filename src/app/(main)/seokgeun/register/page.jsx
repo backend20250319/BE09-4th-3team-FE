@@ -1,5 +1,6 @@
 "use client";
 
+import Header from "@/components/header/Header";
 import React, { useState, useEffect } from "react";
 import termsText from "./termsText";
 import styles from "./register.module.css";

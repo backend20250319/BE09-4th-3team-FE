@@ -1,5 +1,6 @@
 "use client";
 
+import Header from "@/components/header/Header";
 import Image from "next/image";
 import React from "react";
 import styles from "./css/main.module.css";
