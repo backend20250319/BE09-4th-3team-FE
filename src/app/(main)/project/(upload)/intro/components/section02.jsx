@@ -14,8 +14,7 @@ export default function Section02() {
     <section className="w-full mt-[70px] h-[383px] ">
       <Swiper
         modules={[Autoplay]}
-        slidesPerView={7}
-        spaceBetween={40}
+        slidesPerView={6}
         centeredSlides={true}
         allowTouchMove={false}
         loop

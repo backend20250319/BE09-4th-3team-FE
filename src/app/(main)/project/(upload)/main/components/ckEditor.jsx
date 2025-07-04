@@ -6,11 +6,17 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 import "../css/editor.css";
 
-export default function CkEditor({ onChange }) {
+export default function CkEditor({ onChange, data = "" }) {
+  const serverUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   return (
     <CKEditor
       editor={ClassicEditor}
+      data={data} // ✅ 초기값 전달
       config={{
+        ckfinder: {
+          uploadUrl: `${serverUrl}/api/project/images/ckeditor-upload`,
+        },
         toolbar: [
           "heading",
           "|",

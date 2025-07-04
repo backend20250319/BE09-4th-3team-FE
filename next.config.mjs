@@ -1,7 +1,18 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8888",
+        pathname: "/images/**", // 실제 이미지 경로에 따라 조정
+      },
+    ],
+  },
+};
 
-// --- [프론트엔드 /api 요청을 백엔드로 프록시하는 rewrite 설정 추가] ---
+// 프록시 설정
 export async function rewrites() {
   return [
     {
