@@ -1,0 +1,312 @@
+/* 메인 컨테이너 */
+.mysettings-main-container {
+  max-width: 1160px;
+  margin: 60px auto 0 auto;
+  background: #fff;
+  padding: 0 0 40px 0;
+}
+.mysettings-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+  color: #191919;
+  text-align: left;
+}
+.mysettings-horizontal-tabs {
+  display: flex;
+  gap: 36px;
+  border-bottom: 2px solid #f3f3f3;
+  margin-bottom: 32px;
+  margin-top: 8px;
+  padding-left: 2px;
+}
+.mysettings-horizontal-tab {
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 20px;
+  font-weight: 500;
+  color: #bbb;
+  padding: 0 0 14px 0;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: color 0.2s, border-bottom 0.2s;
+}
+.mysettings-horizontal-tab.active {
+  color: #191919;
+  font-weight: 700;
+  border-bottom: 3px solid #191919;
+}
+.mysettings-profile-table-row-wrapper {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+.mysettings-profile-table {
+  flex: 1;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  padding: 0;
+  min-width: 0;
+}
+.mysettings-profile-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 32px 0 20px -50px;
+  min-height: 40px;
+  border-bottom: 1px solid #ececec;
+  position: relative;
+}
+.mysettings-profile-row.mysettings-profile-desc-row {
+  background: none;
+  border-bottom: none;
+  padding: 0 0 16px 24px;
+  align-items: flex-start;
+}
+.mysettings-profile-row:first-child {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+.mysettings-profile-row:last-child {
+  border-bottom: none;
+}
+.mysettings-profile-col {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.mysettings-profile-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0px;
+  margin-top: 10px;
+}
+.mysettings-profile-value {
+  font-size: 15px;
+  color: #444;
+  margin-top: 40px;
+}
+.mysettings-profile-img-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f3f3f3;
+  border: 1.5px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 24px;
+  margin-right: 24px;
+  cursor: pointer;
+}
+.mysettings-profile-img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.mysettings-profile-desc-guide {
+  font-size: 13px;
+  color: #aaa;
+  margin-bottom: 4px;
+  line-height: 1.5;
+}
+.mysettings-profile-empty {
+  color: #bbb;
+  font-size: 15px;
+}
+.mysettings-profile-edit-input {
+  font-size: 16px;
+  font-weight: 500;
+  color: #222;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-right: 8px;
+  background: #fafbfc;
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+  resize: none;
+  margin-bottom: 0;
+}
+.mysettings-profile-edit-input:focus {
+  outline: 2px solid #d32f2f;
+  border-color: #d32f2f;
+}
+.mysettings-profile-action {
+  min-width: 90px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-left: 16px;
+}
+.mysettings-profile-action-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  width: 100px;
+  margin-left: 16px;
+  margin-bottom: 100px;
+}
+.mysettings-edit-btn,
+.mysettings-cancel-btn {
+  margin-left: 0;
+  margin-bottom: 10px;
+  align-self: center;
+}
+.mysettings-edit-btn {
+  border: 1px solid #eee;
+  background: #fafafa;
+  border-radius: 20px;
+  padding: 4px 18px;
+  font-size: 15px;
+  cursor: pointer;
+  height: 32px;
+  transition: border 0.2s, background 0.2s;
+}
+.mysettings-edit-btn:hover {
+  border: 1.5px solid #d32f2f;
+  background: #fff0f0;
+}
+.mysettings-profile-guide-block {
+  min-width: 320px;
+  max-width: 380px;
+  border: 1px solid #eee;
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 20px;
+  font-size: 14px;
+  color: #444;
+}
+.mysettings-profile-edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.mysettings-save-btn {
+  background: #191919;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-bottom: 0;
+}
+.mysettings-save-btn:hover {
+  background: #333;
+}
+.mysettings-cancel-btn {
+  background: #222;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.mysettings-cancel-btn:hover {
+  background: #444;
+}
+.mysettings-profile-row textarea.mysettings-profile-edit-input {
+  min-height: 50px;
+  resize: vertical;
+}
+
+/* Remove center image block styles */
+.mysettings-profile-image-center-block,
+.mysettings-profile-img-center-wrap,
+.mysettings-profile-img-center {
+  display: none !important;
+  margin-top: 10px;
+}
+
+.mysettings-profile-img-left-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 8px;
+  padding-left: 0;
+}
+.mysettings-profile-img-wrap {
+  margin-left: 0 !important;
+  align-self: flex-start;
+  display: block;
+}
+.mysettings-profile-img {
+  display: block;
+  margin: 0;
+}
+
+.mysettings-profile-img-edit-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  margin-top: 12px;
+}
+.mysettings-profile-img-upload-btn {
+  background: #fff;
+  border: 1.5px solid #ccc;
+  border-radius: 4px;
+  font-size: 15px;
+  color: #444;
+  padding: 6px 18px;
+  cursor: pointer;
+  margin-left: 0;
+  margin-right: 0;
+  transition: border 0.2s, background 0.2s;
+}
+.mysettings-profile-img-upload-btn:hover {
+  border: 1.5px solid #191919;
+  background: #f5f5f5;
+}
+.mysettings-profile-edit-actions {
+  margin-left: 0;
+}
+.mysettings-profile-img-upload-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 20px;
+}
+.mysettings-profile-desc-guide {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #888;
+  line-height: 1.5;
+  font-weight: 400;
+  margin-left: 0;
+}
+
+@media (max-width: 900px) {
+  .mysettings-profile-table-row-wrapper {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .mysettings-profile-guide-block {
+    margin-left: 0;
+    margin-top: 24px;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .mysettings-profile-table {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+}

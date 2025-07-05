@@ -10,6 +10,18 @@ export default function Header() {
   const [nickname, setNickname] = useState("");
   const [isLogin, setIsLogin] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profileImg, setProfileImg] = useState(
+    "/images/default_login_icon.png"
+  );
+  useEffect(() => {
+    const updateProfileImg = () => {
+      const savedImg = localStorage.getItem("profileImg");
+      setProfileImg(savedImg || "/images/default_login_icon.png");
+    };
+    updateProfileImg();
+    window.addEventListener("storage", updateProfileImg);
+    return () => window.removeEventListener("storage", updateProfileImg);
+  }, []);
 
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
@@ -247,7 +259,7 @@ export default function Header() {
                   onClick={handleNicknameClick}
                 >
                   <Image
-                    src={"/images/default_login_icon.png"}
+                    src={profileImg}
                     width={24}
                     height={24}
                     alt="기본 로그인 아이콘"
@@ -278,26 +290,63 @@ export default function Header() {
                           후원한 프로젝트
                         </Link>
                       </li>
-                      <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                        내 후기
+
+                      <li>
+                        <Link
+                          href="/seokgeun/myreview"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          내 후기
+                        </Link>
                       </li>
-                      <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                        관심 프로젝트
+                      <li>
+                        <Link
+                          href="/seokgeun/myliked"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          관심 프로젝트
+                        </Link>
                       </li>
-                      <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                        팔로우
+                      <li>
+                        <Link
+                          href="/seokgeun/myfollow"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          팔로우
+                        </Link>
                       </li>
-                      <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                        알림
+                      <li>
+                        <Link
+                          href="/seokgeun/mynotification"
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          알림
+                        </Link>
                       </li>
-                      <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                        메시지
+                      <li>
+                        <Link
+                          href="/seokgeun/mymessage"
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          메시지
+                        </Link>
                       </li>
-                      <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                        내가 만든 프로젝트
+
+                      <li>
+                        <Link
+                          href="/seokgeun/myproject"
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          내가 만든 프로젝트
+                        </Link>
                       </li>
-                      <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                        설정
+                      <li>
+                        <Link
+                          href="/seokgeun/mysettings"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          설정
+                        </Link>
                       </li>
                       <li
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"

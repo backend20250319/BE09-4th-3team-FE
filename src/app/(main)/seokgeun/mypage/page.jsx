@@ -11,6 +11,28 @@ const TAB_LIST = [
   { key: "following", label: "팔로잉" },
 ];
 
+const PROFILE_STATS = [
+  {
+    label: (
+      <>
+        팔로잉 <span className="mypage-link">&gt;</span>
+      </>
+    ),
+    value: "-",
+    key: "following",
+  },
+  { label: "후원수", value: "-", key: "supportCount" },
+  {
+    label: (
+      <>
+        창작생태계 기여도 <span className="mypage-link">&gt;</span>
+      </>
+    ),
+    value: "-",
+    key: "contribution",
+  },
+];
+
 export default function MyPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -68,6 +90,7 @@ export default function MyPage() {
 
   return (
     <div className="mypage-container">
+      <div className="sponsored-divider"></div>
       <div className="mypage-profile-row">
         <div className="mypage-profile-img">
           <Image
@@ -79,17 +102,13 @@ export default function MyPage() {
         </div>
         <div className="mypage-profile-info">
           <div className="mypage-nickname">{user?.nickname || "-"}</div>
-          <div className="mypage-profile-stats">
-            <span>
-              팔로잉 <b>-</b>
-            </span>
-            <span>
-              후원수 <b>-</b>
-            </span>
-            <span>
-              창작생태계 기여도 <b>-</b>
-            </span>
-            <span className="mypage-link">창작생태계 기여도 &gt;</span>
+          <div className="mypage-profile-stats-block-row">
+            {PROFILE_STATS.map((stat) => (
+              <div className="mypage-profile-stat-item" key={stat.key}>
+                <div className="mypage-profile-stat-label">{stat.label}</div>
+                <div className="mypage-profile-stat-value">{stat.value}</div>
+              </div>
+            ))}
           </div>
         </div>
         <button className="mypage-edit-btn">프로필 편집</button>
