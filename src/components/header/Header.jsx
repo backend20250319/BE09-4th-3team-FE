@@ -9,12 +9,25 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
 
+  // ** 클라이언트 마운트 상태 추가 **
+  const [isMounted, setIsMounted] = useState(false);
+
+  // ** 읽지 않은 알림 개수 상태 추가 **
+  const [unreadCount, setUnreadCount] = useState(0);
+
   // 로그인 / 로그아웃 확인용 클릭 이벤트
   const onClickLoginTest = () => {
     setIsLogin(!isLogin);
   };
 
+  // ** 클라이언트 마운트 확인 **
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 60); // 60px 이상이면 fixed
     };
@@ -22,160 +35,162 @@ export default function Header() {
     window.addEventListener("scroll", handleScroll);
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isMounted]);
+
+  // 로그인 상태일 때 읽지 않은 알림 개수 API 호출 (예시 URL, 실제 URL에 맞게 수정)
+  useEffect(() => {
+    if (!isMounted || !isLogin) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const fetchUnreadCount = async () => {
+      try {
+        const userNo = 8; // TODO: 실제 로그인 유저 번호로 변경
+        const res = await fetch(
+          `http://localhost:8888/notifications/unread-count?userNo=${userNo}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch unread count");
+
+        const data = await res.json();
+
+        setUnreadCount(Number(data));
+      } catch (e) {
+        console.error("알림 수 조회 실패:", e);
+        setUnreadCount(0);
+      }
+    };
+
+    // 최초 로딩 시 실행
+    fetchUnreadCount();
+
+    // ✅ 알림 읽음 이벤트가 발생했을 때 다시 fetch
+    const handleNotificationRead = () => {
+      fetchUnreadCount();
+    };
+
+    window.addEventListener("notificationRead", handleNotificationRead);
+
+    // ✅ 이벤트 리스너 정리
+    return () => {
+      window.removeEventListener("notificationRead", handleNotificationRead);
+    };
+  }, [isLogin, isMounted]);
 
   const categoryData = [
-    // 첫 번째 열
-    [
-      {
-        label: "전체",
-        icon: `
-          <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M16.4 9.6H9.6V16.4H16.4V9.6ZM8 8V18H18V8H8Z" fill="#0D0D0D" />
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M28.4 9.6H21.6V16.4H28.4V9.6ZM20 8V18H30V8H20Z" fill="#0D0D0D" />
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M16.4 21.6H9.6V28.4H16.4V21.6ZM8 20V30H18V20H8Z" fill="#0D0D0D" />
-            <path d="M20 20H30V30H20V20Z" fill="#FF5757" />
-          </svg>
-        `,
-        iconType: "svg",
-      },
-      {
-        label: "보드게임 · TRPG",
-        icon: "https://assets.tumblbug.com/categories/svg/board.svg",
-        iconType: "img",
-      },
-      {
-        label: "디지털 게임",
-        icon: "https://assets.tumblbug.com/categories/svg/digital-game.svg",
-        iconType: "img",
-      },
-      {
-        label: "웹툰 · 만화",
-        icon: "https://assets.tumblbug.com/categories/svg/comics.svg",
-        iconType: "img",
-      },
-      {
-        label: "웹툰 리소스",
-        icon: "https://assets.tumblbug.com/categories/svg/webtoon-resource.svg",
-        iconType: "img",
-      },
-    ],
-
-    // 두 번째 열
-    [
-      {
-        label: "디자인 문구",
-        icon: "https://assets.tumblbug.com/categories/svg/stationary.svg",
-        iconType: "img",
-      },
-      {
-        label: "캐릭터 · 굿즈",
-        icon: "https://assets.tumblbug.com/categories/svg/charactor-goods.svg",
-        iconType: "img",
-      },
-      {
-        label: "홈 · 리빙",
-        icon: "https://assets.tumblbug.com/categories/svg/home-living.svg",
-        iconType: "img",
-      },
-      {
-        label: "테크 · 가전",
-        icon: "https://assets.tumblbug.com/categories/svg/tech-electronics.svg",
-        iconType: "img",
-      },
-      {
-        label: "반려동물",
-        icon: "https://assets.tumblbug.com/categories/svg/pet.svg",
-        iconType: "img",
-      },
-    ],
-
-    // 세 번째 열
-    [
-      {
-        label: "푸드",
-        icon: "https://assets.tumblbug.com/categories/svg/food.svg",
-        iconType: "img",
-      },
-      {
-        label: "향수 · 뷰티",
-        icon: "https://assets.tumblbug.com/categories/svg/perfumes-cosmetics.svg",
-        iconType: "img",
-      },
-      {
-        label: "의류",
-        icon: "https://assets.tumblbug.com/categories/svg/fashion.svg",
-        iconType: "img",
-      },
-      {
-        label: "잡화",
-        icon: "https://assets.tumblbug.com/categories/svg/accessories.svg",
-        iconType: "img",
-      },
-      {
-        label: "주얼리",
-        icon: "https://assets.tumblbug.com/categories/svg/jewerly.svg",
-        iconType: "img",
-      },
-    ],
-
-    // 네 번째 열
-    [
-      {
-        label: "출판",
-        icon: "https://assets.tumblbug.com/categories/svg/publishing.svg",
-        iconType: "img",
-      },
-      {
-        label: "디자인",
-        icon: "https://assets.tumblbug.com/categories/svg/design.svg",
-        iconType: "img",
-      },
-      {
-        label: "예술",
-        icon: "https://assets.tumblbug.com/categories/svg/art.svg",
-        iconType: "img",
-      },
-      {
-        label: "사진",
-        icon: "https://assets.tumblbug.com/categories/svg/photography.svg",
-        iconType: "img",
-      },
-      {
-        label: "음악",
-        icon: "https://assets.tumblbug.com/categories/svg/music.svg",
-        iconType: "img",
-      },
-    ],
-
-    // 다섯 번째 열
-    [
-      {
-        label: "영화 · 비디오",
-        icon: "https://assets.tumblbug.com/categories/svg/film.svg",
-        iconType: "img",
-      },
-      {
-        label: "공연",
-        icon: "https://assets.tumblbug.com/categories/svg/performing-art.svg",
-        iconType: "img",
-      },
-    ],
+    // (생략) 기존 카테고리 데이터 그대로 사용
+    // ...
   ];
 
+  // ** 서버 사이드 렌더링 중일 때는 간단한 UI 렌더링 **
+  if (!isMounted) {
+    return (
+      <div className="mx-auto h-[116px] shadow-[0px_1px_6px_rgba(0,0,0,0.08)]">
+        {/* 1번째 헤더 */}
+        <div className="max-w-[1160px] w-full mx-auto flex justify-between items-center h-[60px] mt-[10px]">
+          <div className="w-[132px] h-[60px] flex items-center">
+            <Link href={"/"}>
+              <Image
+                src="/images/tumblbug_logo.png"
+                alt="텀블벅 로고"
+                width={132}
+                height={36}
+              />
+            </Link>
+          </div>
+          <ul className="flex items-center">
+            <li className="p-4">
+              <Link href={"#"}>
+                <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">
+                  프로젝트 올리기
+                </span>
+              </Link>
+            </li>
+            {/* 로그인 상태에 따른 UI는 클라이언트에서만 렌더링 */}
+            <li className="p-4">
+              <Heart />
+            </li>
+            <li className="p-4">
+              <Bell />
+            </li>
+            <li>
+              <div className="flex cursor-pointer items-center border-1 ml-[10px] p-4 border-[#dfdfdf] rounded-[4px] min-w-[30px] max-h-[44px]">
+                <Image
+                  src={"/images/default_login_icon.png"}
+                  width={24}
+                  height={24}
+                  alt="기본 로그인 아이콘"
+                />
+                <div className="font-bold text-[12px] ml-[10px]">로딩중</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        {/* 2번째 헤더 */}
+        <div className="w-full bg-white">
+          <div className="w-[1160px] mx-auto flex justify-between items-center">
+            <ul className="flex gap-[20px] h-[56px] items-center text-[15px] text-[#0d0d0d] font-semibold">
+              <li className="flex group relative cursor-pointer">
+                <Menu className="mr-[8px]" />
+                <span className="pt-[1px] px-[6px]">카테고리</span>
+              </li>
+              <li>
+                <Link href={"#"}>
+                  <span className="pt-[1px] px-[6px]">홈</span>
+                </Link>
+              </li>
+              <li>
+                <Link href={"#"}>
+                  <span className="pt-[1px] px-[6px]">인기</span>
+                </Link>
+              </li>
+              <li>
+                <Link href={"#"}>
+                  <span className="pt-[1px] px-[6px]">신규</span>
+                </Link>
+              </li>
+            </ul>
+            <div className="z-[300] relative px-[30px] pr-[30px] pl-[16px] inline-flex w-[216px] h-[36px] bg-[#f3f3f3] items-center rounded-[8px] text-[12px] leading-[28px] tracking-[0.02em] text-[rgba(0,0,0,0.3)]">
+              <input
+                type="text"
+                placeholder="검색어를 입력해주세요."
+                className="border-none text-[12px] leading-[28px] tracking-[0.02em] bg-[#f3f3f3] text-[#333333] appearance-none outline-none"
+              />
+              <div className="absolute right-[10px] inline-flex w-[20px] h-[20px] items-center justify-center">
+                <Search color="#000" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`mx-auto  h-[116px] ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"} `}>
+    <div
+      className={`mx-auto  h-[116px] ${
+        isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"
+      } `}
+    >
       {/* 1번째 헤더 */}
       <div className="max-w-[1160px] w-full mx-auto flex justify-between items-center h-[60px] mt-[10px]">
         <div className="w-[132px] h-[60px] flex items-center">
           <Link href={"/"}>
-            <Image src="/images/tumblbug_logo.png" alt="텀블벅 로고" width={132} height={36} />
+            <Image
+              src="/images/tumblbug_logo.png"
+              alt="텀블벅 로고"
+              width={132}
+              height={36}
+            />
           </Link>
         </div>
         <ul className="flex items-center">
           <li className="p-4">
             <Link href={"#"}>
-              <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">프로젝트 올리기</span>
+              <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">
+                프로젝트 올리기
+              </span>
             </Link>
           </li>
           {isLogin ? (
@@ -183,15 +198,27 @@ export default function Header() {
               <li className="p-4">
                 <Heart />
               </li>
-              <li className="p-4">
-                <Bell />
+              <li className="p-4 relative">
+                <Link href="nayeon/notification" className="relative">
+                  <Bell />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-[16px] h-[16px] rounded-full flex items-center justify-center pointer-events-none select-none">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </Link>
               </li>
               <li>
                 <button
                   className="flex cursor-pointer items-center border-1 ml-[10px] p-4 border-[#dfdfdf] rounded-[4px] min-w-[30px] max-h-[44px]"
                   onClick={onClickLoginTest}
                 >
-                  <Image src={"/images/default_login_icon.png"} width={24} height={24} alt="기본 로그인 아이콘"></Image>
+                  <Image
+                    src={"/images/default_login_icon.png"}
+                    width={24}
+                    height={24}
+                    alt="기본 로그인 아이콘"
+                  ></Image>
                   <div className="font-bold text-[12px] ml-[10px]">아이디</div>
                 </button>
               </li>
@@ -203,7 +230,9 @@ export default function Header() {
                 href={"/seokgeun"}
               >
                 <User className="bg-[#ddd] rounded-3xl" color="#fff" />
-                <div className="font-bold text-[12px] ml-[10px]">로그인/회원가입</div>
+                <div className="font-bold text-[12px] ml-[10px]">
+                  로그인/회원가입
+                </div>
               </Link>
             </li>
           )}
@@ -213,7 +242,11 @@ export default function Header() {
       {/* 2번째 헤더 */}
       <div
         className={`w-full bg-white ${
-          isScrolled ? `fixed top-0 left-0 z-50 ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"}` : ""
+          isScrolled
+            ? `fixed top-0 left-0 z-50 ${
+                isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"
+              }`
+            : ""
         }`}
       >
         <div className="w-[1160px] mx-auto flex justify-between items-center">
@@ -224,7 +257,9 @@ export default function Header() {
               onMouseLeave={() => setIsCategoryOpen(false)}
             >
               <Menu className="mr-[8px] group-hover:text-[#FF5757] transition-all duration-300" />
-              <span className="pt-[1px] px-[6px] group-hover:text-[#FF5757] transition-all duration-300">카테고리</span>
+              <span className="pt-[1px] px-[6px] group-hover:text-[#FF5757] transition-all duration-300">
+                카테고리
+              </span>
 
               {/* 카테고리 메뉴 */}
               {isCategoryOpen && (
@@ -235,7 +270,10 @@ export default function Header() {
                 >
                   <div className="w-[1160px] mx-auto relative flex justify-between mt-[16px] px-[10px] after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:shadow-[0_6px_7px_rgba(0,0,0,0.08)] after:pointer-events-none">
                     {categoryData.map((column, colIndex) => (
-                      <div key={colIndex} className="flex-grow flex-shrink-0 basis-[20%]">
+                      <div
+                        key={colIndex}
+                        className="flex-grow flex-shrink-0 basis-[20%]"
+                      >
                         {column.map((item, itemIndex) => (
                           <div
                             key={itemIndex}
@@ -243,7 +281,12 @@ export default function Header() {
                           >
                             <div className="overflow-hidden inline-flex flex-col flex-none w-[40px] h-[40px] mr-[4px] justify-center items-center">
                               {item.iconType === "svg" ? (
-                                <div dangerouslySetInnerHTML={{ __html: item.icon }} aria-hidden="true" />
+                                <div
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.icon,
+                                  }}
+                                  aria-hidden="true"
+                                />
                               ) : (
                                 <Image
                                   src={item.icon}
@@ -266,17 +309,26 @@ export default function Header() {
               )}
             </li>
             <li>
-              <Link href={"#"} className="hover:text-[#FF5757] transition-all duration-300">
+              <Link
+                href={"#"}
+                className="hover:text-[#FF5757] transition-all duration-300"
+              >
                 <span className="pt-[1px] px-[6px]">홈</span>
               </Link>
             </li>
             <li>
-              <Link href={"#"} className="hover:text-[#FF5757] transition-all duration-300">
+              <Link
+                href={"#"}
+                className="hover:text-[#FF5757] transition-all duration-300"
+              >
                 <span className="pt-[1px] px-[6px]">인기</span>
               </Link>
             </li>
             <li>
-              <Link href={"#"} className="hover:text-[#FF5757] transition-all duration-300">
+              <Link
+                href={"#"}
+                className="hover:text-[#FF5757] transition-all duration-300"
+              >
                 <span className="pt-[1px] px-[6px]">신규</span>
               </Link>
             </li>

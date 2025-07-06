@@ -29,6 +29,7 @@ export default function NotificationPage() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasMarkedAsRead, setHasMarkedAsRead] = useState(false);
   const userNo = 8; // 임시 하드코딩
 
   const buildQueryParams = () => {
@@ -41,6 +42,43 @@ export default function NotificationPage() {
     }
     return params.toString();
   };
+
+  // 모든 알림을 읽음 처리하는 함수
+  const markAllAsRead = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await fetch(
+        `http://localhost:8888/notifications/mark-all-read?userNo=${userNo}`,
+        {
+          method: "PATCH",
+          headers: {
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+        }
+      );
+
+      if (response.ok) {
+        console.log("모든 알림이 읽음 처리되었습니다.");
+        // 캐시 무효화
+        cache.clear();
+        setHasMarkedAsRead(true);
+
+        // 부모 컴포넌트에 알림 카운트 업데이트 알림
+        window.dispatchEvent(new Event('notificationRead'));
+      } else {
+        console.error("알림 읽음 처리 실패");
+      }
+    } catch (error) {
+      console.error("알림 읽음 처리 중 오류 발생:", error);
+    }
+  };
+
+  // 페이지 로드 시 읽음 처리
+  useEffect(() => {
+    if (!hasMarkedAsRead) {
+      markAllAsRead();
+    }
+  }, [hasMarkedAsRead]);
 
   useEffect(() => {
     const cacheKey = `${currentTab}-${page}`;
@@ -79,7 +117,7 @@ export default function NotificationPage() {
         setTotalPages(0);
         setIsLoading(false);
       });
-  }, [currentTab, page]);
+  }, [currentTab, page, hasMarkedAsRead]);
 
   const handleTabClick = (tabId) => {
     setCurrentTab(tabId);
@@ -88,7 +126,7 @@ export default function NotificationPage() {
 
   const handleDelete = (notificationNo) => {
     const token = localStorage.getItem("accessToken");
-    const url = `http://localhost:8888/notifications/${notificationNo}`;
+    const url = `http://localhost:8888/notifications/${notificationNo}?userNo=${userNo}`;
 
     fetch(url, {
       method: "DELETE",
