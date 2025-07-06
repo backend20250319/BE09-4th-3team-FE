@@ -58,13 +58,12 @@ export default function NotificationPage() {
       );
 
       if (response.ok) {
-        console.log("모든 알림이 읽음 처리되었습니다.");
         // 캐시 무효화
         cache.clear();
         setHasMarkedAsRead(true);
 
         // 부모 컴포넌트에 알림 카운트 업데이트 알림
-        window.dispatchEvent(new Event('notificationRead'));
+        window.dispatchEvent(new Event("notificationRead"));
       } else {
         console.error("알림 읽음 처리 실패");
       }
@@ -124,32 +123,58 @@ export default function NotificationPage() {
     setPage(0);
   };
 
-  const handleDelete = (notificationNo) => {
+  const handleDelete = async (notificationNo) => {
     const token = localStorage.getItem("accessToken");
     const url = `http://localhost:8888/notifications/${notificationNo}?userNo=${userNo}`;
 
-    fetch(url, {
-      method: "DELETE",
-      headers: {
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-    })
-      .then((res) => {
-        if (res.ok) {
-          // 캐시 무효화
-          cache.delete(`${currentTab}-${page}`);
-          // 화면에서도 제거
-          setNotifications((prev) =>
-            prev.filter((n) => n.notificationNo !== notificationNo)
-          );
-        } else {
-          alert("알림 삭제 실패");
-        }
-      })
-      .catch((err) => {
-        console.error("삭제 중 오류 발생", err);
-        alert("삭제 중 오류 발생");
+    try {
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
       });
+      if (!res.ok) {
+        alert("알림 삭제 실패");
+        return;
+      }
+
+      // 캐시 무효화
+      cache.delete(`${currentTab}-${page}`);
+
+      setNotifications((prev) => {
+        const newNotifications = prev.filter(
+          (n) => n.notificationNo !== notificationNo
+        );
+
+        // 현재 페이지 알림 개수가 5 미만이고 다음 페이지가 있으면
+        if (newNotifications.length < 5 && page < totalPages - 1) {
+          const nextPageKey = `${currentTab}-${page + 1}`;
+          const nextPageData = cache.get(nextPageKey);
+
+          if (nextPageData && nextPageData.content.length > 0) {
+            // 다음 페이지 첫 알림을 현재 페이지로 당기기
+            const [firstOfNext, ...restNext] = nextPageData.content;
+
+            // 다음 페이지 데이터에서 첫 알림 제거 후 갱신
+            cache.set(nextPageKey, {
+              ...nextPageData,
+              content: restNext,
+              totalPages: nextPageData.totalPages,
+              timestamp: Date.now(),
+            });
+
+            // 현재 페이지 알림에 추가
+            return [...newNotifications, firstOfNext];
+          }
+        }
+
+        return newNotifications;
+      });
+    } catch (err) {
+      console.error("삭제 중 오류 발생", err);
+      alert("삭제 중 오류 발생");
+    }
   };
 
   return (
@@ -207,9 +232,9 @@ export default function NotificationPage() {
         ))}
       </div>
 
-      {totalPages > 1 && (
+      {totalPages > 0 && (
         <div className={styles.pagination}>
-          {page > 0 && (
+          {totalPages > 1 && page > 0 && (
             <button
               className={styles.pageNavButton}
               onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
@@ -228,12 +253,10 @@ export default function NotificationPage() {
               {i + 1}
             </button>
           ))}
-          {page < totalPages - 1 && (
+          {totalPages > 1 && page < totalPages - 1 && (
             <button
               className={styles.pageNavButton}
-              onClick={() =>
-                setPage((prev) => Math.min(prev + 1, totalPages - 1))
-              }
+              onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
             >
               &#8594;
             </button>

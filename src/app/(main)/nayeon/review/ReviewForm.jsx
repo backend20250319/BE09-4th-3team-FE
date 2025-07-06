@@ -4,16 +4,16 @@ import React, { useState } from "react";
 import { X, Upload, ThumbsUp, ThumbsDown } from "lucide-react";
 import styles from "./review.module.css";
 
-const ReviewForm = () => {
+const ReviewForm = ({ onClose }) => {
+  // Add onClose prop
   const [ratings, setRatings] = useState({
     quality: null,
     plan: null,
     communication: null,
-    // issue: null, // Removed
   });
 
-  // const [willSupportAgain, setWillSupportAgain] = useState(null); // Removed
   const [reviewText, setReviewText] = useState("");
+  const [images, setImages] = useState([]);
 
   const handleRatingChange = (category, value) => {
     setRatings((prev) => ({
@@ -22,9 +22,28 @@ const ReviewForm = () => {
     }));
   };
 
+  // 이미지 선택 시 처리 함수
+  const handleImageChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+
+    // 현재 이미지 + 새로 선택한 이미지 합침
+    const totalImages = images.concat(selectedFiles);
+
+    if (totalImages.length > 10) {
+      alert("최대 10개까지 업로드 가능합니다.");
+      return;
+    }
+
+    setImages(totalImages);
+  };
+
+  // 이미지 삭제 함수
+  const handleImageRemove = (index) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const SmileyButton = ({ type, isSelected, onClick, label }) => {
     const getSmileyIcon = () => {
-      // SVG paths from the provided image for each smiley type
       if (type === "bad") {
         return (
           <svg
@@ -114,7 +133,6 @@ const ReviewForm = () => {
       ratings.quality !== null &&
       ratings.plan !== null &&
       ratings.communication !== null &&
-      // willSupportAgain !== null && // Removed
       reviewText.length >= 20
     );
   };
@@ -124,8 +142,8 @@ const ReviewForm = () => {
       <div className={styles.modal}>
         {/* Header */}
         <div className={styles.header}>
-          <h2 className={styles.title}>후 기 작성하기</h2>
-          <button className={styles.closeButton}>
+          <h2 className={styles.title}>후기 작성하기</h2>
+          <button className={styles.closeButton} onClick={onClose}>
             <X size={20} />
           </button>
         </div>
@@ -228,65 +246,6 @@ const ReviewForm = () => {
                 />
               </div>
             </div>
-
-            {/* Issue Resolution (Optional) - Removed
-            <div
-              className={`${styles.ratingQuestion} ${styles.optionalSection}`}
-            >
-              <h3 className={styles.questionTitle}>
-                창작자는 이슈를 잘 해결했나요?
-                <span className={styles.optional}>(선택)</span>
-              </h3>
-              <div className={styles.smileyContainer}>
-                <SmileyButton
-                  type="bad"
-                  isSelected={ratings.issue === "bad"}
-                  onClick={() => handleRatingChange("issue", "bad")}
-                  label="아쉬워요"
-                />
-                <SmileyButton
-                  type="neutral"
-                  isSelected={ratings.issue === "neutral"}
-                  onClick={() => handleRatingChange("issue", "neutral")}
-                  label="보통이에요"
-                />
-                <SmileyButton
-                  type="good"
-                  isSelected={ratings.issue === "good"}
-                  onClick={() => handleRatingChange("issue", "good")}
-                  label="잘 해결했어요"
-                />
-              </div>
-            </div>
-            */}
-
-            {/* Will Support Again - Removed
-            <div className={styles.ratingQuestion}>
-              <h3 className={styles.questionTitle}>
-                다음에도 후원하실 건가요?
-              </h3>
-              <div className={styles.supportButtonsContainer}>
-                <button
-                  className={`${styles.supportButton} ${
-                    willSupportAgain === false ? styles.supportButtonNo : ""
-                  }`}
-                  onClick={() => setWillSupportAgain(false)}
-                >
-                  <span>재후원 안할래요</span>
-                  <ThumbsDown size={16} />
-                </button>
-                <button
-                  className={`${styles.supportButton} ${
-                    willSupportAgain === true ? styles.supportButtonYes : ""
-                  }`}
-                  onClick={() => setWillSupportAgain(true)}
-                >
-                  <span>재후원 할래요</span>
-                  <ThumbsUp size={16} />
-                </button>
-              </div>
-            </div>
-            */}
           </div>
 
           {/* Review Text */}
@@ -327,7 +286,7 @@ const ReviewForm = () => {
               <div className={styles.uploadArea}>
                 <Upload className={styles.uploadIcon} size={24} />
                 <div className={styles.uploadTitle}>
-                  이미지 업로드 (선택) (0/10)
+                  이미지 업로드 (선택) ({images.length}/10)
                 </div>
                 <div className={styles.uploadInfo}>
                   <p>· 최대 10개까지 업로드 가능</p>
@@ -339,8 +298,28 @@ const ReviewForm = () => {
                 multiple
                 accept="image/png, image/jpeg, image/jpg, image/gif"
                 className={styles.hiddenInput}
+                onChange={handleImageChange}
               />
             </label>
+            {/* 이미지 미리보기 */}
+            <div className={styles.imagePreviewContainer}>
+              {images.map((img, idx) => (
+                <div key={idx} className={styles.imagePreview}>
+                  <img
+                    src={URL.createObjectURL(img)}
+                    alt={`upload-${idx}`}
+                    className={styles.previewImg}
+                  />
+                  <button
+                    className={styles.removeImageButton}
+                    onClick={() => handleImageRemove(idx)}
+                    type="button"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Guidelines */}
