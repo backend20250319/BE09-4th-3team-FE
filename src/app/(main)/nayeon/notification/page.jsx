@@ -28,7 +28,7 @@ export default function NotificationPage() {
   const [notifications, setNotifications] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [isLoading, setIsLoading] = useState(true); // 로딩 상태 추가
+  const [isLoading, setIsLoading] = useState(true);
   const userNo = 8; // 임시 하드코딩
 
   const buildQueryParams = () => {
@@ -45,10 +45,8 @@ export default function NotificationPage() {
   useEffect(() => {
     const cacheKey = `${currentTab}-${page}`;
 
-    // 캐시 정리
     cleanupCache();
 
-    // 캐시에 있으면 바로 사용 (즉시 로딩!)
     if (cache.has(cacheKey)) {
       const cachedData = cache.get(cacheKey);
       setNotifications(cachedData.content || []);
@@ -57,7 +55,7 @@ export default function NotificationPage() {
       return;
     }
 
-    setIsLoading(true); // 로딩 시작
+    setIsLoading(true);
     const token = localStorage.getItem("accessToken");
     const url = `http://localhost:8888/notifications?${buildQueryParams()}`;
 
@@ -68,26 +66,52 @@ export default function NotificationPage() {
     })
       .then((res) => res.json())
       .then((data) => {
-        // 캐시에 저장 (5분간 유효)
         cache.set(cacheKey, {
           ...data,
           timestamp: Date.now(),
         });
-
         setNotifications(data.content || []);
         setTotalPages(data.totalPages || 0);
-        setIsLoading(false); // 로딩 완료
+        setIsLoading(false);
       })
       .catch(() => {
         setNotifications([]);
         setTotalPages(0);
-        setIsLoading(false); // 로딩 완료
+        setIsLoading(false);
       });
   }, [currentTab, page]);
 
   const handleTabClick = (tabId) => {
     setCurrentTab(tabId);
     setPage(0);
+  };
+
+  const handleDelete = (notificationNo) => {
+    const token = localStorage.getItem("accessToken");
+    const url = `http://localhost:8888/notifications/${notificationNo}`;
+
+    fetch(url, {
+      method: "DELETE",
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    })
+      .then((res) => {
+        if (res.ok) {
+          // 캐시 무효화
+          cache.delete(`${currentTab}-${page}`);
+          // 화면에서도 제거
+          setNotifications((prev) =>
+            prev.filter((n) => n.notificationNo !== notificationNo)
+          );
+        } else {
+          alert("알림 삭제 실패");
+        }
+      })
+      .catch((err) => {
+        console.error("삭제 중 오류 발생", err);
+        alert("삭제 중 오류 발생");
+      });
   };
 
   return (
@@ -108,7 +132,6 @@ export default function NotificationPage() {
         ))}
       </div>
 
-      {/* 로딩 상태에 따라 클래스 조건부 적용 */}
       <div
         className={`${styles.notificationList} ${
           isLoading ? styles.loading : ""
@@ -133,7 +156,12 @@ export default function NotificationPage() {
                       {new Date(item.createdAt).toLocaleString()}
                     </div>
                   </div>
-                  <button className={styles.deleteButton}>삭제</button>
+                  <button
+                    className={styles.deleteButton}
+                    onClick={() => handleDelete(item.notificationNo)}
+                  >
+                    삭제
+                  </button>
                 </div>
               </div>
             </div>
@@ -141,10 +169,8 @@ export default function NotificationPage() {
         ))}
       </div>
 
-      {/* 페이징 - 페이지가 2페이지 이상일 때만 전체 페이징 표시 */}
       {totalPages > 1 && (
         <div className={styles.pagination}>
-          {/* 이전 화살표 - 첫 페이지가 아닐 때만 표시 */}
           {page > 0 && (
             <button
               className={styles.pageNavButton}
@@ -153,8 +179,6 @@ export default function NotificationPage() {
               &#8592;
             </button>
           )}
-
-          {/* 페이지 번호들 */}
           {Array.from({ length: totalPages }, (_, i) => (
             <button
               key={i}
@@ -166,12 +190,12 @@ export default function NotificationPage() {
               {i + 1}
             </button>
           ))}
-
-          {/* 다음 화살표 - 마지막 페이지가 아닐 때만 표시 */}
           {page < totalPages - 1 && (
             <button
               className={styles.pageNavButton}
-              onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
+              onClick={() =>
+                setPage((prev) => Math.min(prev + 1, totalPages - 1))
+              }
             >
               &#8594;
             </button>
