@@ -1,10 +1,9 @@
 "use client";
-
 import { useState } from "react";
 import { X, Upload } from "lucide-react";
 import styles from "./reviewForm.module.css";
 
-const ReviewForm = ({ onClose }) => {
+const ReviewForm = ({ onClose, onSubmit }) => {
   const [showExitModal, setShowExitModal] = useState(false);
   const [ratings, setRatings] = useState({
     quality: null,
@@ -22,7 +21,7 @@ const ReviewForm = ({ onClose }) => {
   // 확인 모달에서 '나가기' 클릭
   const handleExit = () => {
     setShowExitModal(false);
-    onClose(); // 부모 컴포넌트(Page.jsx)의 onClose 호출
+    onClose();
   };
 
   // 확인 모달에서 '취소' 클릭
@@ -40,7 +39,6 @@ const ReviewForm = ({ onClose }) => {
   // 이미지 선택 시 처리 함수
   const handleImageChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    // 현재 이미지 + 새로 선택한 이미지 합침
     const totalImages = images.concat(selectedFiles);
     if (totalImages.length > 10) {
       alert("최대 10개까지 업로드 가능합니다.");
@@ -52,6 +50,20 @@ const ReviewForm = ({ onClose }) => {
   // 이미지 삭제 함수
   const handleImageRemove = (index) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // 후기 제출 처리
+  const handleSubmit = () => {
+    // 새로운 후기 데이터 생성 (실제로는 서버에서 받아올 데이터)
+    const newReview = {
+      reviewNo: Date.now(), // 임시 ID
+      projectTitle: "[구인] 네이버웹툰 <마루는 강쥐> 나랑 살 언니 찾습니다",
+      content: reviewText,
+      rating: 5, // 임시 평점
+      createdDate: new Date().toISOString(),
+    };
+
+    onSubmit(newReview);
   };
 
   const SmileyButton = ({ type, isSelected, onClick, label }) => {
@@ -381,13 +393,13 @@ const ReviewForm = ({ onClose }) => {
                   : styles.submitButtonDisabled
               }`}
               disabled={!isFormValid()}
+              onClick={handleSubmit}
             >
               후기 작성 완료
             </button>
           </div>
         </div>
       </div>
-
       {/* 확인 모달 */}
       {showExitModal && (
         <div className={styles.overlay}>

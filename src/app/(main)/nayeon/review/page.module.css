@@ -162,3 +162,79 @@
   color: #6b7280;
   font-size: 1rem;
 }
+
+/* 작성한 후기 카드 스타일 */
+.reviewCard {
+  background: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.reviewContent {
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.reviewTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.reviewDate {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.reviewRating {
+  margin-bottom: 0.5rem;
+}
+
+.star {
+  font-size: 1rem;
+  margin-right: 0.125rem;
+}
+
+.filledStar {
+  color: #fbbf24;
+}
+
+.emptyStar {
+  color: #d1d5db;
+}
+
+.reviewText {
+  font-size: 0.875rem;
+  color: #374151;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.reviewActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.editButton,
+.deleteButton {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.editButton:hover,
+.deleteButton:hover {
+  background-color: #f9fafb;
+}
