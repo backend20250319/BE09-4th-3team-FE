@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+.projects-main {
+    @apply p-6 bg-gray-50 min-h-screen;
+    overflow-y: auto;
+    -ms-overflow-style: none;      /* IE/Edge */
+    scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.projects-header {
+    @apply flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4;
+}
+
+.projects-title {
+    @apply text-3xl font-bold;
+}
+
+.projects-subtitle {
+    @apply text-gray-500 mt-1;
+}
+
+.projects-controls {
+    @apply flex items-center gap-3;
+}
+
+.projects-select {
+    @apply border px-3 py-2 rounded-md bg-white text-sm;
+}
+
+.projects-review-btn {
+    @apply bg-black text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800;
+}
+
+.projects-cards {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8;
+}
+
+.projects-card {
+    @apply p-5 bg-white rounded-xl border shadow-sm text-center;
+}
+
+.projects-card-number {
+    @apply text-2xl font-bold mb-1;
+}
+
+.projects-table-wrapper {
+    @apply bg-white p-6 rounded-xl border shadow-sm;
+}
+
+.projects-table-title {
+    @apply text-xl font-semibold mb-2;
+}
+
+.projects-table {
+    @apply w-full table-auto text-left;
+}
+
+.projects-table thead {
+    @apply bg-gray-100 text-gray-700 text-sm;
+}
+
+.projects-table th,
+.projects-table td {
+    @apply px-4 py-3 align-top;
+}
+
+.badge {
+    @apply inline-block bg-gray-100 text-gray-800 px-2 py-1 text-xs rounded-full;
+}
+
+.status-badge {
+    @apply px-2 py-1 text-xs font-semibold rounded-full;
+}
+
+.status-pending {
+    @apply bg-yellow-100 text-yellow-600;
+}
+
+.status-approved {
+    @apply bg-green-100 text-green-600;
+}
+
+.status-rejected {
+    @apply bg-red-100 text-red-500;
+}
+
+
+.action-button {
+    @apply bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-blue-700;
+}
+
+.btn-icon {
+    @apply bg-white border px-2 py-1 rounded hover:bg-gray-100 text-sm;
+}
+
+/* 🔹 모달 관련 스타일 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.btn-close {
+    background-color: #f3f4f6;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #111827;
+    transition: background-color 0.2s ease;
+}
+
+.btn-close:hover {
+    background-color: #e5e7eb;
+}

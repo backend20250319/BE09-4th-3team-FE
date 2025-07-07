@@ -1,4 +1,18 @@
-import "./adminheader.css";
+import './adminheader.css'
+import AdminHeader from "@/components/header/AdminHeader";
+
+export default function RootLayout({ children }) {
+    return (
+        <html lang="ko">
+        <body>
+        <AdminHeader />
+        <main>{children}</main>
+        </body>
+        </html>
+    )
+}
+
+
 
 export const metadata = {
     title: "텀블벅",
@@ -7,4 +21,3 @@ export const metadata = {
         icon: "/favicon.png",
     },
 };
-
