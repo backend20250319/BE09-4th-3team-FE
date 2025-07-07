@@ -2,8 +2,16 @@
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import "./page.css";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-const TABS = ["프로필", "계정", "결제수단", "배송지", "알림"];
+const TABS = [
+  { label: "프로필", path: "/seokgeun/dropdownmenu/mysettings/profile" },
+  { label: "계정", path: "/seokgeun/dropdownmenu/mysettings/account" },
+  { label: "결제수단", path: "/seokgeun/dropdownmenu/mysettings/pay_methods" },
+  { label: "배송지", path: "/seokgeun/dropdownmenu/mysettings/addresses" },
+  { label: "알림", path: "/seokgeun/dropdownmenu/mysettings/notifications" },
+];
 
 export default function MySettingsPage() {
   const [activeTab, setActiveTab] = useState("프로필");
@@ -20,6 +28,8 @@ export default function MySettingsPage() {
   const [editField, setEditField] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [editFile, setEditFile] = useState(null);
+
+  const pathname = usePathname();
 
   // 페이지 진입 시 localStorage에서 프로필 이미지 불러오기
   useEffect(() => {
@@ -67,28 +77,47 @@ export default function MySettingsPage() {
     } else if (field === "이름") {
       try {
         const accessToken = localStorage.getItem("accessToken");
+
         // 1. 현재 유저 정보 불러오기
         const userRes = await fetch("/api/register/user/me", {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
         if (!userRes.ok) throw new Error("유저 정보 조회 실패");
         const user = await userRes.json();
-        // 2. 닉네임만 바꾼 새 객체 생성
-        const updatedUser = { ...user, nickname: editValue };
-        // 3. PATCH 요청
-        const patchRes = await fetch("/api/register/user/me/update", {
+
+        // 2. UserUpdateRequestDTO 형식에 맞게 데이터 구성
+        const updateData = {
+          nickname: editValue,
+          email: user.email,
+          phone: user.phone || "",
+          address: user.address || "",
+          addressDetail: user.addressDetail || "",
+        };
+
+        // 3. 새로운 프로필 업데이트 엔드포인트 사용
+        const patchRes = await fetch("/api/register/user/me/profile", {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
-          body: JSON.stringify(updatedUser),
+          body: JSON.stringify(updateData),
         });
-        if (!patchRes.ok) throw new Error("닉네임 변경 실패");
+
+        if (!patchRes.ok) {
+          const errorData = await patchRes.text();
+          console.error("API 응답:", patchRes.status, errorData);
+          throw new Error(`닉네임 변경 실패: ${patchRes.status}`);
+        }
+
+        const updatedUser = await patchRes.json();
+        console.log("업데이트 성공:", updatedUser);
+
         setNickname(editValue);
         localStorage.setItem("nickname", editValue);
         window.dispatchEvent(new Event("storage"));
       } catch (e) {
+        console.error("닉네임 변경 에러:", e);
         alert("닉네임 변경에 실패했습니다. 다시 시도해 주세요.");
         return;
       }
@@ -107,16 +136,15 @@ export default function MySettingsPage() {
       <h1 className="mysettings-title">설정</h1>
       <div className="mysettings-horizontal-tabs">
         {TABS.map((tab) => (
-          <button
-            key={tab}
+          <Link
+            key={tab.path}
+            href={tab.path}
             className={`mysettings-horizontal-tab${
-              activeTab === tab ? " active" : ""
+              pathname === tab.path ? " active" : ""
             }`}
-            onClick={() => setActiveTab(tab)}
-            type="button"
           >
-            {tab}
-          </button>
+            {tab.label}
+          </Link>
         ))}
       </div>
       <div className="mysettings-profile-table-row-wrapper">

@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import "./page.css";
 
 const TAB_LIST = [
@@ -38,6 +39,19 @@ export default function MyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("profile");
+  // Header와 동일하게 프로필 이미지 상태 관리
+  const [profileImg, setProfileImg] = useState(
+    "/images/default_login_icon.png"
+  );
+  useEffect(() => {
+    const updateProfileImg = () => {
+      const savedImg = localStorage.getItem("profileImg");
+      setProfileImg(savedImg || "/images/default_login_icon.png");
+    };
+    updateProfileImg();
+    window.addEventListener("storage", updateProfileImg);
+    return () => window.removeEventListener("storage", updateProfileImg);
+  }, []);
 
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
@@ -93,12 +107,7 @@ export default function MyPage() {
       <div className="sponsored-divider"></div>
       <div className="mypage-profile-row">
         <div className="mypage-profile-img">
-          <Image
-            src={"/images/default_login_icon.png"}
-            width={80}
-            height={80}
-            alt="프로필"
-          />
+          <Image src={profileImg} width={80} height={80} alt="프로필" />
         </div>
         <div className="mypage-profile-info">
           <div className="mypage-nickname">{user?.nickname || "-"}</div>
@@ -111,7 +120,9 @@ export default function MyPage() {
             ))}
           </div>
         </div>
-        <button className="mypage-edit-btn">프로필 편집</button>
+        <Link href="/seokgeun/dropdownmenu/mysettings">
+          <button className="mypage-edit-btn">프로필 편집</button>
+        </Link>
       </div>
       <div className="mypage-tabs">
         <ul className="mypage-tabs-list">
