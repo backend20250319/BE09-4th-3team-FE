@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import ReviewForm from "./ReviewForm";
 import styles from "./page.module.css";
@@ -24,7 +25,6 @@ const Page = () => {
     <div>
       <div className={styles.container}>
         <h1 className={styles.title}>내 후기</h1>
-
         <div className={styles.tabs}>
           <button
             onClick={() => setActiveTab("write")}
@@ -43,7 +43,6 @@ const Page = () => {
             작성한 후기
           </button>
         </div>
-
         <div className={styles.alert}>
           <svg
             className={styles.alertIcon}
@@ -60,13 +59,12 @@ const Page = () => {
             <p>2건의 프로젝트가 후원자님의 리뷰를 기다리고 있어요 📝</p>
           </div>
         </div>
-
         <div>
           {projects.map((project) => (
             <div key={project.id} className={styles.projectCard}>
               <div className={styles.projectContent}>
                 <img
-                  src={project.image}
+                  src={project.image || "/placeholder.svg"}
                   alt={project.title}
                   className={styles.projectImage}
                 />
@@ -94,14 +92,12 @@ const Page = () => {
             </div>
           ))}
         </div>
-
         {activeTab === "written" && (
           <div className={styles.emptyState}>
             <p>작성한 후기가 없습니다.</p>
           </div>
         )}
       </div>
-
       {isReviewFormOpen && (
         <ReviewForm
           isOpen={isReviewFormOpen}

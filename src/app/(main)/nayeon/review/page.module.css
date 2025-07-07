@@ -16,7 +16,7 @@
   gap: 0;
   border-bottom: 2px solid #e5e5e5;
   position: relative;
-  margin-bottom: 1.5rem; /* 기존 유지 */
+  margin-bottom: 1.5rem;
 }
 
 .tabButton {
@@ -54,6 +54,7 @@
   background-color: #ff6b35;
   width: calc(100% - 35px);
 }
+
 .alert {
   background-color: #eff6ff;
   border: 1px solid #bfdbfe;

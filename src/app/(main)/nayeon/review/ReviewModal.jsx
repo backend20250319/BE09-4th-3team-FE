@@ -1,9 +1,11 @@
+"use client";
+
 import { useState } from "react";
 import ReviewForm from "./ReviewForm";
-import styles from "./review.module.css";
+import styles from "./reviewModal.module.css";
 import { X } from "lucide-react";
 
-const ProjectReviewModal = () => {
+const ReviewModal = () => {
   const [showExitModal, setShowExitModal] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -33,7 +35,7 @@ const ProjectReviewModal = () => {
 
   if (!isVisible) {
     return (
-      <button className={styles.openButton} onClick={openModal}>
+      <button onClick={openModal} className={styles.openButton}>
         후기 작성하기
       </button>
     );
@@ -45,14 +47,16 @@ const ProjectReviewModal = () => {
         <div className={styles.modal}>
           <div className={styles.header}>
             <h2 className={styles.title}>프로젝트 후기 작성</h2>
-            <button className={styles.closeButton} onClick={handleClose}>
+            <button onClick={handleClose} className={styles.closeButton}>
               <X size={20} />
             </button>
           </div>
+
           <div className={styles.content}>
             {/* ReviewForm에도 onClose 전달하여 닫기 시 확인 모달 띄움 */}
             <ReviewForm onClose={handleClose} />
           </div>
+
           <div className={styles.footer}>
             <button className={styles.submitButton}>후기 등록</button>
           </div>
@@ -61,14 +65,26 @@ const ProjectReviewModal = () => {
 
       {/* 확인 모달 */}
       {showExitModal && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.confirmModal}>
-            <p>프로젝트 후기 작성을 취소하고 나가겠습니까?</p>
-            <div className={styles.modalButtons}>
-              <button onClick={handleCancel}>취소</button>
-              <button className={styles.leaveButton} onClick={handleExit}>
-                나가기
-              </button>
+        <div className={styles.overlay}>
+          <div className={styles.exitModal}>
+            <div className={styles.exitModalContent}>
+              <p className={styles.exitModalText}>
+                프로젝트 후기 작성을 취소하고 나가겠습니까?
+              </p>
+              <div className={styles.exitModalButtons}>
+                <button
+                  onClick={handleCancel}
+                  className={`${styles.exitModalButton} ${styles.cancelButton}`}
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleExit}
+                  className={`${styles.exitModalButton} ${styles.exitButton}`}
+                >
+                  나가기
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -77,4 +93,4 @@ const ProjectReviewModal = () => {
   );
 };
 
-export default ProjectReviewModal;
+export default ReviewModal;

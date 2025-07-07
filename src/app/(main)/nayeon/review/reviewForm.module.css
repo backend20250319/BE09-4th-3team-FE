@@ -15,7 +15,6 @@
 
 /* Modal */
 .modal {
-  /* 기존 스타일 유지 */
   background: white;
   border-radius: 8px;
   max-width: 480px;
@@ -24,24 +23,22 @@
   overflow-y: auto;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
-
-  /* 스크롤바 숨기기 (크로스 브라우징용) */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .modal::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+  display: none;
 }
 
 /* Header */
 .header {
   display: flex;
   align-items: center;
-  justify-content: center; /* space-between -> center */
+  justify-content: center;
   padding: 16px;
   border-bottom: 1px solid #e5e7eb;
-  position: relative; /* 닫기 버튼이 있으면 절대 위치로 배치 가능하게 */
+  position: relative;
 }
 
 .title {
@@ -129,14 +126,18 @@
 
 .smileyContainer {
   display: flex;
-  justify-content: center; /* 버튼들을 가운데로 정렬 */
+  justify-content: center;
   gap: 16px;
-  padding: 0 16px; /* 필요 시 여백 */
+  padding: 0 16px;
 }
 
 .smileyButton {
-  flex: none; /* 버튼 너비 자동 조절 (늘어나지 않음) */
-  min-width: 80px; /* 필요 시 고정 너비 지정 */
+  flex: none;
+  min-width: 80px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
 }
 
 .smileyButton:hover {
@@ -147,13 +148,13 @@
 .smileyButton.selected {
   border: none !important;
   background-color: transparent !important;
-  color: inherit; /* 텍스트 색상도 원래대로 */
+  color: inherit;
 }
 
 .smileyIcon {
   font-size: 24px;
   margin-bottom: 4px;
-  display: flex; /* To center SVG */
+  display: flex;
   align-items: center;
   justify-content: center;
 }
@@ -165,7 +166,7 @@
 }
 
 .smileyLabel.labelSelected {
-  color: inherit !important; /* 선택된 라벨 텍스트 색상도 원래대로 */
+  color: inherit !important;
   font-weight: normal !important;
 }
 
@@ -205,28 +206,28 @@
 }
 
 .supportButton svg {
-  color: #9ca3af; /* Default icon color */
+  color: #9ca3af;
   transition: color 0.2s;
 }
 
 .supportButton.supportButtonNo {
-  border-color: #ef4444; /* Red border for 'no' selected */
-  background-color: #fef2f2; /* Light red background for 'no' selected */
-  color: #ef4444; /* Red text for 'no' selected */
+  border-color: #ef4444;
+  background-color: #fef2f2;
+  color: #ef4444;
 }
 
 .supportButton.supportButtonNo svg {
-  color: #ef4444; /* Red icon for 'no' selected */
+  color: #ef4444;
 }
 
 .supportButton.supportButtonYes {
-  border-color: #22c55e; /* Green border for 'yes' selected */
-  background-color: #f0fdf4; /* Light green background for 'yes' selected */
-  color: #22c55e; /* Green text for 'yes' selected */
+  border-color: #22c55e;
+  background-color: #f0fdf4;
+  color: #22c55e;
 }
 
 .supportButton.supportButtonYes svg {
-  color: #22c55e; /* Green icon for 'yes' selected */
+  color: #22c55e;
 }
 
 /* Review Text Section */
@@ -254,13 +255,13 @@
   font-family: inherit;
   font-size: 14px;
   line-height: 1.5;
-  box-sizing: border-box; /* Ensures padding doesn't add to the width */
+  box-sizing: border-box;
 }
 
 .textarea:focus {
   outline: none;
   border-color: #f97316;
-  box-shadow: 0 0 0 1px #f97316; /* Adjust box-shadow for a cleaner look */
+  box-shadow: 0 0 0 1px #f97316;
 }
 
 .textareaFooter {
@@ -276,7 +277,7 @@
 }
 
 .minLengthError {
-  color: #ef4444; /* Red color for error */
+  color: #ef4444;
 }
 
 .charCount {
@@ -303,7 +304,7 @@
 }
 
 .uploadArea:hover {
-  border-color: #b0b6bf; /* Darker dashed border on hover */
+  border-color: #b0b6bf;
 }
 
 .uploadIcon {
@@ -333,6 +334,44 @@
   display: none;
 }
 
+/* Image Preview */
+.imagePreviewContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.imagePreview {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.previewImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.removeImageButton {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+}
+
 /* Guidelines */
 .guidelines {
   margin-bottom: 24px;
@@ -351,8 +390,8 @@
   color: #6b7280;
   line-height: 1.5;
   margin: 0;
-  padding-left: 16px; /* Added padding for bullet points */
-  list-style: disc; /* Use disc for bullet points */
+  padding-left: 16px;
+  list-style: disc;
 }
 
 .guidelineList li,
@@ -391,10 +430,67 @@
 }
 
 .submitButtonDisabled {
-  background-color: #fed7aa; /* Lighter orange for disabled */
+  background-color: #fed7aa;
   cursor: not-allowed;
 }
 
 .submitButtonEnabled {
   background-color: #f97316;
+}
+
+/* Exit Modal */
+.exitModal {
+  background: white;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.exitModalContent {
+  padding: 24px;
+  text-align: center;
+}
+
+.exitModalText {
+  font-size: 16px;
+  color: #1f2937;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.exitModalButtons {
+  display: flex;
+  font-size: 14px;
+  line-height: 24px;
+  letter-spacing: -0.015em;
+  font-weight: 400;
+  background: #fff;
+  color: #3d3d3d;
+}
+
+.exitModalButton {
+  flex: 0 0 50%;
+  border: 0px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  font: 500 14px / 22px Pretendard, sans-serif;
+  background-color: rgb(255, 255, 255);
+  cursor: pointer;
+  outline: 0;
+  text-align: center;
+}
+
+.cancelButton {
+  color: rgb(61, 61, 61);
+}
+
+.exitButton {
+  color: rgb(248, 100, 83);
+  border-left: 1px solid rgb(228, 228, 228);
+}
+
+.exitModalButton:hover {
+  background-color: #f9f9f9;
 }

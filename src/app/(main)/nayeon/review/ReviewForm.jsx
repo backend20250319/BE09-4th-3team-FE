@@ -1,19 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
-import { X, Upload, ThumbsUp, ThumbsDown } from "lucide-react";
-import styles from "./review.module.css";
+import { useState } from "react";
+import { X, Upload } from "lucide-react";
+import styles from "./reviewForm.module.css";
 
 const ReviewForm = ({ onClose }) => {
-  // Add onClose prop
+  const [showExitModal, setShowExitModal] = useState(false);
   const [ratings, setRatings] = useState({
     quality: null,
     plan: null,
     communication: null,
   });
-
   const [reviewText, setReviewText] = useState("");
   const [images, setImages] = useState([]);
+
+  // X 버튼 클릭 시 확인 모달 띄우기
+  const handleCloseClick = () => {
+    setShowExitModal(true);
+  };
+
+  // 확인 모달에서 '나가기' 클릭
+  const handleExit = () => {
+    setShowExitModal(false);
+    onClose(); // 부모 컴포넌트(Page.jsx)의 onClose 호출
+  };
+
+  // 확인 모달에서 '취소' 클릭
+  const handleCancel = () => {
+    setShowExitModal(false);
+  };
 
   const handleRatingChange = (category, value) => {
     setRatings((prev) => ({
@@ -25,15 +40,12 @@ const ReviewForm = ({ onClose }) => {
   // 이미지 선택 시 처리 함수
   const handleImageChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
-
     // 현재 이미지 + 새로 선택한 이미지 합침
     const totalImages = images.concat(selectedFiles);
-
     if (totalImages.length > 10) {
       alert("최대 10개까지 업로드 가능합니다.");
       return;
     }
-
     setImages(totalImages);
   };
 
@@ -138,247 +150,271 @@ const ReviewForm = ({ onClose }) => {
   };
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
-        {/* Header */}
-        <div className={styles.header}>
-          <h2 className={styles.title}>후기 작성하기</h2>
-          <button className={styles.closeButton} onClick={onClose}>
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className={styles.content}>
-          {/* Project Info */}
-          <div className={styles.projectInfo}>
-            <img
-              src="https://img.tumblbug.com/eyJidWNrZXQiOiJ0dW1ibGJ1Zy1pbWctYXNzZXRzIiwia2V5IjoiY292ZXIvMGY2MmM2MGYtZjljNS00YWQ4LThlMmYtYTZiOTViYjMxY2YyLzBhZTYxMDY2LWFmMjAtNGFhOC05ZmYzLTg4MWQ5OTg3OTJhNy5qcGVnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjo2MjAsImhlaWdodCI6NDY1LCJ3aXRob3V0RW5sYXJnZW1lbnQiOnRydWUsImZpdCI6bnVsbH0sInJvdW5kQ3JvcCI6ZmFsc2UsInJvdGF0ZSI6bnVsbH19"
-              alt="Project Cover"
-              className={styles.projectImage}
-            />
-            <div>
-              <div className={styles.projectCreator}>네이버웹툰</div>
-              <div className={styles.projectTitle}>
-                [구인] 네이버웹툰 &lt;마루는 강쥐&gt; 나랑 살 언니 찾습니다
-              </div>
-            </div>
+    <>
+      <div className={styles.overlay}>
+        <div className={styles.modal}>
+          {/* Header */}
+          <div className={styles.header}>
+            <h2 className={styles.title}>후기 작성하기</h2>
+            <button className={styles.closeButton} onClick={handleCloseClick}>
+              <X size={20} />
+            </button>
           </div>
-
-          {/* Rating Questions */}
-          <div className={styles.ratingsSection}>
-            {/* Quality Rating */}
-            <div className={styles.ratingQuestion}>
-              <h3 className={styles.questionTitle}>
-                프로젝트 리워드 퀄리티가 좋았나요?
-              </h3>
-              <div className={styles.smileyContainer}>
-                <SmileyButton
-                  type="bad"
-                  isSelected={ratings.quality === "bad"}
-                  onClick={() => handleRatingChange("quality", "bad")}
-                  label="아쉬워요"
-                />
-                <SmileyButton
-                  type="neutral"
-                  isSelected={ratings.quality === "neutral"}
-                  onClick={() => handleRatingChange("quality", "neutral")}
-                  label="보통이에요"
-                />
-                <SmileyButton
-                  type="good"
-                  isSelected={ratings.quality === "good"}
-                  onClick={() => handleRatingChange("quality", "good")}
-                  label="만족해요"
-                />
-              </div>
-            </div>
-
-            {/* Plan Rating */}
-            <div className={styles.ratingQuestion}>
-              <h3 className={styles.questionTitle}>
-                창작자는 프로젝트 계획을 잘 지켰나요?
-              </h3>
-              <div className={styles.smileyContainer}>
-                <SmileyButton
-                  type="bad"
-                  isSelected={ratings.plan === "bad"}
-                  onClick={() => handleRatingChange("plan", "bad")}
-                  label="아쉬워요"
-                />
-                <SmileyButton
-                  type="neutral"
-                  isSelected={ratings.plan === "neutral"}
-                  onClick={() => handleRatingChange("plan", "neutral")}
-                  label="보통이에요"
-                />
-                <SmileyButton
-                  type="good"
-                  isSelected={ratings.plan === "good"}
-                  onClick={() => handleRatingChange("plan", "good")}
-                  label="잘 지켰어요"
-                />
-              </div>
-            </div>
-
-            {/* Communication Rating */}
-            <div className={styles.ratingQuestion}>
-              <h3 className={styles.questionTitle}>
-                창작자와 소통이 잘 되고 친절했나요?
-              </h3>
-              <div className={styles.smileyContainer}>
-                <SmileyButton
-                  type="bad"
-                  isSelected={ratings.communication === "bad"}
-                  onClick={() => handleRatingChange("communication", "bad")}
-                  label="아쉬워요"
-                />
-                <SmileyButton
-                  type="neutral"
-                  isSelected={ratings.communication === "neutral"}
-                  onClick={() => handleRatingChange("communication", "neutral")}
-                  label="보통이에요"
-                />
-                <SmileyButton
-                  type="good"
-                  isSelected={ratings.communication === "good"}
-                  onClick={() => handleRatingChange("communication", "good")}
-                  label="친절했어요"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Review Text */}
-          <div className={styles.reviewTextSection}>
-            <h3 className={`${styles.questionTitle} ${styles.leftAlign}`}>
-              후원 후기를 남겨주세요
-            </h3>
-            <p className={styles.reviewDescription}>
-              후원 후기는 창작자 뿐만 아니라 다른 후원자에게도 큰 도움이 됩니다.
-            </p>
-            <div className={styles.textareaContainer}>
-              <textarea
-                className={styles.textarea}
-                rows="4"
-                placeholder="창작자의 새로운 시도를 응원하는 따뜻한 후기는 창작자에게 큰 도움이 됩니다."
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                maxLength={1000}
+          <div className={styles.content}>
+            {/* Project Info */}
+            <div className={styles.projectInfo}>
+              <img
+                src="https://img.tumblbug.com/eyJidWNrZXQiOiJ0dW1ibGJ1Zy1pbWctYXNzZXRzIiwia2V5IjoiY292ZXIvMGY2MmM2MGYtZjljNS00YWQ4LThlMmYtYTZiOTViYjMxY2YyLzBhZTYxMDY2LWFmMjAtNGFhOC05ZmYzLTg4MWQ5OTg3OTJhNy5qcGVnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjo2MjAsImhlaWdodCI6NDY1LCJ3aXRob3V0RW5sYXJnZW1lbnQiOnRydWUsImZpdCI6bnVsbH0sInJvdW5kQ3JvcCI6ZmFsc2UsInJvdGF0ZSI6bnVsbH19"
+                alt="Project Cover"
+                className={styles.projectImage}
               />
-              <div className={styles.textareaFooter}>
-                <span
-                  className={`${styles.minLength} ${
-                    reviewText.length < 20 ? styles.minLengthError : ""
-                  }`}
-                >
-                  최소 20자이상 입력해 주세요
-                </span>
-                <span className={styles.charCount}>
-                  {reviewText.length}/1000
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Image Upload */}
-          <div className={styles.imageUploadSection}>
-            <label className={styles.uploadLabel}>
-              <div className={styles.uploadArea}>
-                <Upload className={styles.uploadIcon} size={24} />
-                <div className={styles.uploadTitle}>
-                  이미지 업로드 (선택) ({images.length}/10)
-                </div>
-                <div className={styles.uploadInfo}>
-                  <p>· 최대 10개까지 업로드 가능</p>
-                  <p>· 파일 형식: jpg 또는 png 또는 jpeg 또는 gif</p>
+              <div>
+                <div className={styles.projectCreator}>네이버웹툰</div>
+                <div className={styles.projectTitle}>
+                  [구인] 네이버웹툰 &lt;마루는 강쥐&gt; 나랑 살 언니 찾습니다
                 </div>
               </div>
-              <input
-                type="file"
-                multiple
-                accept="image/png, image/jpeg, image/jpg, image/gif"
-                className={styles.hiddenInput}
-                onChange={handleImageChange}
-              />
-            </label>
-            {/* 이미지 미리보기 */}
-            <div className={styles.imagePreviewContainer}>
-              {images.map((img, idx) => (
-                <div key={idx} className={styles.imagePreview}>
-                  <img
-                    src={URL.createObjectURL(img)}
-                    alt={`upload-${idx}`}
-                    className={styles.previewImg}
+            </div>
+            {/* Rating Questions */}
+            <div className={styles.ratingsSection}>
+              {/* Quality Rating */}
+              <div className={styles.ratingQuestion}>
+                <h3 className={styles.questionTitle}>
+                  프로젝트 리워드 퀄리티가 좋았나요?
+                </h3>
+                <div className={styles.smileyContainer}>
+                  <SmileyButton
+                    type="bad"
+                    isSelected={ratings.quality === "bad"}
+                    onClick={() => handleRatingChange("quality", "bad")}
+                    label="아쉬워요"
                   />
-                  <button
-                    className={styles.removeImageButton}
-                    onClick={() => handleImageRemove(idx)}
-                    type="button"
-                  >
-                    <X size={16} />
-                  </button>
+                  <SmileyButton
+                    type="neutral"
+                    isSelected={ratings.quality === "neutral"}
+                    onClick={() => handleRatingChange("quality", "neutral")}
+                    label="보통이에요"
+                  />
+                  <SmileyButton
+                    type="good"
+                    isSelected={ratings.quality === "good"}
+                    onClick={() => handleRatingChange("quality", "good")}
+                    label="만족해요"
+                  />
                 </div>
-              ))}
+              </div>
+              {/* Plan Rating */}
+              <div className={styles.ratingQuestion}>
+                <h3 className={styles.questionTitle}>
+                  창작자는 프로젝트 계획을 잘 지켰나요?
+                </h3>
+                <div className={styles.smileyContainer}>
+                  <SmileyButton
+                    type="bad"
+                    isSelected={ratings.plan === "bad"}
+                    onClick={() => handleRatingChange("plan", "bad")}
+                    label="아쉬워요"
+                  />
+                  <SmileyButton
+                    type="neutral"
+                    isSelected={ratings.plan === "neutral"}
+                    onClick={() => handleRatingChange("plan", "neutral")}
+                    label="보통이에요"
+                  />
+                  <SmileyButton
+                    type="good"
+                    isSelected={ratings.plan === "good"}
+                    onClick={() => handleRatingChange("plan", "good")}
+                    label="잘 지켰어요"
+                  />
+                </div>
+              </div>
+              {/* Communication Rating */}
+              <div className={styles.ratingQuestion}>
+                <h3 className={styles.questionTitle}>
+                  창작자와 소통이 잘 되고 친절했나요?
+                </h3>
+                <div className={styles.smileyContainer}>
+                  <SmileyButton
+                    type="bad"
+                    isSelected={ratings.communication === "bad"}
+                    onClick={() => handleRatingChange("communication", "bad")}
+                    label="아쉬워요"
+                  />
+                  <SmileyButton
+                    type="neutral"
+                    isSelected={ratings.communication === "neutral"}
+                    onClick={() =>
+                      handleRatingChange("communication", "neutral")
+                    }
+                    label="보통이에요"
+                  />
+                  <SmileyButton
+                    type="good"
+                    isSelected={ratings.communication === "good"}
+                    onClick={() => handleRatingChange("communication", "good")}
+                    label="친절했어요"
+                  />
+                </div>
+              </div>
+            </div>
+            {/* Review Text */}
+            <div className={styles.reviewTextSection}>
+              <h3 className={`${styles.questionTitle} ${styles.leftAlign}`}>
+                후원 후기를 남겨주세요
+              </h3>
+              <p className={styles.reviewDescription}>
+                후원 후기는 창작자 뿐만 아니라 다른 후원자에게도 큰 도움이
+                됩니다.
+              </p>
+              <div className={styles.textareaContainer}>
+                <textarea
+                  className={styles.textarea}
+                  rows="4"
+                  placeholder="창작자의 새로운 시도를 응원하는 따뜻한 후기는 창작자에게 큰 도움이 됩니다."
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  maxLength={1000}
+                />
+                <div className={styles.textareaFooter}>
+                  <span
+                    className={`${styles.minLength} ${
+                      reviewText.length < 20 ? styles.minLengthError : ""
+                    }`}
+                  >
+                    최소 20자이상 입력해 주세요
+                  </span>
+                  <span className={styles.charCount}>
+                    {reviewText.length}/1000
+                  </span>
+                </div>
+              </div>
+            </div>
+            {/* Image Upload */}
+            <div className={styles.imageUploadSection}>
+              <label className={styles.uploadLabel}>
+                <div className={styles.uploadArea}>
+                  <Upload className={styles.uploadIcon} size={24} />
+                  <div className={styles.uploadTitle}>
+                    이미지 업로드 (선택) ({images.length}/10)
+                  </div>
+                  <div className={styles.uploadInfo}>
+                    <p>· 최대 10개까지 업로드 가능</p>
+                    <p>· 파일 형식: jpg 또는 png 또는 jpeg 또는 gif</p>
+                  </div>
+                </div>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/png, image/jpeg, image/jpg, image/gif"
+                  className={styles.hiddenInput}
+                  onChange={handleImageChange}
+                />
+              </label>
+              {/* 이미지 미리보기 */}
+              <div className={styles.imagePreviewContainer}>
+                {images.map((img, idx) => (
+                  <div key={idx} className={styles.imagePreview}>
+                    <img
+                      src={URL.createObjectURL(img) || "/placeholder.svg"}
+                      alt={`upload-${idx}`}
+                      className={styles.previewImg}
+                    />
+                    <button
+                      className={styles.removeImageButton}
+                      onClick={() => handleImageRemove(idx)}
+                      type="button"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Guidelines */}
+            <div className={styles.guidelines}>
+              <h4 className={styles.guidelineTitle}>
+                프로젝트 후기 작성 가이드라인
+              </h4>
+              <ul className={styles.guidelineList}>
+                <li>
+                  • 텀블벅은 창작자의 새로운 시도를 응원하고, 개선점이 있다면
+                  솔직하게 피드백하는 후기 문화를 만들어가고자 합니다.
+                </li>
+                <li>
+                  • 크라우드펀딩의 취지에 대한 이해를 바탕으로 건강하고 따뜻한
+                  후기 문화를 만들어갈 수 있도록 도움 주시기를 부탁드립니다.
+                </li>
+              </ul>
+              <h4 className={styles.guidelineTitle}>프로젝트 후기 정책 안내</h4>
+              <p className={styles.policyText}>
+                *텀블벅은 정보통신망법 44조에 의거하여, 사생활 침해 또는
+                명예훼손 등 타인의 권리를 침해하는 행위는 정보통신 서비스
+                제공자로서 유통하지 않도록 노력합니다. 운영 정책에 해당하지 않는
+                게시물 또는 아래와 같은 경우 블라인드 조치가 이루어질 수
+                있습니다.
+              </p>
+              <ul className={styles.policyList}>
+                <li>
+                  • 창작자를 포함한 특정 대상에 대한 위협, 모욕, 비방, 개인정보
+                  침해의 요소가 포함된 후기
+                </li>
+                <li>• 욕설, 비속어, 스팸성으로 반복되는 문장이 포함된 후기</li>
+                <li>
+                  • 사실이 아닌 내용이나 프로젝트 후원 경험과 관계없는 내용 또는
+                  사진이 포함된 후기
+                </li>
+                <li>
+                  • 프로젝트에 대한 후기가 아닌 창작자에 대한 문의나 요청으로
+                  구성된 후기
+                </li>
+                <li>• 이용자의 신고가 3건 이상 누적 발생한 후기</li>
+              </ul>
             </div>
           </div>
-
-          {/* Guidelines */}
-          <div className={styles.guidelines}>
-            <h4 className={styles.guidelineTitle}>
-              프로젝트 후기 작성 가이드라인
-            </h4>
-            <ul className={styles.guidelineList}>
-              <li>
-                • 텀블벅은 창작자의 새로운 시도를 응원하고, 개선점이 있다면
-                솔직하게 피드백하는 후기 문화를 만들어가고자 합니다.
-              </li>
-              <li>
-                • 크라우드펀딩의 취지에 대한 이해를 바탕으로 건강하고 따뜻한
-                후기 문화를 만들어갈 수 있도록 도움 주시기를 부탁드립니다.
-              </li>
-            </ul>
-
-            <h4 className={styles.guidelineTitle}>프로젝트 후기 정책 안내</h4>
-            <p className={styles.policyText}>
-              *텀블벅은 정보통신망법 44조에 의거하여, 사생활 침해 또는 명예훼손
-              등 타인의 권리를 침해하는 행위는 정보통신 서비스 제공자로서
-              유통하지 않도록 노력합니다. 운영 정책에 해당하지 않는 게시물 또는
-              아래와 같은 경우 블라인드 조치가 이루어질 수 있습니다.
-            </p>
-            <ul className={styles.policyList}>
-              <li>
-                • 창작자를 포함한 특정 대상에 대한 위협, 모욕, 비방, 개인정보
-                침해의 요소가 포함된 후기
-              </li>
-              <li>• 욕설, 비속어, 스팸성으로 반복되는 문장이 포함된 후기</li>
-              <li>
-                • 사실이 아닌 내용이나 프로젝트 후원 경험과 관계없는 내용 또는
-                사진이 포함된 후기
-              </li>
-              <li>
-                • 프로젝트에 대한 후기가 아닌 창작자에 대한 문의나 요청으로
-                구성된 후기
-              </li>
-              <li>• 이용자의 신고가 3건 이상 누적 발생한 후기</li>
-            </ul>
+          {/* Footer Button */}
+          <div className={styles.footer}>
+            <button
+              className={`${styles.submitButton} ${
+                isFormValid()
+                  ? styles.submitButtonEnabled
+                  : styles.submitButtonDisabled
+              }`}
+              disabled={!isFormValid()}
+            >
+              후기 작성 완료
+            </button>
           </div>
-        </div>
-
-        {/* Footer Button */}
-        <div className={styles.footer}>
-          <button
-            className={`${styles.submitButton} ${
-              isFormValid()
-                ? styles.submitButtonEnabled
-                : styles.submitButtonDisabled
-            }`}
-            disabled={!isFormValid()}
-          >
-            후기 작성 완료
-          </button>
         </div>
       </div>
-    </div>
+
+      {/* 확인 모달 */}
+      {showExitModal && (
+        <div className={styles.overlay}>
+          <div className={styles.exitModal}>
+            <div className={styles.exitModalContent}>
+              <p className={styles.exitModalText}>
+                프로젝트 후기 작성을 취소하고 나가겠습니까?
+              </p>
+              <div className={styles.exitModalButtons}>
+                <button
+                  onClick={handleCancel}
+                  className={`${styles.exitModalButton} ${styles.cancelButton}`}
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleExit}
+                  className={`${styles.exitModalButton} ${styles.exitButton}`}
+                >
+                  나가기
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
