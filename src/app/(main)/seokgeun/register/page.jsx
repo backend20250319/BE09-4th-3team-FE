@@ -8,10 +8,14 @@ import styles from "./register.module.css";
 // ✅ 중복 확인 함수들
 const checkUserId = async (userId) => {
   try {
+    console.log("아이디 중복 확인 요청:", userId);
     const res = await fetch(
       `http://localhost:8888/api/register/check-user-id?userId=${userId}`
     );
-    return await res.json();
+    console.log("아이디 중복 확인 응답 상태:", res.status);
+    const data = await res.json();
+    console.log("아이디 중복 확인 응답:", data);
+    return data;
   } catch (err) {
     console.error("아이디 중복 확인 오류:", err);
     return false;
@@ -20,10 +24,14 @@ const checkUserId = async (userId) => {
 
 const checkNickname = async (nickname) => {
   try {
+    console.log("닉네임 중복 확인 요청:", nickname);
     const res = await fetch(
       `http://localhost:8888/api/register/check-nickname?nickname=${nickname}`
     );
-    return await res.json();
+    console.log("닉네임 중복 확인 응답 상태:", res.status);
+    const data = await res.json();
+    console.log("닉네임 중복 확인 응답:", data);
+    return data;
   } catch (err) {
     console.error("닉네임 중복 확인 오류:", err);
     return false;
@@ -32,10 +40,14 @@ const checkNickname = async (nickname) => {
 
 const checkEmail = async (email) => {
   try {
+    console.log("이메일 중복 확인 요청:", email);
     const res = await fetch(
       `http://localhost:8888/api/register/check-email?email=${email}`
     );
-    return await res.json();
+    console.log("이메일 중복 확인 응답 상태:", res.status);
+    const data = await res.json();
+    console.log("이메일 중복 확인 응답:", data);
+    return data;
   } catch (err) {
     console.error("이메일 중복 확인 오류:", err);
     return false;
@@ -44,10 +56,14 @@ const checkEmail = async (email) => {
 
 const checkPhone = async (phone) => {
   try {
+    console.log("전화번호 중복 확인 요청:", phone);
     const res = await fetch(
       `http://localhost:8888/api/register/check-phone?phone=${phone}`
     );
-    return await res.json();
+    console.log("전화번호 중복 확인 응답 상태:", res.status);
+    const data = await res.json();
+    console.log("전화번호 중복 확인 응답:", data);
+    return data;
   } catch (err) {
     console.error("전화번호 중복 확인 오류:", err);
     return false;
@@ -88,13 +104,15 @@ export default function Page() {
   const validateField = (name, value) => {
     switch (name) {
       case "userId":
-        return value.trim() === "" ? "아이디를 입력해주세요." : "";
+        return !/^[a-zA-Z0-9]{5,20}$/.test(value)
+          ? "아이디는 영문+숫자 5~20자여야 합니다."
+          : "";
 
       case "password":
-        return !/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/.test(
+        return !/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(
           value
         )
-          ? "비밀번호는 영문 대소문자+숫자+특수문자 포함 8~15자여야 합니다."
+          ? "비밀번호는 영문 대소문자+숫자+특수문자 포함 8~20자여야 합니다."
           : "";
 
       case "confirmPassword":
@@ -107,7 +125,7 @@ export default function Page() {
 
       case "phone":
         return !/^01[016789]-?\d{3,4}-?\d{4}$/.test(value)
-          ? "유효한 전화번호를 입력해주세요.(예:010-1234-1234)."
+          ? "유효한 전화번호를 입력해주세요.(예:010-1234-1234)"
           : "";
 
       default:
@@ -193,7 +211,11 @@ export default function Page() {
     if (!emailValid) return alert("이메일 중복 확인을 완료해주세요.");
     if (!phoneValid) return alert("전화번호 중복 확인을 완료해주세요.");
 
+    // 서버 연결 상태는 회원가입 요청 시 확인
+
     try {
+      console.log("전송할 데이터:", form);
+
       const response = await fetch(
         "http://localhost:8888/api/register/signup",
         {
@@ -206,10 +228,28 @@ export default function Page() {
         }
       );
 
+      console.log("응답 상태:", response.status);
+      console.log("응답 헤더:", Object.fromEntries(response.headers.entries()));
+
       let data = {};
       const contentType = response.headers.get("content-type") || "";
-      if (contentType.includes("application/json")) {
-        data = await response.json();
+
+      try {
+        if (contentType.includes("application/json")) {
+          data = await response.json();
+        } else {
+          const textData = await response.text();
+          console.log("응답 텍스트:", textData);
+          try {
+            data = JSON.parse(textData);
+          } catch (parseError) {
+            console.log("JSON 파싱 실패, 텍스트 응답:", textData);
+            data = { message: textData };
+          }
+        }
+      } catch (readError) {
+        console.error("응답 읽기 오류:", readError);
+        data = { message: "응답을 읽을 수 없습니다." };
       }
 
       if (response.ok) {
@@ -217,11 +257,21 @@ export default function Page() {
         window.location.href = "/seokgeun/login";
       } else {
         console.error("회원가입 오류 응답:", response.status, data);
+        // 응답 텍스트를 다시 읽으려고 하면 이미 소비된 스트림이므로 오류 발생
         alert(`회원가입 실패: ${data.message || response.status}`);
       }
     } catch (error) {
       console.error("회원가입 통신 오류:", error);
-      alert("서버 통신 중 오류가 발생했습니다.");
+      console.error("오류 상세:", error.message);
+      console.error("오류 스택:", error.stack);
+
+      if (error.name === "TypeError" && error.message.includes("fetch")) {
+        alert(
+          "서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해주세요."
+        );
+      } else {
+        alert("서버 통신 중 오류가 발생했습니다: " + error.message);
+      }
     }
   };
 
