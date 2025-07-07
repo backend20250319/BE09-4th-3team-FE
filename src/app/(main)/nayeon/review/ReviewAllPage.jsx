@@ -39,7 +39,6 @@ export default function ReviewAllPage({ onBack }) {
           }&size=${reviewsPerPage}&sort=${sortBy}`
         );
 
-        // response.data 예시 구조: { content: [...], totalElements: 100, totalPages: 10, ... }
         setAllReviews(response.data.content);
         setTotalPages(response.data.totalPages);
         setTotalElements(response.data.totalElements);
@@ -75,7 +74,6 @@ export default function ReviewAllPage({ onBack }) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
 
-    // 이전 버튼
     if (currentPage > 1) {
       pages.push(
         <button
@@ -88,7 +86,6 @@ export default function ReviewAllPage({ onBack }) {
       );
     }
 
-    // 페이지 번호 버튼들
     for (let i = startPage; i <= endPage; i++) {
       pages.push(
         <button
@@ -103,7 +100,6 @@ export default function ReviewAllPage({ onBack }) {
       );
     }
 
-    // 다음 버튼
     if (currentPage < totalPages) {
       pages.push(
         <button
@@ -140,7 +136,6 @@ export default function ReviewAllPage({ onBack }) {
             onChange={(e) => setSortBy(e.target.value)}
           >
             <option value="latest">최신순</option>
-            <option value="helpful">도움순</option>
             <option value="satisfaction">만족도순</option>
           </select>
         </div>
@@ -166,6 +161,8 @@ export default function ReviewAllPage({ onBack }) {
             <div key={review.reviewNo} className={styles.reviewCard}>
               <div className={styles.reviewHeader}>
                 <div className={styles.authorInfo}>
+                  {/* 아바타 이미지 영역 - 필요 없으면 주석 처리 */}
+                  {/*
                   <div className={styles.avatar}>
                     <img
                       src={
@@ -175,9 +172,10 @@ export default function ReviewAllPage({ onBack }) {
                       alt="프로필"
                     />
                   </div>
+                  */}
                   <div className={styles.authorDetails}>
                     <div className={styles.authorName}>
-                      <span>{review.user?.nickname || "익명"}</span>
+                      <span>{review.userNickname || "익명"}</span>
                     </div>
                     <div className={styles.reviewMeta}>
                       <span className={styles.reviewDate}>
