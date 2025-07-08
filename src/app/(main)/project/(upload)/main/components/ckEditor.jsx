@@ -29,7 +29,7 @@ export default function CkEditor({ onChange, data = "" }) {
           "imageUpload",
           "blockQuote",
         ],
-        placeholder: "여기에 내용을 작성하세요...",
+        placeholder: "후원자 분들이 프로젝트를 빠르게 이해할 수 있도록 명확하게 소개해주세요.",
         heading: {
           options: [
             { model: "paragraph", title: "본문", class: "ck-heading_paragraph" },
