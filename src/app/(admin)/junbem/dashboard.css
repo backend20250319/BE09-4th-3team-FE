@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+/* 컨테이너 및 메인 영역 */
+.dashboard-container {
+    @apply flex min-h-screen w-full flex-col bg-gray-100;
+}
+
+.dashboard-main {
+    @apply flex flex-col flex-1 gap-4 p-4 md:p-8;
+}
+
+/* 통계 카드 그리드 */
+.dashboard-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4;
+}
+
+.stat-card {
+    @apply bg-white p-4 rounded-lg shadow;
+}
+
+.stat-card-header {
+    @apply flex justify-between items-center mb-2;
+}
+
+.stat-card-icon {
+    @apply text-gray-400;
+}
+
+.stat-card-value {
+    @apply text-2xl font-bold;
+}
+
+.stat-card-change {
+    @apply text-xs text-gray-500;
+}
+
+/* 최근 활동 및 빠른 작업 영역 */
+.dashboard-content {
+    @apply grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3;
+}
+
+/* 최근 활동 */
+.activity-card {
+    @apply bg-white p-4 rounded-lg shadow xl:col-span-2;
+}
+
+.activity-header {
+    @apply flex justify-between items-center mb-4;
+}
+
+.activity-list {
+    @apply space-y-3;
+}
+
+/* 빠른 작업 */
+.quick-actions-card {
+    @apply bg-white p-4 rounded-lg shadow;
+}
+
+.quick-actions-list {
+    @apply space-y-2;
+}
+
+.quick-action-btn {
+    @apply w-full flex items-center border p-2 rounded hover:bg-gray-50 text-sm;
+}
+
+/* 링크 */
+.view-all-link {
+    @apply text-sm text-blue-600 hover:underline;
+}
