@@ -1,49 +1,81 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Eye, Check, X } from "lucide-react";
 import "./reviews.css";
 
 export default function ProjectReviewPage() {
-    const initialProjects = [
-        {
-            id: 1,
-            name: "AI-Powered Learning Platform",
-            creator: "Sarah Johnson",
-            category: "Education",
-            goal: "$50,000",
-            date: "Jan 15, 2024",
-            description: "An innovative platform that uses AI to personalize learning.",
-        },
-        {
-            id: 2,
-            name: "Sustainable Energy Monitor",
-            creator: "Michael Chen",
-            category: "Technology",
-            goal: "$75,000",
-            date: "Jan 14, 2024",
-            description: "IoT device that helps households track and optimize energy usage.",
-        },
-        {
-            id: 3,
-            name: "Mental Health Companion App",
-            creator: "Dr. James Wilson",
-            category: "Healthcare",
-            goal: "$100,000",
-            date: "Jan 12, 2024",
-            description: "24/7 mental health support via AI-driven mobile app.",
-        },
-    ];
-
-    const [projects, setProjects] = useState(initialProjects);
-    const [selectedProject, setSelectedProject] = useState(null); // 🔹 모달용 상태
+    const [projects, setProjects] = useState([]);
+    const [selectedProject, setSelectedProject] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
-    const handleStatusChange = (projectId, status) => {
-        setProjects((prev) => prev.filter((project) => project.id !== projectId));
-        console.log(`Project ${projectId} marked as ${status}`);
+    // ✅ 프로젝트 상태 변경 함수
+    const handleStatusChange = async (projectId, status) => {
+        const statusCode = status === "approved" ? "APPROVED" : "REJECTED";
+
+        try {
+            const res = await fetch("http://localhost:8888/admin/projects/status", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1MTM2MjcyMiwiZXhwIjoxNzUyNTcyMzIyfQ.5rCSiaJ6SvPhDnqAXQPQeal-UvvbhYt8b5oSmG3YikI`, // 토큰은 실제 값으로 대체
+                },
+                body: JSON.stringify({
+                    projectId: projectId,
+                    productStatus: statusCode,
+                }),
+            });
+
+            if (!res.ok) throw new Error("상태 변경 실패");
+
+            // 🔄 성공 시 목록에서 제거
+            setProjects((prev) => prev.filter((p) => p.id !== projectId));
+        } catch (error) {
+            console.error("상태 변경 오류:", error);
+            alert("프로젝트 상태 변경에 실패했습니다.");
+        }
     };
+
+    // 🔽 API에서 승인 대기(WAITING_APPROVAL) 상태 프로젝트 불러오기
+    useEffect(() => {
+        const fetchProjects = async () => {
+            try {
+                const res = await fetch("http://localhost:8888/admin/projects", {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1MTM2MjcyMiwiZXhwIjoxNzUyNTcyMzIyfQ.5rCSiaJ6SvPhDnqAXQPQeal-UvvbhYt8b5oSmG3YikI`, // ✅ 직접 입력한 유효한 토큰으로 교체
+                    },
+                });
+
+                if (!res.ok) throw new Error("서버 응답 오류");
+
+                const data = await res.json();
+
+                const waitingProjects = data.content
+                    .filter((item) => item.productStatus === "WAITING_APPROVAL")
+                    .map((item) => ({
+                        id: item.projectNo,
+                        name: item.title,
+                        creator: item.userId,
+                        category: item.categoryName,
+                        goal: item.goalAmount.toLocaleString("ko-KR", {
+                            style: "currency",
+                            currency: "KRW",
+                        }),
+                        date: new Date(item.createdAt).toLocaleDateString("ko-KR"),
+                        description: item.description.replace(/<[^>]+>/g, ""), // HTML 제거
+                    }));
+
+                setProjects(waitingProjects);
+            } catch (error) {
+                console.error("데이터 로딩 실패:", error);
+            }
+        };
+
+        fetchProjects();
+    }, []);
+
 
     const openModal = (project) => {
         setSelectedProject(project);
@@ -60,7 +92,7 @@ export default function ProjectReviewPage() {
             <div className="flex justify-between items-start mb-6">
                 <div>
                     <h1 className="text-3xl font-bold">프로젝트 승인</h1>
-                    <p className="text-gray-500 mt-1">Review and approve pending project submissions</p>
+                    <p className="text-gray-500 mt-1">보류 중인 프로젝트 제출을 검토하고 승인합니다.</p>
                 </div>
                 <span className="text-sm bg-gray-200 rounded-full px-3 py-1">
                     {projects.length} Pending Review
@@ -74,18 +106,18 @@ export default function ProjectReviewPage() {
             </div>
 
             <div className="bg-white p-6 rounded-xl border shadow-sm">
-                <h2 className="text-xl font-semibold mb-2">Pending Project Submissions</h2>
-                <p className="text-gray-500 mb-4">Review and approve project submissions from creators</p>
+                <h2 className="text-xl font-semibold mb-2">승인 대기 중인 펀딩 프로젝트</h2>
+                <p className="text-gray-500 mb-4">창작자의 프로젝트 제출물을 검토하고 승인합니다.</p>
                 <div className="overflow-x-auto">
                     <table className="review-table w-full text-left text-sm">
                         <thead className="bg-gray-100 text-gray-700">
                         <tr>
-                            <th>Project</th>
-                            <th>Creator</th>
-                            <th>Category</th>
-                            <th>Funding Goal</th>
-                            <th>Status</th>
-                            <th>Date Submitted</th>
+                            <th>프로젝트</th>
+                            <th>창작자</th>
+                            <th>카테고리</th>
+                            <th>목표 펀딩 금액</th>
+                            <th>상태값</th>
+                            <th>등록된 날짜</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
@@ -140,10 +172,10 @@ export default function ProjectReviewPage() {
                     <div className="modal-content">
                         <h3 className="text-xl font-semibold mb-2">{selectedProject.name}</h3>
                         <p className="text-gray-600 text-sm mb-4">by {selectedProject.creator}</p>
-                        <p className="text-sm mb-2"><strong>Category:</strong> {selectedProject.category}</p>
-                        <p className="text-sm mb-2"><strong>Funding Goal:</strong> {selectedProject.goal}</p>
-                        <p className="text-sm mb-2"><strong>Submitted:</strong> {selectedProject.date}</p>
-                        <p className="text-sm mb-4"><strong>Description:</strong> {selectedProject.description}</p>
+                        <p className="text-sm mb-2"><strong>카테고리:</strong> {selectedProject.category}</p>
+                        <p className="text-sm mb-2"><strong>목표 금액:</strong> {selectedProject.goal}</p>
+                        <p className="text-sm mb-2"><strong>신청 날짜:</strong> {selectedProject.date}</p>
+                        <p className="text-sm mb-4"><strong>설명:</strong> {selectedProject.description}</p>
                         <button onClick={closeModal} className="btn-close cursor-pointer">닫기</button>
                     </div>
                 </div>

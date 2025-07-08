@@ -1,158 +1,108 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import "./projects.css";
-import { Eye, ChevronLeft, ChevronRight, ExternalLink, Calendar } from "lucide-react";
+import { Eye, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 
 export default function ProjectsPage() {
-    const allProjects = [
-        {
-            name: "AI-Powered Learning Platform",
-            description: "An innovative platform that uses artificial intelligence to personalize learning experiences.",
-            creator: "Sarah Johnson",
-            category: "Education",
-            goal: "$50,000",
-            status: "rejected",
-            date: "Jan 15, 2024",
-        },
-        {
-            name: "AI-Powered Learning Platform",
-            description: "An innovative platform that uses artificial intelligence to personalize learning experiences.",
-            creator: "Sarah Johnson",
-            category: "Education",
-            goal: "$50,000",
-            status: "approved",
-            date: "Jan 15, 2024",
-        },
-        {
-            name: "AI-Powered Learning Platform",
-            description: "An innovative platform that uses artificial intelligence to personalize learning experiences.",
-            creator: "Sarah Johnson",
-            category: "Education",
-            goal: "$50,000",
-            status: "pending",
-            date: "Jan 15, 2024",
-        },
-        {
-            name: "AI-Powered Learning Platform",
-            description: "An innovative platform that uses artificial intelligence to personalize learning experiences.",
-            creator: "Sarah Johnson",
-            category: "Education",
-            goal: "$50,000",
-            status: "pending",
-            date: "Jan 15, 2024",
-        },
-        {
-            name: "AI-Powered Learning Platform",
-            description: "An innovative platform that uses artificial intelligence to personalize learning experiences.",
-            creator: "Sarah Johnson",
-            category: "Education",
-            goal: "$50,000",
-            status: "pending",
-            date: "Jan 15, 2024",
-        },
-        {
-            name: "AI-Powered Learning Platform",
-            description: "An innovative platform that uses artificial intelligence to personalize learning experiences.",
-            creator: "Sarah Johnson",
-            category: "Education",
-            goal: "$50,000",
-            status: "pending",
-            date: "Jan 15, 2024",
-        },
-        {
-            name: "AI-Powered Learning Platform",
-            description: "An innovative platform that uses artificial intelligence to personalize learning experiences.",
-            creator: "Sarah Johnson",
-            category: "Education",
-            goal: "$50,000",
-            status: "pending",
-            date: "Jan 15, 2024",
-        },
-        {
-            name: "AI-Powered Learning Platform",
-            description: "An innovative platform that uses artificial intelligence to personalize learning experiences.",
-            creator: "Sarah Johnson",
-            category: "Education",
-            goal: "$50,000",
-            status: "pending",
-            date: "Jan 15, 2024",
-        },
-        {
-            name: "AI-Powered Learning Platform",
-            description: "An innovative platform that uses artificial intelligence to personalize learning experiences.",
-            creator: "Sarah Johnson",
-            category: "Education",
-            goal: "$50,000",
-            status: "pending",
-            date: "Jan 15, 2024",
-        },
-        {
-            name: "AI-Powered Learning Platform",
-            description: "An innovative platform that uses artificial intelligence to personalize learning experiences.",
-            creator: "Sarah Johnson",
-            category: "Education",
-            goal: "$50,000",
-            status: "pending",
-            date: "Jan 15, 2024",
-        },
-        {
-            name: "AI-Powered Learning Platform",
-            description: "An innovative platform that uses artificial intelligence to personalize learning experiences.",
-            creator: "Sarah Johnson",
-            category: "Education",
-            goal: "$50,000",
-            status: "approved",
-            date: "Jan 15, 2024",
-        },
-        {
-            name: "AI-Powered Learning Platform",
-            description: "An innovative platform that uses artificial intelligence to personalize learning experiences.",
-            creator: "Sarah Johnson",
-            category: "Education",
-            goal: "$50,000",
-            status: "pending",
-            date: "Jan 15, 2024",
-        },
-        {
-            name: "AI-Powered Learning Platform",
-            description: "An innovative platform that uses artificial intelligence to personalize learning experiences.",
-            creator: "Sarah Johnson",
-            category: "Education",
-            goal: "$50,000",
-            status: "pending",
-            date: "Jan 15, 2024",
-        },
-        {
-            name: "AI-Powered Learning Platform",
-            description: "An innovative platform that uses artificial intelligence to personalize learning experiences.",
-            creator: "Sarah Johnson",
-            category: "Education",
-            goal: "$50,000",
-            status: "pending",
-            date: "Jan 15, 2024",
-        },
-        // 필요 시 더 추가
-    ];
-
+    const [allProjects, setAllProjects] = useState([]);
+    const [totalPages, setTotalPages] = useState(1);
+    const [selectedProject, setSelectedProject] = useState(null);
     const [statusFilter, setStatusFilter] = useState("all");
-    const [selectedProject, setSelectedProject] = useState(null); // 🔹 선택된 프로젝트
-    const [showModal, setShowModal] = useState(false); // 🔹 모달 상태
-
+    const [showModal, setShowModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+
+    const [totalCount, setTotalCount] = useState(0); // 전체 프로젝트 수
+    const [statusCounts, setStatusCounts] = useState({
+        pending: 0,
+        approved: 0,
+        rejected: 0,
+    });
     const projectsPerPage = 10;
+
+    useEffect(() => {
+        fetchProjects();
+    }, [currentPage]);
+
+useEffect(() => {
+    fetchProjectCounts(); // 최초 마운트 시 1회 실행
+}, []);
+
+        const fetchProjects = async () => {
+            try {
+                const res = await fetch(`http://localhost:8888/admin/projects?page=${currentPage - 1}`, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1MTM2MjcyMiwiZXhwIjoxNzUyNTcyMzIyfQ.5rCSiaJ6SvPhDnqAXQPQeal-UvvbhYt8b5oSmG3YikI`, // ✅ 하드코딩된 토큰 사용
+                    },
+                });
+
+                if (!res.ok) throw new Error("서버 응답 오류");
+                const data = await res.json();
+
+                // ✅ content 안에서 필요한 정보 가공
+                const mappedProjects = data.content.map((item) => ({
+                    name: item.title,
+                    description: item.description.replace(/<[^>]+>/g, ""), // HTML 태그 제거
+                    creator: item.userId,
+                    category: item.categoryName,
+                    goal: item.goalAmount.toLocaleString("ko-KR", {style: "currency", currency: "KRW"}),
+                    status: convertStatus(item.productStatus),
+                    date: new Date(item.createdAt).toLocaleDateString("ko-KR"),
+                    thumbnail: item.thumbnailUrl,
+                }));
+
+                setAllProjects(mappedProjects);
+                setTotalPages(data.totalPages); // totalPages 저장
+            } catch (err) {
+                console.error("데이터 로딩 오류:", err);
+            }
+        };
+
+// ✅ 새로운 통계용 API 호출 함수
+    const fetchProjectCounts = async () => {
+        try {
+            const res = await fetch("http://localhost:8888/admin/projects/count", {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1MTM2MjcyMiwiZXhwIjoxNzUyNTcyMzIyfQ.5rCSiaJ6SvPhDnqAXQPQeal-UvvbhYt8b5oSmG3YikI`,
+                },
+            });
+
+            if (!res.ok) throw new Error("통계 데이터 요청 실패");
+            const data = await res.json();
+
+            setTotalCount(data.total); // 전체 수
+            setStatusCounts({
+                pending: data.pending,
+                approved: data.approved,
+                rejected: data.rejected,
+            });
+        } catch (err) {
+            console.error("통계 데이터 로딩 오류:", err);
+        }
+    };
+
+    const convertStatus = (statusCode) => {
+        switch (statusCode) {
+            case "WAITING_APPROVAL":
+                return "pending";
+            case "APPROVED":
+                return "approved";
+            case "REJECTED":
+                return "rejected";
+            default:
+                return "unknown";
+        }
+    };
 
     const filteredProjects =
         statusFilter === "all"
             ? allProjects
             : allProjects.filter((project) => project.status.toLowerCase() === statusFilter);
 
-    const totalPages = Math.ceil(filteredProjects.length / projectsPerPage);
-    const currentProjects = filteredProjects.slice(
-        (currentPage - 1) * projectsPerPage,
-        currentPage * projectsPerPage
-    );
-
+    const currentProjects = filteredProjects;
 
     const openModal = (project) => {
         setSelectedProject(project);
@@ -194,24 +144,24 @@ export default function ProjectsPage() {
             {/* 통계 카드 */}
             <div className="projects-cards">
                 <div className="projects-card">
-                    <p className="projects-card-number">{allProjects.length}</p>
+                    <p className="projects-card-number">{totalCount}</p>
                     <p>전체 프로젝트</p>
                 </div>
                 <div className="projects-card">
                     <p className="projects-card-number text-yellow-500">
-                        {allProjects.filter((p) => p.status === "pending").length}
+                        {statusCounts.pending}
                     </p>
                     <p>대기중인 프로젝트</p>
                 </div>
                 <div className="projects-card">
                     <p className="projects-card-number text-green-600">
-                        {allProjects.filter((p) => p.status === "approved").length}
+                        {statusCounts.approved}
                     </p>
                     <p>승인된 프로젝트</p>
                 </div>
                 <div className="projects-card">
                     <p className="projects-card-number text-red-500">
-                        {allProjects.filter((p) => p.status === "rejected").length}
+                        {statusCounts.rejected}
                     </p>
                     <p>거절한 프로젝트</p>
                 </div>
@@ -251,9 +201,12 @@ export default function ProjectsPage() {
                                         <button className="btn-icon cursor-pointer" onClick={() => openModal(project)}>
                                             <Eye className="h-4 w-4" />
                                         </button>
-                                        <Link href="/junbem/projects/reviews" className="action-button cursor-pointer">
-                                            승인하기
-                                        </Link>
+                                        {/*승인하기 버튼*/}
+                                        {project.status === "pending" && (
+                                            <Link href="/junbem/projects/reviews" className="action-button cursor-pointer">
+                                                승인하기
+                                            </Link>
+                                        )}
                                     </div>
                                 </td>
                             </tr>
@@ -268,7 +221,7 @@ export default function ProjectsPage() {
                 <button
                     onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                     disabled={currentPage === 1}
-                    className="px-2 py-1 border rounded disabled:opacity-50"
+                    className="px-2 py-1 border rounded disabled:opacity-50 cursor-pointer"
                 >
                     <ChevronLeft className="inline w-4 h-4" /> 이전
                 </button>
@@ -276,7 +229,7 @@ export default function ProjectsPage() {
                 <button
                     onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="px-2 py-1 border rounded disabled:opacity-50"
+                    className="px-2 py-1 border rounded disabled:opacity-50 cursor-pointer"
                 >
                     다음 <ChevronRight className="inline w-4 h-4" />
                 </button>

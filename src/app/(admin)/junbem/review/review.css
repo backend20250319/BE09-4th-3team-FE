@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+.review-page {
+    @apply p-8 bg-gray-50 min-h-screen font-sans;
+}
+
+.search-input {
+    @apply w-full p-2 border border-gray-300 rounded mb-4;
+}
+
+.review-stats {
+    @apply flex justify-between text-sm mb-4;
+}
+
+.review-table {
+    @apply w-full text-sm border border-gray-200 rounded-lg mb-4;
+}
+
+.review-table th {
+    @apply bg-gray-100 p-2 text-left border-b;
+}
+
+.review-table td {
+    @apply p-2 border-b align-top;
+}
+
+.review-table .truncate {
+    @apply max-w-xs overflow-hidden whitespace-nowrap text-ellipsis;
+}
+
+.pagination {
+    @apply mt-4 flex justify-center items-center gap-4;
+}
+
+.pagination button {
+    @apply px-2 py-1 border rounded disabled:opacity-50 cursor-pointer;
+}
+
+.star {
+    @apply text-gray-300;
+}
+
+.star.filled {
+    @apply text-yellow-400;
+}

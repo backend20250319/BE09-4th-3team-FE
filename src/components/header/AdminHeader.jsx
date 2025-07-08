@@ -14,6 +14,7 @@ export default function AdminHeader() {
                 <Link href="/junbem/projects" className="dashboard-link">프로젝트 관리</Link>
                 <Link href="/junbem/users" className="dashboard-link">회원 관리</Link>
                 <Link href="/junbem/fundings" className="dashboard-link">펀딩 관리</Link>
+                <Link href="/junbem/review" className="dashboard-link">리뷰 관리</Link>
             </nav>
 
             {/* 모바일 햄버거 메뉴 */}

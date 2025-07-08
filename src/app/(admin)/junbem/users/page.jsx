@@ -1,165 +1,88 @@
-// page.jsx
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Eye, Ban, UserCheck, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import "./users.css";
 
 export default function UsersPage() {
-    const mockUsers = [
-        {
-            id: 1,
-            name: "김철수",
-            email: "kim.chulsoo@example.com",
-            status: "LOGIN",
-            role: "창작자",
-            joinDate: "2024-01-15",
-            lastLogin: "2024-01-20 14:30",
-            projectsCount: 3,
-            totalFunding: 150000,
-        },
-        {
-            id: 2,
-            name: "이영희",
-            email: "lee.younghee@example.com",
-            status: "LOGOUT",
-            role: "후원자",
-            joinDate: "2024-01-14",
-            lastLogin: "2024-01-19 09:15",
-            projectsCount: 0,
-            totalFunding: 0,
-        },
-        {
-            id: 3,
-            name: "박민수",
-            email: "park.minsu@example.com",
-            status: "LOGIN",
-            role: "창작자",
-            joinDate: "2024-01-13",
-            lastLogin: "2024-01-20 16:45",
-            projectsCount: 1,
-            totalFunding: 75000,
-        },
-        {
-            id: 4,
-            name: "정수진",
-            email: "jung.sujin@example.com",
-            status: "BANNED",
-            role: "창작자",
-            joinDate: "2024-01-12",
-            lastLogin: "2024-01-18 11:20",
-            projectsCount: 2,
-            totalFunding: 0,
-        },
-        {
-            id: 5,
-            name: "최동현",
-            email: "choi.donghyun@example.com",
-            status: "LOGIN",
-            role: "후원자",
-            joinDate: "2024-01-11",
-            lastLogin: "2024-01-20 13:10",
-            projectsCount: 0,
-            totalFunding: 0,
-        },
-        {
-            id: 6,
-            name: "강미영",
-            email: "kang.miyoung@example.com",
-            status: "LOGOUT",
-            role: "창작자",
-            joinDate: "2024-01-10",
-            lastLogin: "2024-01-19 17:30",
-            projectsCount: 4,
-            totalFunding: 200000,
-        },
-        {
-            id: 7,
-            name: "윤성호",
-            email: "yoon.sungho@example.com",
-            status: "LOGIN",
-            role: "후원자",
-            joinDate: "2024-01-09",
-            lastLogin: "2024-01-20 10:45",
-            projectsCount: 0,
-            totalFunding: 0,
-        },
-        {
-            id: 8,
-            name: "임지현",
-            email: "lim.jihyun@example.com",
-            status: "LOGOUT",
-            role: "창작자",
-            joinDate: "2024-01-08",
-            lastLogin: "2024-01-18 15:20",
-            projectsCount: 1,
-            totalFunding: 50000,
-        },
-        {
-            id: 9,
-            name: "한상우",
-            email: "han.sangwoo@example.com",
-            status: "LOGIN",
-            role: "후원자",
-            joinDate: "2024-01-07",
-            lastLogin: "2024-01-20 12:00",
-            projectsCount: 0,
-            totalFunding: 0,
-        },
-        {
-            id: 10,
-            name: "송미라",
-            email: "song.mira@example.com",
-            status: "BANNED",
-            role: "창작자",
-            joinDate: "2024-01-06",
-            lastLogin: "2024-01-17 14:15",
-            projectsCount: 1,
-            totalFunding: 0,
-        },
-        {
-            id: 11,
-            name: "오준석",
-            email: "oh.junseok@example.com",
-            status: "LOGIN",
-            role: "창작자",
-            joinDate: "2024-01-05",
-            lastLogin: "2024-01-20 11:30",
-            projectsCount: 2,
-            totalFunding: 120000,
-        },
-        {
-            id: 12,
-            name: "배현정",
-            email: "bae.hyunjeong@example.com",
-            status: "LOGOUT",
-            role: "후원자",
-            joinDate: "2024-01-04",
-            lastLogin: "2024-01-19 08:45",
-            projectsCount: 0,
-            totalFunding: 0,
-        },
-    ];
-
-    const [users, setUsers] = useState(mockUsers);
+    const [users, setUsers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedUser, setSelectedUser] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [confirmAction, setConfirmAction] = useState({ userId: null, type: null });
 
     const usersPerPage = 10;
+
+    const fetchUsers = async (page = currentPage) => {
+        try {
+            const res = await fetch(`http://localhost:8888/admin/users?page=${page - 1}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1MTM2MjcyMiwiZXhwIjoxNzUyNTcyMzIyfQ.5rCSiaJ6SvPhDnqAXQPQeal-UvvbhYt8b5oSmG3YikI`,
+                },
+            });
+
+            if (!res.ok) throw new Error("서버 요청 실패");
+            const data = await res.json();
+
+            const formatted = data.content.map((user) => ({
+                id: user.userNo,
+                name: user.nickname,
+                email: user.email,
+                status: user.userStatus,
+                role: user.roleType === "USER" ? "후원자" : user.roleType,
+                joinDate: formatDate(user.createdAt),
+                lastLogin: formatDate(user.updatedAt),
+                projectsCount: 0,
+                totalFunding: 0,
+            }));
+
+            setUsers(formatted);
+            setTotalPages(data.totalPages);
+        } catch (err) {
+            console.error("유저 로딩 실패:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchUsers();
+    }, [currentPage]);
+
+// 날짜 포맷 함수
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return `${date.getFullYear()}년 ${String(date.getMonth() + 1).padStart(2, "0")}월 ${String(date.getDate()).padStart(2, "0")}일 ${String(date.getHours()).padStart(2, "0")}시 ${String(date.getMinutes()).padStart(2, "0")}분`;
+    };
     const filteredUsers = useMemo(() => {
         return users
             .filter((u) => u.name.toLowerCase().includes(searchTerm.toLowerCase()))
             .sort((a, b) => a.name.localeCompare(b.name, "ko"));
     }, [users, searchTerm]);
 
-    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
     const currentUsers = filteredUsers.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
-    const handleUserStatusChange = (id, status) => {
-        setUsers(users.map((u) => (u.id === id ? { ...u, status } : u)));
+    const handleUserStatusChange = async (id, status) => {
+        try {
+            const res = await fetch("http://localhost:8888/admin/users/status", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1MTM2MjcyMiwiZXhwIjoxNzUyNTcyMzIyfQ.5rCSiaJ6SvPhDnqAXQPQeal-UvvbhYt8b5oSmG3YikI`, // 실제 토큰
+                },
+                body: JSON.stringify({userNo: id, userStatus: status === "BANNED" ? "BAN" : "LOGOUT"}),
+            });
+
+            if (!res.ok) throw new Error("서버 요청 실패");
+
+            // 🔄 상태 변경 후 유저 목록 다시 불러오기
+            await fetchUsers();
+
+        } catch (error) {
+            console.error("상태 변경 실패:", error);
+            alert("상태 변경 중 오류가 발생했습니다.");
+        }
     };
 
     const getStatusBadge = (status) => {
@@ -173,12 +96,12 @@ export default function UsersPage() {
         return <span className={badgeClass}>{text}</span>;
     };
 
-    const { onlineCount, offlineCount, bannedCount, creatorCount } = useMemo(() => {
+    const {onlineCount, offlineCount, bannedCount, creatorCount} = useMemo(() => {
         const online = users.filter((u) => u.status === "LOGIN").length;
         const offline = users.filter((u) => u.status === "LOGOUT").length;
         const banned = users.filter((u) => u.status === "BANNED").length;
         const creators = users.filter((u) => u.role === "창작자").length;
-        return { onlineCount: online, offlineCount: offline, bannedCount: banned, creatorCount: creators };
+        return {onlineCount: online, offlineCount: offline, bannedCount: banned, creatorCount: creators};
     }, [users]);
 
     return (
@@ -237,7 +160,7 @@ export default function UsersPage() {
                         <td>{user.role}</td>
                         <td>{getStatusBadge(user.status)}</td>
                         <td className="flex items-center gap-1 text-sm text-gray-500">
-                            <Calendar className="w-4 h-4" />
+                            <Calendar className="w-4 h-4"/>
                             {user.joinDate}
                         </td>
                         <td className="text-sm text-gray-500">{user.lastLogin}</td>
@@ -250,22 +173,22 @@ export default function UsersPage() {
                                         setIsModalOpen(true);
                                     }}
                                 >
-                                    <Eye className="h-4 w-4" />
+                                    <Eye className="h-4 w-4"/>
                                 </button>
 
                                 {user.status !== "BANNED" ? (
                                     <button
                                         className=" btn-ban"
-                                        onClick={() => setConfirmAction({ userId: user.id, type: "ban" })}
+                                        onClick={() => setConfirmAction({userId: user.id, type: "ban"})}
                                     >
-                                        <Ban className="h-4 w-4" />
+                                        <Ban className="h-4 w-4"/>
                                     </button>
                                 ) : (
                                     <button
                                         className=" btn-unban"
-                                        onClick={() => setConfirmAction({ userId: user.id, type: "unban" })}
+                                        onClick={() => setConfirmAction({userId: user.id, type: "unban"})}
                                     >
-                                        <UserCheck className="h-4 w-4" />
+                                        <UserCheck className="h-4 w-4"/>
                                     </button>
                                 )}
                             </div>
@@ -280,17 +203,17 @@ export default function UsersPage() {
                 <button
                     onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                     disabled={currentPage === 1}
-                    className="px-2 py-1 border rounded disabled:opacity-50"
+                    className="px-2 py-1 border rounded disabled:opacity-50 cursor-pointer"
                 >
-                    <ChevronLeft className="inline w-4 h-4" /> 이전
+                    <ChevronLeft className="inline w-4 h-4"/> 이전
                 </button>
                 <span className="text-sm">{currentPage} / {totalPages}</span>
                 <button
                     onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="px-2 py-1 border rounded disabled:opacity-50"
+                    className="px-2 py-1 border rounded disabled:opacity-50 cursor-pointer"
                 >
-                    다음 <ChevronRight className="inline w-4 h-4" />
+                    다음 <ChevronRight className="inline w-4 h-4"/>
                 </button>
             </div>
 
@@ -320,12 +243,14 @@ export default function UsersPage() {
                                 : `정말로 차단을 해제하시겠습니까?`}
                         </p>
                         <div className="flex justify-end gap-2">
-                            <button className="btn-close" onClick={() => setConfirmAction({ userId: null, type: null })}>취소</button>
+                            <button className="btn-close"
+                                    onClick={() => setConfirmAction({userId: null, type: null})}>취소
+                            </button>
                             <button
                                 onClick={() => {
                                     const actionUser = users.find(u => u.id === confirmAction.userId);
                                     handleUserStatusChange(confirmAction.userId, confirmAction.type === "ban" ? "BANNED" : "LOGOUT");
-                                    setConfirmAction({ userId: null, type: null });
+                                    setConfirmAction({userId: null, type: null});
                                 }}
                                 className={`px-4 py-2 rounded text-white ${confirmAction.type === "ban" ? "bg-red-600 hover:bg-red-700 cursor-pointer" : "bg-green-600 hover:bg-green-700 cursor-pointer"}`}
                             >
