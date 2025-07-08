@@ -23,7 +23,6 @@ export default function Section02() {
           disableOnInteraction: false,
         }}
         speed={1000}
-        onSlideChange={() => console.log("slide change")}
         className="h-[355px]"
       >
         {slideData.map((el, idx) => (
