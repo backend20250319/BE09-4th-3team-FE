@@ -1,19 +1,32 @@
 "use client";
+
 import { Bell, Heart, Menu, Search, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function Header() {
-  // 닉네임/로그인 상태 관리
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const hiddenPaths = ["/seokgeun/login", "/seokgeun/register", "/seokgeun"];
+  const shouldShow = !hiddenPaths.includes(pathname);
+
+  // 모든 Hook은 최상단에서 선언
+  const [isMounted, setIsMounted] = useState(false);
   const [nickname, setNickname] = useState("");
   const [isLogin, setIsLogin] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [profileImg, setProfileImg] = useState(
-    "/images/default_login_icon.png"
-  );
+  const [profileImg, setProfileImg] = useState("/images/default_login_icon.png");
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   useEffect(() => {
     const updateProfileImg = () => {
       const savedImg = localStorage.getItem("profileImg");
@@ -24,13 +37,10 @@ export default function Header() {
     return () => window.removeEventListener("storage", updateProfileImg);
   }, []);
 
-  // 닉네임을 localStorage에서 읽어오고 storage 이벤트 감지
   useEffect(() => {
     const updateNickname = () => {
       const savedNickname = localStorage.getItem("nickname");
-      if (savedNickname) {
-        setNickname(savedNickname);
-      }
+      if (savedNickname) setNickname(savedNickname);
     };
     updateNickname();
     window.addEventListener("storage", updateNickname);
@@ -43,6 +53,7 @@ export default function Header() {
       setIsLogin(false);
       return;
     }
+
     fetch("/api/register/user/me", {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
@@ -51,7 +62,6 @@ export default function Header() {
         return res.json();
       })
       .then((data) => {
-        // localStorage에 닉네임이 없으면 API에서 가져온 값으로 설정
         const savedNickname = localStorage.getItem("nickname");
         if (!savedNickname) {
           setNickname(data.nickname);
@@ -62,171 +72,41 @@ export default function Header() {
       .catch(() => setIsLogin(false));
   }, []);
 
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  // ** 클라이언트 마운트 상태 추가 **
-  const [isMounted, setIsMounted] = useState(false);
-
-  // ** 읽지 않은 알림 개수 상태 추가 **
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  // 로그인 / 로그아웃 확인용 클릭 이벤트
-  const onClickLoginTest = () => {
-    setIsLogin(!isLogin);
-  };
-
-  // ** 클라이언트 마운트 확인 **
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isMounted) return;
-
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 60); // 60px 이상이면 fixed
-      setDropdownOpen(false); // 스크롤 시 드롭다운 닫기
+      setIsScrolled(window.scrollY > 60);
+      setDropdownOpen(false);
     };
-
     window.addEventListener("scroll", handleScroll);
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isMounted]);
+  }, []);
 
-  // 로그인 상태일 때 읽지 않은 알림 개수 API 호출 (예시 URL, 실제 URL에 맞게 수정)
-  useEffect(() => {
-    if (!isMounted || !isLogin) {
-      setUnreadCount(0);
-      return;
-    }
+  // useEffect(() => {
+  //   if (!isMounted || !isLogin) {
+  //     setUnreadCount(0);
+  //     return;
+  //   }
 
-    const fetchUnreadCount = async () => {
-      try {
-        const userNo = 8; // TODO: 실제 로그인 유저 번호로 변경
-        const res = await fetch(
-          `http://localhost:8888/notifications/unread-count?userNo=${userNo}`
-        );
-        if (!res.ok) throw new Error("Failed to fetch unread count");
+  //   const fetchUnreadCount = async () => {
+  //     try {
+  //       const userNo = 8; // TODO: 실제 유저 번호 적용
+  //       const res = await fetch(`http://localhost:8888/notifications/unread-count?userNo=${userNo}`);
+  //       if (!res.ok) throw new Error("Failed to fetch unread count");
+  //       const data = await res.json();
+  //       setUnreadCount(Number(data));
+  //     } catch (e) {
+  //       console.error("알림 수 조회 실패:", e);
+  //       setUnreadCount(0);
+  //     }
+  //   };
 
-        const data = await res.json();
+  //   fetchUnreadCount();
+  //   const handleNotificationRead = () => fetchUnreadCount();
+  //   window.addEventListener("notificationRead", handleNotificationRead);
+  //   return () => window.removeEventListener("notificationRead", handleNotificationRead);
+  // }, [isMounted, isLogin]);
 
-        setUnreadCount(Number(data));
-      } catch (e) {
-        console.error("알림 수 조회 실패:", e);
-        setUnreadCount(0);
-      }
-    };
-
-    // 최초 로딩 시 실행
-    fetchUnreadCount();
-
-    // ✅ 알림 읽음 이벤트가 발생했을 때 다시 fetch
-    const handleNotificationRead = () => {
-      fetchUnreadCount();
-    };
-
-    window.addEventListener("notificationRead", handleNotificationRead);
-
-    // ✅ 이벤트 리스너 정리
-    return () => {
-      window.removeEventListener("notificationRead", handleNotificationRead);
-    };
-  }, [isLogin, isMounted]);
-
-  const categoryData = [
-    // (생략) 기존 카테고리 데이터 그대로 사용
-    // ...
-  ];
-
-  // ** 서버 사이드 렌더링 중일 때는 간단한 UI 렌더링 **
-  if (!isMounted) {
-    return (
-      <div className="mx-auto h-[116px] shadow-[0px_1px_6px_rgba(0,0,0,0.08)]">
-        {/* 1번째 헤더 */}
-        <div className="max-w-[1160px] w-full mx-auto flex justify-between items-center h-[60px] mt-[10px]">
-          <div className="w-[132px] h-[60px] flex items-center">
-            <Link href={"/"}>
-              <Image
-                src="/images/tumblbug_logo.png"
-                alt="텀블벅 로고"
-                width={132}
-                height={36}
-              />
-            </Link>
-          </div>
-          <ul className="flex items-center">
-            <li className="p-4">
-              <Link href={"#"}>
-                <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">
-                  프로젝트 올리기
-                </span>
-              </Link>
-            </li>
-            {/* 로그인 상태에 따른 UI는 클라이언트에서만 렌더링 */}
-            <li className="p-4">
-              <Heart />
-            </li>
-            <li className="p-4">
-              <Bell />
-            </li>
-            <li>
-              <div className="flex cursor-pointer items-center border-1 ml-[10px] p-4 border-[#dfdfdf] rounded-[4px] min-w-[30px] max-h-[44px]">
-                <Image
-                  src={"/images/default_login_icon.png"}
-                  width={24}
-                  height={24}
-                  alt="기본 로그인 아이콘"
-                />
-                <div className="font-bold text-[12px] ml-[10px]">로딩중</div>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        {/* 2번째 헤더 */}
-        <div className="w-full bg-white">
-          <div className="w-[1160px] mx-auto flex justify-between items-center">
-            <ul className="flex gap-[20px] h-[56px] items-center text-[15px] text-[#0d0d0d] font-semibold">
-              <li className="flex group relative cursor-pointer">
-                <Menu className="mr-[8px]" />
-                <span className="pt-[1px] px-[6px]">카테고리</span>
-              </li>
-              <li>
-                <Link href={"#"}>
-                  <span className="pt-[1px] px-[6px]">홈</span>
-                </Link>
-              </li>
-              <li>
-                <Link href={"#"}>
-                  <span className="pt-[1px] px-[6px]">인기</span>
-                </Link>
-              </li>
-              <li>
-                <Link href={"#"}>
-                  <span className="pt-[1px] px-[6px]">신규</span>
-                </Link>
-              </li>
-            </ul>
-            <div className="z-[300] relative px-[30px] pr-[30px] pl-[16px] inline-flex w-[216px] h-[36px] bg-[#f3f3f3] items-center rounded-[8px] text-[12px] leading-[28px] tracking-[0.02em] text-[rgba(0,0,0,0.3)]">
-              <input
-                type="text"
-                placeholder="검색어를 입력해주세요."
-                className="border-none text-[12px] leading-[28px] tracking-[0.02em] bg-[#f3f3f3] text-[#333333] appearance-none outline-none"
-              />
-              <div className="absolute right-[10px] inline-flex w-[20px] h-[20px] items-center justify-center">
-                <Search color="#000" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const router = useRouter();
-
-  // 로그아웃 핸들러
   const handleLogout = async () => {
     const accessToken = localStorage.getItem("accessToken");
     try {
@@ -242,25 +122,19 @@ export default function Header() {
     router.push("/seokgeun/main");
   };
 
-  const pathname = usePathname();
+  const handleNicknameClick = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
 
+  if (!isMounted || !shouldShow) return null;
 
   return (
-    <div
-      className={`mx-auto  h-[116px] ${
-        isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"
-      } `}
-    >
+    <div className={`mx-auto h-[116px] ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"}`}>
       {/* 1번째 헤더 */}
       <div className="max-w-[1160px] w-full mx-auto flex justify-between items-center h-[60px] mt-[10px]">
         <div className="w-[132px] h-[60px] flex items-center">
           <Link href={"/"}>
-            <Image
-              src="/images/tumblbug_logo.png"
-              alt="텀블벅 로고"
-              width={132}
-              height={36}
-            />
+            <Image src="/images/tumblbug_logo.png" alt="텀블벅 로고" width={132} height={36} />
           </Link>
         </div>
         <ul className="flex items-center">
@@ -274,31 +148,16 @@ export default function Header() {
               <li className="p-4">
                 <Heart />
               </li>
-              <li className="p-4 relative">
-                <Link href="nayeon/notification" className="relative">
-                  <Bell />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-[16px] h-[16px] rounded-full flex items-center justify-center pointer-events-none select-none">
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </span>
-                  )}
-                </Link>
+              <li className="p-4">
+                <Bell />
               </li>
               <li className="relative">
                 <button
                   className="flex cursor-pointer items-center border-1 ml-[10px] p-4 border-[#dfdfdf] rounded-[4px] min-w-[30px] max-h-[44px]"
                   onClick={handleNicknameClick}
                 >
-                  <Image
-                    src={profileImg}
-                    width={24}
-                    height={24}
-                    alt="기본 로그인 아이콘"
-                  />
-                  <div className="font-bold text-[12px] ml-[10px]">
-                    {nickname}
-                  </div>
-
+                  <Image src={profileImg} width={24} height={24} alt="기본 로그인 아이콘" />
+                  <div className="font-bold text-[12px] ml-[10px]">{nickname}</div>
                 </button>
                 {dropdownOpen && (
                   <div
@@ -379,10 +238,7 @@ export default function Header() {
                           설정
                         </Link>
                       </li>
-                      <li
-                        className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        onClick={handleLogout}
-                      >
+                      <li className="block px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={handleLogout}>
                         로그아웃
                       </li>
                     </ul>
@@ -397,9 +253,7 @@ export default function Header() {
                 href={"/seokgeun"}
               >
                 <User className="bg-[#ddd] rounded-3xl" color="#fff" />
-                <div className="font-bold text-[12px] ml-[10px]">
-                  로그인/회원가입
-                </div>
+                <div className="font-bold text-[12px] ml-[10px]">로그인/회원가입</div>
               </Link>
             </li>
           )}
@@ -409,11 +263,7 @@ export default function Header() {
       {/* 2번째 헤더 */}
       <div
         className={`w-full bg-white ${
-          isScrolled
-            ? `fixed top-0 left-0 z-50 ${
-                isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"
-              }`
-            : ""
+          isScrolled ? `fixed top-0 left-0 z-50 ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"}` : ""
         }`}
         style={{ overflow: "visible" }}
       >
@@ -425,9 +275,7 @@ export default function Header() {
               onMouseLeave={() => setIsCategoryOpen(false)}
             >
               <Menu className="mr-[8px] group-hover:text-[#FF5757] transition-all duration-300" />
-              <span className="pt-[1px] px-[6px] group-hover:text-[#FF5757] transition-all duration-300">
-                카테고리
-              </span>
+              <span className="pt-[1px] px-[6px] group-hover:text-[#FF5757] transition-all duration-300">카테고리</span>
 
               {/* 카테고리 메뉴 */}
               {isCategoryOpen && (
@@ -438,10 +286,7 @@ export default function Header() {
                 >
                   <div className="w-[1160px] mx-auto relative flex justify-between mt-[16px] px-[10px] after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:shadow-[0_6px_7px_rgba(0,0,0,0.08)] after:pointer-events-none">
                     {categoryData.map((column, colIndex) => (
-                      <div
-                        key={colIndex}
-                        className="flex-grow flex-shrink-0 basis-[20%]"
-                      >
+                      <div key={colIndex} className="flex-grow flex-shrink-0 basis-[20%]">
                         {column.map((item, itemIndex) => (
                           <div
                             key={itemIndex}
@@ -477,26 +322,17 @@ export default function Header() {
               )}
             </li>
             <li>
-              <Link
-                href={"#"}
-                className="hover:text-[#FF5757] transition-all duration-300"
-              >
+              <Link href={"#"} className="hover:text-[#FF5757] transition-all duration-300">
                 <span className="pt-[1px] px-[6px]">홈</span>
               </Link>
             </li>
             <li>
-              <Link
-                href={"#"}
-                className="hover:text-[#FF5757] transition-all duration-300"
-              >
+              <Link href={"#"} className="hover:text-[#FF5757] transition-all duration-300">
                 <span className="pt-[1px] px-[6px]">인기</span>
               </Link>
             </li>
             <li>
-              <Link
-                href={"#"}
-                className="hover:text-[#FF5757] transition-all duration-300"
-              >
+              <Link href={"#"} className="hover:text-[#FF5757] transition-all duration-300">
                 <span className="pt-[1px] px-[6px]">신규</span>
               </Link>
             </li>
