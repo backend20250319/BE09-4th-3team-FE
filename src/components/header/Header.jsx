@@ -241,29 +241,18 @@ export default function Header() {
   const pathname = usePathname();
 
   return (
-    <div
-      className={`mx-auto  h-[116px] ${
-        isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"
-      } `}
-    >
+    <div className={`mx-auto  h-[116px] ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"} `}>
       {/* 1번째 헤더 */}
       <div className="max-w-[1160px] w-full mx-auto flex justify-between items-center h-[60px] mt-[10px]">
         <div className="w-[132px] h-[60px] flex items-center">
           <Link href={"/"}>
-            <Image
-              src="/images/tumblbug_logo.png"
-              alt="텀블벅 로고"
-              width={132}
-              height={36}
-            />
+            <Image src="/images/tumblbug_logo.png" alt="텀블벅 로고" width={132} height={36} />
           </Link>
         </div>
         <ul className="flex items-center">
           <li className="p-4">
-            <Link href={"#"}>
-              <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">
-                프로젝트 올리기
-              </span>
+            <Link href={"/project/intro"}>
+              <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">프로젝트 올리기</span>
             </Link>
           </li>
           {isLogin ? (
@@ -311,7 +300,6 @@ export default function Header() {
                           후원한 프로젝트
                         </Link>
                       </li>
-
                       <li>
                         <Link
                           href="/seokgeun/dropdownmenu/myreview"
@@ -387,9 +375,7 @@ export default function Header() {
                 href={"/seokgeun"}
               >
                 <User className="bg-[#ddd] rounded-3xl" color="#fff" />
-                <div className="font-bold text-[12px] ml-[10px]">
-                  로그인/회원가입
-                </div>
+                <div className="font-bold text-[12px] ml-[10px]">로그인/회원가입</div>
               </Link>
             </li>
           )}
@@ -399,11 +385,7 @@ export default function Header() {
       {/* 2번째 헤더 */}
       <div
         className={`w-full bg-white ${
-          isScrolled
-            ? `fixed top-0 left-0 z-50 ${
-                isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"
-              }`
-            : ""
+          isScrolled ? `fixed top-0 left-0 z-50 ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"}` : ""
         }`}
         style={{ overflow: "visible" }}
       >
@@ -415,9 +397,7 @@ export default function Header() {
               onMouseLeave={() => setIsCategoryOpen(false)}
             >
               <Menu className="mr-[8px] group-hover:text-[#FF5757] transition-all duration-300" />
-              <span className="pt-[1px] px-[6px] group-hover:text-[#FF5757] transition-all duration-300">
-                카테고리
-              </span>
+              <span className="pt-[1px] px-[6px] group-hover:text-[#FF5757] transition-all duration-300">카테고리</span>
 
               {/* 카테고리 메뉴 */}
               {isCategoryOpen && (
@@ -428,10 +408,7 @@ export default function Header() {
                 >
                   <div className="w-[1160px] mx-auto relative flex justify-between mt-[16px] px-[10px] after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:shadow-[0_6px_7px_rgba(0,0,0,0.08)] after:pointer-events-none">
                     {categoryData.map((column, colIndex) => (
-                      <div
-                        key={colIndex}
-                        className="flex-grow flex-shrink-0 basis-[20%]"
-                      >
+                      <div key={colIndex} className="flex-grow flex-shrink-0 basis-[20%]">
                         {column.map((item, itemIndex) => (
                           <div
                             key={itemIndex}
@@ -467,26 +444,17 @@ export default function Header() {
               )}
             </li>
             <li>
-              <Link
-                href={"#"}
-                className="hover:text-[#FF5757] transition-all duration-300"
-              >
+              <Link href={"#"} className="hover:text-[#FF5757] transition-all duration-300">
                 <span className="pt-[1px] px-[6px]">홈</span>
               </Link>
             </li>
             <li>
-              <Link
-                href={"#"}
-                className="hover:text-[#FF5757] transition-all duration-300"
-              >
+              <Link href={"#"} className="hover:text-[#FF5757] transition-all duration-300">
                 <span className="pt-[1px] px-[6px]">인기</span>
               </Link>
             </li>
             <li>
-              <Link
-                href={"#"}
-                className="hover:text-[#FF5757] transition-all duration-300"
-              >
+              <Link href={"#"} className="hover:text-[#FF5757] transition-all duration-300">
                 <span className="pt-[1px] px-[6px]">신규</span>
               </Link>
             </li>

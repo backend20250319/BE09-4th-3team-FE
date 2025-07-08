@@ -1,17 +1,35 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
-
-// --- [프론트엔드 /api 요청을 백엔드로 프록시하는 rewrite 설정 추가] ---
-export async function rewrites() {
-  return [
-    {
-      source: "/api/:path*",
-      destination: "http://localhost:8888/api/:path*",
-    },
-  ];
-}
-
-export default {
-  ...nextConfig,
-  rewrites,
+const nextConfig = {
+  reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8888",
+        pathname: "/images/**",
+      },
+      {
+        protocol: "http",
+        hostname: "dev.macacolabs.site",
+        port: "8008",
+        pathname: "/images/**",
+      },
+      {
+        protocol: "http",
+        hostname: "dev.macacolabs.site", // ✅ 포트 없는 요청도 허용
+        pathname: "/images/**",
+      },
+    ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "http://localhost:8888/api/:path*",
+      },
+    ];
+  },
 };
+
+export default nextConfig;
