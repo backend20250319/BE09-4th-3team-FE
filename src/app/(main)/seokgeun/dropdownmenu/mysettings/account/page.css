@@ -1,0 +1,93 @@
+/* mysettings account styles (중복 허용) */
+
+.mysettings-profile-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 32px 0 20px 0;
+  min-height: 40px;
+  border-bottom: 1px solid #ececec;
+  position: relative;
+}
+.mysettings-profile-col {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.mysettings-profile-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0px;
+  margin-top: 10px;
+}
+.mysettings-edit-btn {
+  border: 1px solid #eee;
+  background: #fafafa;
+  border-radius: 20px;
+  padding: 4px 18px;
+  font-size: 15px;
+  cursor: pointer;
+  height: 32px;
+  transition: border 0.2s, background 0.2s;
+  margin-left: 0;
+  margin-right: 0;
+}
+.mysettings-edit-btn:hover {
+  border: 1.5px solid #d32f2f;
+  background: #fff0f0;
+}
+.mysettings-profile-value {
+  font-size: 16px;
+  font-weight: 500;
+  color: #222;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #fafbfc;
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+  margin-bottom: 0;
+}
+.mysettings-profile-value:focus {
+  outline: 2px solid #d32f2f;
+  border-color: #d32f2f;
+}
+.mysettings-profile-edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.mysettings-save-btn {
+  background: #191919;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-bottom: 0;
+}
+.mysettings-save-btn:hover {
+  background: #333;
+}
+.mysettings-cancel-btn {
+  background: #222;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.mysettings-cancel-btn:hover {
+  background: #444;
+}

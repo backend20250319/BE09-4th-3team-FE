@@ -1,0 +1,184 @@
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.formWrapper {
+  flex: 1;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+}
+
+.form {
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: #333;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.addressGroup {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.phoneGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.submitButton {
+  padding: 0.75rem;
+  background-color: #333;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+/* 이메일 인증 - 인증코드 input */
+.emailCodeInput {
+  width: 120px;
+  min-width: 80px;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+}
+
+/* 인증 성공 메시지 */
+.successText {
+  color: #2cbc27; /* green */
+  font-size: 12px;
+  margin-top: 0.25rem;
+  margin-left: 0.25rem;
+}
+
+/* 버튼 비활성화(재발송 타이머 등) */
+.button:disabled {
+  background-color: #bbb !important;
+  color: #fff;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* 약관 전체 박스 */
+.termsBox {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  font-size: 14px;
+}
+
+/* 개별 약관 항목 섹션 */
+.termSection {
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* 약관 내용 스크롤 가능한 박스 */
+.termContent {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  max-height: 100px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 4px;
+  white-space: pre-line;
+}
+
+/* 체크박스를 텍스트 오른쪽에 정렬 */
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+  gap: 0.5rem;
+  font-size: 14px;
+}
+
+/* 마케팅 경고 메시지 */
+.marketingWarning {
+  color: red;
+  font-size: 12px;
+  margin-top: 0.5rem;
+}
+
+/* 확인/가입 버튼 섹션 여백 */
+.confirmSection {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+/* [필수] 약관 동의 - 문장형 체크 정렬 */
+.consentRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 14px;
+}
+.consentRow input[type="checkbox"] {
+  margin-left: 0.5rem;
+}
+
+/* 유효성 검사: 에러 테두리 표시 */
+.invalid input,
+.invalid textarea,
+.invalid select {
+  border-color: red;
+}
+
+/* 유효성 검사: 에러 메시지 */
+.helperText {
+  color: red;
+  font-size: 12px;
+  margin-top: 0.25rem;
+  margin-left: 0.25rem;
+}

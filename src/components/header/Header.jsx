@@ -3,11 +3,67 @@ import { Bell, Heart, Menu, Search, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
+  // 닉네임/로그인 상태 관리
+  const [nickname, setNickname] = useState("");
+  const [isLogin, setIsLogin] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profileImg, setProfileImg] = useState(
+    "/images/default_login_icon.png"
+  );
+  useEffect(() => {
+    const updateProfileImg = () => {
+      const savedImg = localStorage.getItem("profileImg");
+      setProfileImg(savedImg || "/images/default_login_icon.png");
+    };
+    updateProfileImg();
+    window.addEventListener("storage", updateProfileImg);
+    return () => window.removeEventListener("storage", updateProfileImg);
+  }, []);
+
+  // 닉네임을 localStorage에서 읽어오고 storage 이벤트 감지
+  useEffect(() => {
+    const updateNickname = () => {
+      const savedNickname = localStorage.getItem("nickname");
+      if (savedNickname) {
+        setNickname(savedNickname);
+      }
+    };
+    updateNickname();
+    window.addEventListener("storage", updateNickname);
+    return () => window.removeEventListener("storage", updateNickname);
+  }, []);
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      setIsLogin(false);
+      return;
+    }
+    fetch("/api/register/user/me", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("not logged in");
+        return res.json();
+      })
+      .then((data) => {
+        // localStorage에 닉네임이 없으면 API에서 가져온 값으로 설정
+        const savedNickname = localStorage.getItem("nickname");
+        if (!savedNickname) {
+          setNickname(data.nickname);
+          localStorage.setItem("nickname", data.nickname);
+        }
+        setIsLogin(true);
+      })
+      .catch(() => setIsLogin(false));
+  }, []);
+
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
 
   // ** 클라이언트 마운트 상태 추가 **
   const [isMounted, setIsMounted] = useState(false);
@@ -30,6 +86,7 @@ export default function Header() {
 
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 60); // 60px 이상이면 fixed
+      setDropdownOpen(false); // 스크롤 시 드롭다운 닫기
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -167,6 +224,27 @@ export default function Header() {
     );
   }
 
+  const router = useRouter();
+
+  // 로그아웃 핸들러
+  const handleLogout = async () => {
+    const accessToken = localStorage.getItem("accessToken");
+    try {
+      await fetch("/api/register/user/me/logout", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+    } catch (e) {}
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    setIsLogin(false);
+    setNickname("");
+    router.push("/seokgeun/main");
+  };
+
+  const pathname = usePathname();
+
+
   return (
     <div
       className={`mx-auto  h-[116px] ${
@@ -187,10 +265,8 @@ export default function Header() {
         </div>
         <ul className="flex items-center">
           <li className="p-4">
-            <Link href={"#"}>
-              <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">
-                프로젝트 올리기
-              </span>
+            <Link href={"/project/intro"}>
+              <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">프로젝트 올리기</span>
             </Link>
           </li>
           {isLogin ? (
@@ -208,19 +284,110 @@ export default function Header() {
                   )}
                 </Link>
               </li>
-              <li>
+              <li className="relative">
                 <button
                   className="flex cursor-pointer items-center border-1 ml-[10px] p-4 border-[#dfdfdf] rounded-[4px] min-w-[30px] max-h-[44px]"
-                  onClick={onClickLoginTest}
+                  onClick={handleNicknameClick}
                 >
                   <Image
-                    src={"/images/default_login_icon.png"}
+                    src={profileImg}
                     width={24}
                     height={24}
                     alt="기본 로그인 아이콘"
-                  ></Image>
-                  <div className="font-bold text-[12px] ml-[10px]">아이디</div>
+                  />
+                  <div className="font-bold text-[12px] ml-[10px]">
+                    {nickname}
+                  </div>
+
                 </button>
+                {dropdownOpen && (
+                  <div
+                    className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-[9999]"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <ul>
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/mypage"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          프로필
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/sponsoredprojects"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          후원한 프로젝트
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/myreview"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          내 후기
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/myliked"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          관심 프로젝트
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/myfollow"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          팔로우
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/mynotification"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          알림
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/mymessage"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          메시지
+                        </Link>
+                      </li>
+
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/myproject"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          내가 만든 프로젝트
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/mysettings/profile"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          설정
+                        </Link>
+                      </li>
+                      <li
+                        className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={handleLogout}
+                      >
+                        로그아웃
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </li>
             </>
           ) : (
@@ -248,6 +415,7 @@ export default function Header() {
               }`
             : ""
         }`}
+        style={{ overflow: "visible" }}
       >
         <div className="w-[1160px] mx-auto flex justify-between items-center">
           <ul className="flex gap-[20px] h-[56px] items-center text-[15px] text-[#0d0d0d] font-semibold">
