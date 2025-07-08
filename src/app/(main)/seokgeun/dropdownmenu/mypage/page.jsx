@@ -1,7 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import "./page.css";
+import { useRouter } from "next/navigation";
 
 const TAB_LIST = [
   { key: "profile", label: "프로필" },
@@ -11,17 +13,54 @@ const TAB_LIST = [
   { key: "following", label: "팔로잉" },
 ];
 
+const PROFILE_STATS = [
+  {
+    label: (
+      <>
+        팔로잉 <span className="mypage-link">&gt;</span>
+      </>
+    ),
+    value: "-",
+    key: "following",
+  },
+  { label: "후원수", value: "-", key: "supportCount" },
+  {
+    label: (
+      <>
+        창작생태계 기여도 <span className="mypage-link">&gt;</span>
+      </>
+    ),
+    value: "-",
+    key: "contribution",
+  },
+];
+
 export default function MyPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("profile");
+  // Header와 동일하게 프로필 이미지 상태 관리
+  const [profileImg, setProfileImg] = useState(
+    "/images/default_login_icon.png"
+  );
+  const router = useRouter();
+
+  useEffect(() => {
+    const updateProfileImg = () => {
+      const savedImg = localStorage.getItem("profileImg");
+      setProfileImg(savedImg || "/images/default_login_icon.png");
+    };
+    updateProfileImg();
+    window.addEventListener("storage", updateProfileImg);
+    return () => window.removeEventListener("storage", updateProfileImg);
+  }, []);
 
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
-      setError("로그인 정보가 없습니다.");
-      setLoading(false);
+      alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+      router.replace("/seokgeun/login");
       return;
     }
     fetch("/api/register/user/me", {
@@ -35,9 +74,14 @@ export default function MyPage() {
         setUser(data);
         setLoading(false);
       })
-      .catch(() => {
-        setError("유저 정보를 불러올 수 없습니다.");
-        setLoading(false);
+      .catch((err) => {
+        if (err.message === "유저 정보 없음") {
+          alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+          router.replace("/seokgeun/login");
+        } else {
+          setError("유저 정보를 불러올 수 없습니다.");
+          setLoading(false);
+        }
       });
   }, []);
 
@@ -68,31 +112,25 @@ export default function MyPage() {
 
   return (
     <div className="mypage-container">
+      <div className="sponsored-divider"></div>
       <div className="mypage-profile-row">
         <div className="mypage-profile-img">
-          <Image
-            src={"/images/default_login_icon.png"}
-            width={80}
-            height={80}
-            alt="프로필"
-          />
+          <Image src={profileImg} width={80} height={80} alt="프로필" />
         </div>
         <div className="mypage-profile-info">
           <div className="mypage-nickname">{user?.nickname || "-"}</div>
-          <div className="mypage-profile-stats">
-            <span>
-              팔로잉 <b>-</b>
-            </span>
-            <span>
-              후원수 <b>-</b>
-            </span>
-            <span>
-              창작생태계 기여도 <b>-</b>
-            </span>
-            <span className="mypage-link">창작생태계 기여도 &gt;</span>
+          <div className="mypage-profile-stats-block-row">
+            {PROFILE_STATS.map((stat) => (
+              <div className="mypage-profile-stat-item" key={stat.key}>
+                <div className="mypage-profile-stat-label">{stat.label}</div>
+                <div className="mypage-profile-stat-value">{stat.value}</div>
+              </div>
+            ))}
           </div>
         </div>
-        <button className="mypage-edit-btn">프로필 편집</button>
+        <Link href="/seokgeun/dropdownmenu/mysettings">
+          <button className="mypage-edit-btn">프로필 편집</button>
+        </Link>
       </div>
       <div className="mypage-tabs">
         <ul className="mypage-tabs-list">

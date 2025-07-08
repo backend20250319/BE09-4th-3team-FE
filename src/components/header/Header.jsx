@@ -4,12 +4,38 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
   // 닉네임/로그인 상태 관리
   const [nickname, setNickname] = useState("");
   const [isLogin, setIsLogin] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profileImg, setProfileImg] = useState(
+    "/images/default_login_icon.png"
+  );
+  useEffect(() => {
+    const updateProfileImg = () => {
+      const savedImg = localStorage.getItem("profileImg");
+      setProfileImg(savedImg || "/images/default_login_icon.png");
+    };
+    updateProfileImg();
+    window.addEventListener("storage", updateProfileImg);
+    return () => window.removeEventListener("storage", updateProfileImg);
+  }, []);
+
+  // 닉네임을 localStorage에서 읽어오고 storage 이벤트 감지
+  useEffect(() => {
+    const updateNickname = () => {
+      const savedNickname = localStorage.getItem("nickname");
+      if (savedNickname) {
+        setNickname(savedNickname);
+      }
+    };
+    updateNickname();
+    window.addEventListener("storage", updateNickname);
+    return () => window.removeEventListener("storage", updateNickname);
+  }, []);
 
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
@@ -25,7 +51,12 @@ export default function Header() {
         return res.json();
       })
       .then((data) => {
-        setNickname(data.nickname);
+        // localStorage에 닉네임이 없으면 API에서 가져온 값으로 설정
+        const savedNickname = localStorage.getItem("nickname");
+        if (!savedNickname) {
+          setNickname(data.nickname);
+          localStorage.setItem("nickname", data.nickname);
+        }
         setIsLogin(true);
       })
       .catch(() => setIsLogin(false));
@@ -207,6 +238,8 @@ export default function Header() {
     router.push("/seokgeun/main");
   };
 
+  const pathname = usePathname();
+
   return (
     <div className={`mx-auto  h-[116px] ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"} `}>
       {/* 1번째 헤더 */}
@@ -235,8 +268,15 @@ export default function Header() {
                   className="flex cursor-pointer items-center border-1 ml-[10px] p-4 border-[#dfdfdf] rounded-[4px] min-w-[30px] max-h-[44px]"
                   onClick={handleNicknameClick}
                 >
-                  <Image src={"/images/default_login_icon.png"} width={24} height={24} alt="기본 로그인 아이콘" />
-                  <div className="font-bold text-[12px] ml-[10px]">{nickname}</div>
+                  <Image
+                    src={profileImg}
+                    width={24}
+                    height={24}
+                    alt="기본 로그인 아이콘"
+                  />
+                  <div className="font-bold text-[12px] ml-[10px]">
+                    {nickname}
+                  </div>
                 </button>
                 {dropdownOpen && (
                   <div
@@ -245,26 +285,82 @@ export default function Header() {
                   >
                     <ul>
                       <li>
-                        <Link href="/seokgeun/mypage" className="block px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                        <Link
+                          href="/seokgeun/dropdownmenu/mypage"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
                           프로필
                         </Link>
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/sponsoredprojects"
+                          href="/seokgeun/dropdownmenu/sponsoredprojects"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           후원한 프로젝트
                         </Link>
                       </li>
-                      <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">내 후기</li>
-                      <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">관심 프로젝트</li>
-                      <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">팔로우</li>
-                      <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">알림</li>
-                      <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">메시지</li>
-                      <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">내가 만든 프로젝트</li>
-                      <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">설정</li>
-                      <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={handleLogout}>
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/myreview"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          내 후기
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/myliked"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          관심 프로젝트
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/myfollow"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          팔로우
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/mynotification"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          알림
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/mymessage"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          메시지
+                        </Link>
+                      </li>
+
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/myproject"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          내가 만든 프로젝트
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/seokgeun/dropdownmenu/mysettings/profile"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          설정
+                        </Link>
+                      </li>
+                      <li
+                        className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={handleLogout}
+                      >
                         로그아웃
                       </li>
                     </ul>

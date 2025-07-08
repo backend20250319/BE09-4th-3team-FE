@@ -3,7 +3,7 @@
 import Header from "@/components/header/Header";
 import Image from "next/image";
 import React from "react";
-import styles from "./css/main.module.css";
+import styles from "./main.module.css";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -30,13 +30,13 @@ export default function LoginPage() {
       {/* 좌측 로그인 박스 */}
       <div className={styles.leftPanel}>
         {/* 🔥 좌측 상단 로고 고정 */}
-        <div className={styles.logoContainer}>
-        </div>
+        <div className={styles.logoContainer}></div>
 
         <div className={styles.loginBox}>
           <div className={styles.description}>
             간편하게 로그인하고 <br />
-            <b>세상에 하나뿐인</b><br /> 
+            <b>세상에 하나뿐인</b>
+            <br />
             <b>특별한 프로젝트를 발견해보세요</b>
           </div>
 

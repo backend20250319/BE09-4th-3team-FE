@@ -71,6 +71,34 @@
   width: 100%;
 }
 
+/* 이메일 인증 - 인증코드 input */
+.emailCodeInput {
+  width: 120px;
+  min-width: 80px;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+}
+
+/* 인증 성공 메시지 */
+.successText {
+  color: #2cbc27; /* green */
+  font-size: 12px;
+  margin-top: 0.25rem;
+  margin-left: 0.25rem;
+}
+
+/* 버튼 비활성화(재발송 타이머 등) */
+.button:disabled {
+  background-color: #bbb !important;
+  color: #fff;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 /* 약관 전체 박스 */
 .termsBox {
   border: 1px solid #ccc;

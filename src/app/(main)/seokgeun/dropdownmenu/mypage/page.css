@@ -1,16 +1,16 @@
 /* 마이페이지 전체 컨테이너 */
 .mypage-container {
-  max-width: 1100px;
+  max-width: 1160px;
   margin: 40px auto 0;
-  /* border: 3px solid #d32f2f; */
   border-radius: 10px;
   background: #fff;
+  padding-left: 0; /* 또는 0으로 */
 }
 
 .mypage-profile-row {
   display: flex;
   align-items: center;
-  padding: 40px 40px 0 40px;
+  /* padding: 0 0 0 0; */
 }
 
 .mypage-profile-img {
@@ -77,12 +77,12 @@
   gap: 32px;
   font-size: 18px;
   font-weight: 600;
-  color: #888;
+  color: #cccccc;
   margin-bottom: -2px;
 }
 
 .mypage-tabs-list .active {
-  color: #d32f2f;
+  color: #323132;
   border-bottom: 2.5px solid #d32f2f;
   padding-bottom: 12px;
 }
@@ -92,4 +92,46 @@
   min-height: 120px;
   color: #888;
   font-size: 16px;
+}
+
+.mypage-profile-stats-block {
+  margin-top: 18px;
+}
+.mypage-profile-stats-labels,
+.mypage-profile-stats-values {
+  display: flex;
+  gap: 48px;
+  font-size: 16px;
+  color: #444;
+}
+.mypage-profile-stats-labels {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.mypage-profile-stats-values {
+  color: #888;
+  font-weight: 400;
+}
+
+.mypage-profile-stats-block-row {
+  display: flex;
+  flex-direction: row;
+  gap: 48px;
+  margin-top: 18px;
+}
+.mypage-profile-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.mypage-profile-stat-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 4px;
+}
+.mypage-profile-stat-value {
+  font-size: 16px;
+  color: #888;
+  font-weight: 400;
 }
