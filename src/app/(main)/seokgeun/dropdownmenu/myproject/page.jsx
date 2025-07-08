@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import "./page.css";
+import { useRouter } from "next/navigation";
 
 const FILTERS = [
   "전체",
@@ -20,8 +21,15 @@ export default function MyProjectPage() {
   const [error, setError] = useState("");
   const [activeFilter, setActiveFilter] = useState("전체");
   const [showTooltip, setShowTooltip] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+      router.replace("/seokgeun/login");
+      return;
+    }
     // TODO: 실제 API 연동 시 fetch/axios 등으로 데이터 받아오기
     setLoading(true);
     setTimeout(() => {

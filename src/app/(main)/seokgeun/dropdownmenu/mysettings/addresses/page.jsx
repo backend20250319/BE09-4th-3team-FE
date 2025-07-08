@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import "../profile/page.css";
+import "./page.css";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const TABS = [
   { label: "프로필", path: "/seokgeun/dropdownmenu/mysettings/profile" },
@@ -14,6 +15,7 @@ const TABS = [
 
 export default function AddressesPage() {
   const pathname = usePathname();
+  const router = useRouter();
   const [showForm, setShowForm] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -39,6 +41,34 @@ export default function AddressesPage() {
   useEffect(() => {
     loadDaumPostcodeScript();
   }, []);
+
+  // 로그인 필요 페이지 진입 시 토큰 체크
+  useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      router.replace("/seokgeun/login");
+    }
+  }, [router]);
+
+  // 인증 만료/실패 시 자동 로그아웃 및 리다이렉트 fetch 유틸
+  const fetchWithAuth = async (url, options = {}) => {
+    const accessToken = localStorage.getItem("accessToken");
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    if (res.status === 401 || res.status === 419) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+      router.replace("/seokgeun/login");
+      return null;
+    }
+    return res;
+  };
 
   // 주소 검색 팝업
   const handleAddressSearch = () => {

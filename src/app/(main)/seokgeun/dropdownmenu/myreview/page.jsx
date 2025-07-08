@@ -1,14 +1,22 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import "./page.css";
+import { useRouter } from "next/navigation";
 
 export default function MyReviewPage() {
   // 후기 데이터 상태
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+      router.replace("/seokgeun/login");
+      return;
+    }
     // TODO: 실제 API 연동 시 fetch/axios 등으로 데이터 받아오기
     // 예시: fetch('/api/myreview').then(...)
     setLoading(true);

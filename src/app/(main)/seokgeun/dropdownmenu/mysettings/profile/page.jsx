@@ -4,6 +4,7 @@ import Image from "next/image";
 import "./page.css";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const TABS = [
   { label: "프로필", path: "/seokgeun/dropdownmenu/mysettings/profile" },
@@ -14,6 +15,7 @@ const TABS = [
 ];
 
 export default function MySettingsPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("프로필");
   const [nickname, setNickname] = useState("석근");
   const [profileImg, setProfileImg] = useState(
@@ -31,12 +33,54 @@ export default function MySettingsPage() {
 
   const pathname = usePathname();
 
-  // 페이지 진입 시 localStorage에서 프로필 이미지 불러오기
+  // 로그인 필요 페이지 진입 시 토큰 체크
   useEffect(() => {
-    const savedNickname = localStorage.getItem("nickname");
-    if (savedNickname) setNickname(savedNickname);
-    const savedImg = localStorage.getItem("profileImg");
-    if (savedImg) setProfileImg(savedImg);
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      router.replace("/seokgeun/login");
+    }
+  }, [router]);
+
+  // 인증 만료/실패 시 자동 로그아웃 및 리다이렉트 fetch 유틸
+  const fetchWithAuth = async (url, options = {}) => {
+    const accessToken = localStorage.getItem("accessToken");
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    if (res.status === 401 || res.status === 419) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+      router.replace("/seokgeun/login");
+      return null;
+    }
+    return res;
+  };
+
+  // 사용자 정보 fetch 함수 추가
+  const fetchUserInfo = async () => {
+    const res = await fetchWithAuth("/api/register/user/me");
+    if (res && res.ok) {
+      const user = await res.json();
+      setNickname(user.nickname || "");
+      const localImg = localStorage.getItem("profileImg");
+      setProfileImg(
+        user.profileImg || localImg || "/images/default_login_icon.png"
+      );
+      setUserUrl(user.userUrl || "");
+      setBio(user.bio || "");
+      setIdeus(user.ideus || "");
+      setWebsite(user.website || "");
+    }
+  };
+
+  // 최초 마운트 시 사용자 정보 불러오기
+  useEffect(() => {
+    fetchUserInfo();
   }, []);
 
   // 변경 버튼 클릭 시 에디트 모드 진입 (이전 에디트 모드는 자동 취소)
@@ -73,19 +117,14 @@ export default function MySettingsPage() {
         setProfileImg(previewImg);
         localStorage.setItem("profileImg", previewImg);
         window.dispatchEvent(new Event("storage"));
+        await fetchUserInfo(); // 변경 후 정보 갱신
       }
     } else if (field === "이름") {
       try {
         const accessToken = localStorage.getItem("accessToken");
-
-        // 1. 현재 유저 정보 불러오기
-        const userRes = await fetch("/api/register/user/me", {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (!userRes.ok) throw new Error("유저 정보 조회 실패");
+        const userRes = await fetchWithAuth("/api/register/user/me");
+        if (!userRes) return; // fetchWithAuth에서 리다이렉트되었으면 저장 중단
         const user = await userRes.json();
-
-        // 2. UserUpdateRequestDTO 형식에 맞게 데이터 구성
         const updateData = {
           nickname: editValue,
           email: user.email,
@@ -93,9 +132,7 @@ export default function MySettingsPage() {
           address: user.address || "",
           addressDetail: user.addressDetail || "",
         };
-
-        // 3. 새로운 프로필 업데이트 엔드포인트 사용
-        const patchRes = await fetch("/api/register/user/me/profile", {
+        const patchRes = await fetchWithAuth("/api/register/user/me/profile", {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -103,28 +140,36 @@ export default function MySettingsPage() {
           },
           body: JSON.stringify(updateData),
         });
-
+        if (!patchRes) return; // fetchWithAuth에서 리다이렉트되었으면 저장 중단
         if (!patchRes.ok) {
           const errorData = await patchRes.text();
           console.error("API 응답:", patchRes.status, errorData);
           throw new Error(`닉네임 변경 실패: ${patchRes.status}`);
         }
-
         const updatedUser = await patchRes.json();
         console.log("업데이트 성공:", updatedUser);
-
         setNickname(editValue);
         localStorage.setItem("nickname", editValue);
         window.dispatchEvent(new Event("storage"));
+        await fetchUserInfo(); // 변경 후 정보 갱신
       } catch (e) {
         console.error("닉네임 변경 에러:", e);
         alert("닉네임 변경에 실패했습니다. 다시 시도해 주세요.");
         return;
       }
-    } else if (field === "사용자 이름(URL)") setUserUrl(editValue);
-    else if (field === "소개") setBio(editValue);
-    else if (field === "아이디어스 주소") setIdeus(editValue);
-    else if (field === "웹사이트") setWebsite(editValue);
+    } else if (field === "사용자 이름(URL)") {
+      setUserUrl(editValue);
+      await fetchUserInfo();
+    } else if (field === "소개") {
+      setBio(editValue);
+      await fetchUserInfo();
+    } else if (field === "아이디어스 주소") {
+      setIdeus(editValue);
+      await fetchUserInfo();
+    } else if (field === "웹사이트") {
+      setWebsite(editValue);
+      await fetchUserInfo();
+    }
     setEditField(null);
     setEditValue("");
     setPreviewImg(null);

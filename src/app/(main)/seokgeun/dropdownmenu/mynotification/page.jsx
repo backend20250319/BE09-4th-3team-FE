@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import "./page.css";
+import { useRouter } from "next/navigation";
 
 const TAB_LIST = [
   { key: "all", label: "전체" },
@@ -40,9 +41,16 @@ async function deleteNotification(id) {
 export default function MyNotification() {
   const [activeTab, setActiveTab] = useState("all");
   const [notifications, setNotifications] = useState([]);
+  const router = useRouter();
 
   // 마운트 시 알림 불러오기
   useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+      router.replace("/seokgeun/login");
+      return;
+    }
     fetchNotifications().then(setNotifications);
   }, []);
 

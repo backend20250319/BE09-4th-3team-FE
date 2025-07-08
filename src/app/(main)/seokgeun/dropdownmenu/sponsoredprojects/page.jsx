@@ -1,8 +1,21 @@
-import React from "react";
+"use client";
+import React, { useEffect } from "react";
 import "./page.css";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function SponsoredProjects() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+      router.replace("/seokgeun/login");
+      return;
+    }
+  }, []);
+
   return (
     <div className="sponsored-outer-wrapper">
       <div className="sponsored-divider"></div>

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import "./page.css";
+import { useRouter } from "next/navigation";
 
 const TAB_LIST = [
   { key: "profile", label: "프로필" },
@@ -43,6 +44,8 @@ export default function MyPage() {
   const [profileImg, setProfileImg] = useState(
     "/images/default_login_icon.png"
   );
+  const router = useRouter();
+
   useEffect(() => {
     const updateProfileImg = () => {
       const savedImg = localStorage.getItem("profileImg");
@@ -56,8 +59,8 @@ export default function MyPage() {
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
-      setError("로그인 정보가 없습니다.");
-      setLoading(false);
+      alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+      router.replace("/seokgeun/login");
       return;
     }
     fetch("/api/register/user/me", {
@@ -71,9 +74,14 @@ export default function MyPage() {
         setUser(data);
         setLoading(false);
       })
-      .catch(() => {
-        setError("유저 정보를 불러올 수 없습니다.");
-        setLoading(false);
+      .catch((err) => {
+        if (err.message === "유저 정보 없음") {
+          alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+          router.replace("/seokgeun/login");
+        } else {
+          setError("유저 정보를 불러올 수 없습니다.");
+          setLoading(false);
+        }
       });
   }, []);
 
