@@ -1,17 +1,59 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import usePersistedState from "../hooks/usePersistedState";
+import { CircleAlert } from "lucide-react";
+import { numberWithCommas } from "@/components/utils/number";
 
 const CkEditor = dynamic(() => import("./ckEditor"), {
   ssr: false,
 });
+
+// 목표금액 계산
+const getFees = (amount) => {
+  const num = parseInt(amount.toString().replace(/[^0-9]/g, ""), 10) || 0;
+
+  const pgFee = Math.floor(num * 0.033); // 3.3%
+  const platformFee = Math.floor(num * 0.055); // 5.5%
+  const totalFee = pgFee + platformFee;
+  const estimatedReceive = num - totalFee;
+
+  return {
+    pgFee,
+    platformFee,
+    totalFee,
+    estimatedReceive,
+  };
+};
 
 export default function Section01() {
   const [title, setTitle] = usePersistedState("project_title", "");
   const [description, setDescription] = usePersistedState("project_description", "");
   const [goalAmount, setGoalAmount] = usePersistedState("project_goalAmount", "");
   const [categoryNo, setCategoryNo] = usePersistedState("project_categoryNo", 1);
+  const [validationMessage, setValidationMessage] = useState("");
+
+  const handleGoalAmountChange = (e) => {
+    let rawValue = e.target.value.replace(/[^0-9]/g, ""); // 숫자만 추출
+
+    // 최대 자리수 제한 (10자리: 9999999999)
+    if (rawValue.length > 10) {
+      rawValue = rawValue.slice(0, 10);
+    }
+
+    const numericValue = parseInt(rawValue || "0", 10);
+
+    // 유효성 검사 메시지
+    if (numericValue < 500000) {
+      setValidationMessage("50만원 이상의 금액을 입력해주세요.");
+    } else if (numericValue > 9999999999) {
+      setValidationMessage("9,999,999,999원 이하인 금액을 입력해주세요.");
+    } else {
+      setValidationMessage("");
+    }
+
+    setGoalAmount(rawValue);
+  };
 
   const categories = [
     { id: 1, name: "보드게임 · TRPG" },
@@ -36,6 +78,8 @@ export default function Section01() {
     { id: 20, name: "영화 · 비디오" },
     { id: 21, name: "공연" },
   ];
+
+  const { pgFee, platformFee, totalFee, estimatedReceive } = getFees(goalAmount);
 
   return (
     <section>
@@ -115,27 +159,66 @@ export default function Section01() {
             <span className="text-[#f00] pt-[2px]">*</span>
           </div>
           <p className="text-[#6d6d6d] font-normal text-sm">프로젝트를 완수하기 위해 필요한 금액을 설정해주세요.</p>
-          <div className="bg-[#fff2f3] rounded-sm px-6 py-5">
-            <span>목표 금액 설정 시 꼭 알아두세요!</span>
-            <ul>
-              <li>종료일까지 목표금액을 달성하지 못하면 후원자 결제가 진행되지 않습니다.</li>
-              <li>후원 취소 및 결제 누락을 대비해 10% 이상 초과 달성을 목표로 해주세요.</li>
-              <li>제작비, 선물 배송비, 인건비, 예비 비용 등을 함께 고려해주세요.</li>
+          <div className="bg-[#fff2f3] rounded-sm px-6 py-5  mt-[18px]">
+            <span className="flex items-center text-xs font-bold text-[#e53c41] leading-[120%]">
+              <CircleAlert size={13.5} className="mr-2" />
+              목표 금액 설정 시 꼭 알아두세요!
+            </span>
+            <ul className="mt-2 list-disc">
+              <li className="ml-3.5 mb-[5px] whitespace-pre-wrap text-xs leading-[150%] text-[#545454]">
+                종료일까지 목표금액을 달성하지 못하면 후원자 결제가 진행되지 않습니다.
+              </li>
+              <li className="ml-3.5 mb-[5px] whitespace-pre-wrap text-xs leading-[150%] text-[#545454]">
+                후원 취소 및 결제 누락을 대비해 10% 이상 초과 달성을 목표로 해주세요.
+              </li>
+              <li className="ml-3.5 mb-[5px] whitespace-pre-wrap text-xs leading-[150%] text-[#545454]">
+                제작비, 선물 배송비, 인건비, 예비 비용 등을 함께 고려해주세요.
+              </li>
             </ul>
           </div>
         </div>
         <div className="w-[630px]">
-          <input
-            id="goalAmount"
-            type="number"
-            value={goalAmount}
-            onChange={(e) => setGoalAmount(e.target.value)}
-            placeholder="50만원 이상의 금액을 입력해 주세요"
-            className="w-full border px-3 py-2 rounded pr-12"
-          />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
-            원
-          </span>
+          <div className="bg-white border border-[#eaeaea] pt-8 pb-6 pr-6 pl-6 w-full">
+            <div className="relative">
+              <p className="font-bold text-[11px] reading-[18px] mb-2 text-[#3d3d3d] flex">목표금액</p>
+              <input
+                id="goalAmount"
+                type="number"
+                value={numberWithCommas(goalAmount)}
+                required
+                autoCapitalize="off"
+                autoComplete="off"
+                onChange={handleGoalAmountChange}
+                placeholder="50만원 이상의 금액을 입력해 주세요"
+                className="w-full border px-3 py-2 rounded pr-7 text-right"
+              />
+              <span
+                className={`absolute right-3 ${
+                  validationMessage ? "top-[50%]" : "top-[68%]"
+                } -translate-y-1/2 text-gray-500 text-sm pointer-events-none`}
+              >
+                원
+              </span>
+              {validationMessage && <p className="text-red-500 text-xs mt-1">{validationMessage}</p>}
+            </div>
+            <div className="bg-[#fcfcfc] rounded-[4px] px-[15px] pt-[25px] pb-[22px]">
+              <div className="flex justify-between text-[#3d3d3d] text-xs reading-[19px] pb-4 mb-[11px] border-b border-[#eaeaea]">
+                <span>목표 금액 달성 시 예상 수령액</span>
+                <em className="not-italic text-[#f86453] text-[18px] leading-[27px] tracking-[-0.02em] font-semibold">
+                  {estimatedReceive.toLocaleString()}원
+                </em>
+              </div>
+              <div className="flex justify-between text-[#9e9e9e] text-xs leading-[19px]">
+                총 수수료<em>{totalFee.toLocaleString()}원</em>
+              </div>
+              <div className="flex justify-between text-[#9e9e9e] text-xs leading-[19px]">
+                결제대행 수수료 (총 결제 성공 금액의 3% + VAT)<em>{pgFee.toLocaleString()}원</em>
+              </div>
+              <div className="flex justify-between text-[#9e9e9e] text-xs leading-[19px]">
+                Basic 요금제 수수료 (총 결제 성공 금액의 5% + VAT)<em>{platformFee.toLocaleString()}원</em>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

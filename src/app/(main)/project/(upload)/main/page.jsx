@@ -70,7 +70,7 @@ export default function Page() {
   };
 
   return (
-    <div className="w-full flex flex-col justify-center items-center pt-[84px]">
+    <div className="w-full flex flex-col justify-center items-center pt-[84px] bg-gray-50">
       <form onSubmit={handleSubmit} className="w-[1080px] mx-auto p-4 space-y-6">
         <Section01 />
 
