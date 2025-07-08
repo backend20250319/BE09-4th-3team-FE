@@ -128,6 +128,145 @@ export default function Header() {
 
   if (!isMounted || !shouldShow) return null;
 
+  const categoryData = [
+    // 첫 번째 열
+    [
+      {
+        label: "전체",
+        icon: `
+          <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M16.4 9.6H9.6V16.4H16.4V9.6ZM8 8V18H18V8H8Z" fill="#0D0D0D" />
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M28.4 9.6H21.6V16.4H28.4V9.6ZM20 8V18H30V8H20Z" fill="#0D0D0D" />
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M16.4 21.6H9.6V28.4H16.4V21.6ZM8 20V30H18V20H8Z" fill="#0D0D0D" />
+            <path d="M20 20H30V30H20V20Z" fill="#FF5757" />
+          </svg>
+        `,
+        iconType: "svg",
+      },
+      {
+        label: "보드게임 · TRPG",
+        icon: "https://assets.tumblbug.com/categories/svg/board.svg",
+        iconType: "img",
+      },
+      {
+        label: "디지털 게임",
+        icon: "https://assets.tumblbug.com/categories/svg/digital-game.svg",
+        iconType: "img",
+      },
+      {
+        label: "웹툰 · 만화",
+        icon: "https://assets.tumblbug.com/categories/svg/comics.svg",
+        iconType: "img",
+      },
+      {
+        label: "웹툰 리소스",
+        icon: "https://assets.tumblbug.com/categories/svg/webtoon-resource.svg",
+        iconType: "img",
+      },
+    ],
+
+    // 두 번째 열
+    [
+      {
+        label: "디자인 문구",
+        icon: "https://assets.tumblbug.com/categories/svg/stationary.svg",
+        iconType: "img",
+      },
+      {
+        label: "캐릭터 · 굿즈",
+        icon: "https://assets.tumblbug.com/categories/svg/charactor-goods.svg",
+        iconType: "img",
+      },
+      {
+        label: "홈 · 리빙",
+        icon: "https://assets.tumblbug.com/categories/svg/home-living.svg",
+        iconType: "img",
+      },
+      {
+        label: "테크 · 가전",
+        icon: "https://assets.tumblbug.com/categories/svg/tech-electronics.svg",
+        iconType: "img",
+      },
+      {
+        label: "반려동물",
+        icon: "https://assets.tumblbug.com/categories/svg/pet.svg",
+        iconType: "img",
+      },
+    ],
+
+    // 세 번째 열
+    [
+      {
+        label: "푸드",
+        icon: "https://assets.tumblbug.com/categories/svg/food.svg",
+        iconType: "img",
+      },
+      {
+        label: "향수 · 뷰티",
+        icon: "https://assets.tumblbug.com/categories/svg/perfumes-cosmetics.svg",
+        iconType: "img",
+      },
+      {
+        label: "의류",
+        icon: "https://assets.tumblbug.com/categories/svg/fashion.svg",
+        iconType: "img",
+      },
+      {
+        label: "잡화",
+        icon: "https://assets.tumblbug.com/categories/svg/accessories.svg",
+        iconType: "img",
+      },
+      {
+        label: "주얼리",
+        icon: "https://assets.tumblbug.com/categories/svg/jewerly.svg",
+        iconType: "img",
+      },
+    ],
+
+    // 네 번째 열
+    [
+      {
+        label: "출판",
+        icon: "https://assets.tumblbug.com/categories/svg/publishing.svg",
+        iconType: "img",
+      },
+      {
+        label: "디자인",
+        icon: "https://assets.tumblbug.com/categories/svg/design.svg",
+        iconType: "img",
+      },
+      {
+        label: "예술",
+        icon: "https://assets.tumblbug.com/categories/svg/art.svg",
+        iconType: "img",
+      },
+      {
+        label: "사진",
+        icon: "https://assets.tumblbug.com/categories/svg/photography.svg",
+        iconType: "img",
+      },
+      {
+        label: "음악",
+        icon: "https://assets.tumblbug.com/categories/svg/music.svg",
+        iconType: "img",
+      },
+    ],
+
+    // 다섯 번째 열
+    [
+      {
+        label: "영화 · 비디오",
+        icon: "https://assets.tumblbug.com/categories/svg/film.svg",
+        iconType: "img",
+      },
+      {
+        label: "공연",
+        icon: "https://assets.tumblbug.com/categories/svg/performing-art.svg",
+        iconType: "img",
+      },
+    ],
+  ];
+
   return (
     <div className={`mx-auto h-[116px] ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"}`}>
       {/* 1번째 헤더 */}
