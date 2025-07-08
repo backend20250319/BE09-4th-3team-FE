@@ -1,0 +1,137 @@
+/* 마이페이지 전체 컨테이너 */
+.mypage-container {
+  max-width: 1160px;
+  margin: 40px auto 0;
+  border-radius: 10px;
+  background: #fff;
+  padding-left: 0; /* 또는 0으로 */
+}
+
+.mypage-profile-row {
+  display: flex;
+  align-items: center;
+  /* padding: 0 0 0 0; */
+}
+
+.mypage-profile-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f3f3f3;
+  border: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mypage-profile-info {
+  margin-left: 40px;
+  flex: 1;
+}
+
+.mypage-nickname {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.mypage-profile-stats {
+  display: flex;
+  gap: 32px;
+  margin-top: 18px;
+  font-size: 16px;
+  color: #444;
+}
+
+.mypage-profile-stats b {
+  margin-left: 4px;
+  font-weight: 500;
+}
+
+.mypage-profile-stats .mypage-link {
+  color: #d32f2f;
+  cursor: pointer;
+}
+
+.mypage-edit-btn {
+  border: 1.5px solid #d32f2f;
+  color: #d32f2f;
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px 32px;
+  font-weight: 600;
+  font-size: 16px;
+  margin-left: 24px;
+  height: 48px;
+  cursor: pointer;
+}
+
+.mypage-tabs {
+  border-bottom: 1.5px solid #eee;
+  margin: 32px 0 0 0;
+  padding: 0 40px;
+}
+
+.mypage-tabs-list {
+  display: flex;
+  gap: 32px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #cccccc;
+  margin-bottom: -2px;
+}
+
+.mypage-tabs-list .active {
+  color: #323132;
+  border-bottom: 2.5px solid #d32f2f;
+  padding-bottom: 12px;
+}
+
+.mypage-desc {
+  padding: 40px;
+  min-height: 120px;
+  color: #888;
+  font-size: 16px;
+}
+
+.mypage-profile-stats-block {
+  margin-top: 18px;
+}
+.mypage-profile-stats-labels,
+.mypage-profile-stats-values {
+  display: flex;
+  gap: 48px;
+  font-size: 16px;
+  color: #444;
+}
+.mypage-profile-stats-labels {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.mypage-profile-stats-values {
+  color: #888;
+  font-weight: 400;
+}
+
+.mypage-profile-stats-block-row {
+  display: flex;
+  flex-direction: row;
+  gap: 48px;
+  margin-top: 18px;
+}
+.mypage-profile-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.mypage-profile-stat-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 4px;
+}
+.mypage-profile-stat-value {
+  font-size: 16px;
+  color: #888;
+  font-weight: 400;
+}
