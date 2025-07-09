@@ -23,6 +23,21 @@ const cleanupCache = () => {
   }
 };
 
+// JWT 토큰에서 userId 추출 함수
+function getUserIdFromAccessToken() {
+  const token = localStorage.getItem("accessToken");
+  if (!token) return null;
+
+  try {
+    const base64Payload = token.split(".")[1];
+    const payload = JSON.parse(atob(base64Payload));
+    return payload.sub || payload.userId || payload.id || null; // JWT 구조에 맞게 조정
+  } catch (e) {
+    console.error("토큰 디코딩 실패:", e);
+    return null;
+  }
+}
+
 export default function NotificationPage() {
   const [currentTab, setCurrentTab] = useState("all");
   const [notifications, setNotifications] = useState([]);
@@ -30,11 +45,21 @@ export default function NotificationPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMarkedAsRead, setHasMarkedAsRead] = useState(false);
-  const userNo = 8; // 임시 하드코딩
 
+  // userId 상태 추가 (초기값 null)
+  const [userId, setUserId] = useState(null);
+
+  // 컴포넌트 마운트 시 accessToken에서 userId 추출
+  useEffect(() => {
+    const id = getUserIdFromAccessToken();
+    console.log("userId:", id);
+    if (id) setUserId(id);
+  }, []);
+
+  // 쿼리 파라미터 빌드
   const buildQueryParams = () => {
     const params = new URLSearchParams();
-    params.append("userNo", userNo);
+    if (userId) params.append("userId", userId);
     params.append("page", page);
     params.append("size", 5);
     if (currentTab !== "all") {
@@ -43,12 +68,14 @@ export default function NotificationPage() {
     return params.toString();
   };
 
-  // 모든 알림을 읽음 처리하는 함수
+  // 모든 알림 읽음 처리
   const markAllAsRead = async () => {
+    if (!userId) return;
+
     try {
       const token = localStorage.getItem("accessToken");
       const response = await fetch(
-        `http://localhost:8888/notifications/mark-all-read?userNo=${userNo}`,
+        `http://localhost:8888/notifications/mark-all-read?userId=${userId}`,
         {
           method: "PATCH",
           headers: {
@@ -58,11 +85,8 @@ export default function NotificationPage() {
       );
 
       if (response.ok) {
-        // 캐시 무효화
         cache.clear();
         setHasMarkedAsRead(true);
-
-        // 부모 컴포넌트에 알림 카운트 업데이트 알림
         window.dispatchEvent(new Event("notificationRead"));
       } else {
         console.error("알림 읽음 처리 실패");
@@ -72,14 +96,17 @@ export default function NotificationPage() {
     }
   };
 
-  // 페이지 로드 시 읽음 처리
+  // 마운트 및 읽음 처리 후 호출
   useEffect(() => {
-    if (!hasMarkedAsRead) {
+    if (!hasMarkedAsRead && userId) {
       markAllAsRead();
     }
-  }, [hasMarkedAsRead]);
+  }, [hasMarkedAsRead, userId]);
 
+  // 알림 목록 가져오기
   useEffect(() => {
+    if (!userId) return;
+
     const cacheKey = `${currentTab}-${page}`;
 
     cleanupCache();
@@ -116,16 +143,14 @@ export default function NotificationPage() {
         setTotalPages(0);
         setIsLoading(false);
       });
-  }, [currentTab, page, hasMarkedAsRead]);
+  }, [currentTab, page, hasMarkedAsRead, userId]);
 
-  const handleTabClick = (tabId) => {
-    setCurrentTab(tabId);
-    setPage(0);
-  };
-
+  // 알림 삭제
   const handleDelete = async (notificationNo) => {
+    if (!userId) return;
+
     const token = localStorage.getItem("accessToken");
-    const url = `http://localhost:8888/notifications/${notificationNo}?userNo=${userNo}`;
+    const url = `http://localhost:8888/notifications/${notificationNo}?userId=${userId}`;
 
     try {
       const res = await fetch(url, {
@@ -139,7 +164,6 @@ export default function NotificationPage() {
         return;
       }
 
-      // 캐시 무효화
       cache.delete(`${currentTab}-${page}`);
 
       setNotifications((prev) => {
@@ -147,16 +171,13 @@ export default function NotificationPage() {
           (n) => n.notificationNo !== notificationNo
         );
 
-        // 현재 페이지 알림 개수가 5 미만이고 다음 페이지가 있으면
         if (newNotifications.length < 5 && page < totalPages - 1) {
           const nextPageKey = `${currentTab}-${page + 1}`;
           const nextPageData = cache.get(nextPageKey);
 
           if (nextPageData && nextPageData.content.length > 0) {
-            // 다음 페이지 첫 알림을 현재 페이지로 당기기
             const [firstOfNext, ...restNext] = nextPageData.content;
 
-            // 다음 페이지 데이터에서 첫 알림 제거 후 갱신
             cache.set(nextPageKey, {
               ...nextPageData,
               content: restNext,
@@ -164,7 +185,6 @@ export default function NotificationPage() {
               timestamp: Date.now(),
             });
 
-            // 현재 페이지 알림에 추가
             return [...newNotifications, firstOfNext];
           }
         }
@@ -177,6 +197,7 @@ export default function NotificationPage() {
     }
   };
 
+  // UI 렌더링
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>알림</h1>
@@ -185,7 +206,10 @@ export default function NotificationPage() {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => handleTabClick(tab.id)}
+            onClick={() => {
+              setCurrentTab(tab.id);
+              setPage(0);
+            }}
             className={`${styles.tabButton} ${
               currentTab === tab.id ? styles.activeTab : ""
             }`}
@@ -256,7 +280,9 @@ export default function NotificationPage() {
           {totalPages > 1 && page < totalPages - 1 && (
             <button
               className={styles.pageNavButton}
-              onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
+              onClick={() =>
+                setPage((prev) => Math.min(prev + 1, totalPages - 1))
+              }
             >
               &#8594;
             </button>
