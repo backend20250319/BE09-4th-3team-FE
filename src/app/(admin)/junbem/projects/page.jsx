@@ -29,51 +29,58 @@ useEffect(() => {
     fetchProjectCounts(); // 최초 마운트 시 1회 실행
 }, []);
 
-        const fetchProjects = async () => {
-            try {
-                const res = await fetch(`http://localhost:8888/admin/projects?page=${currentPage - 1}`, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1MTM2MjcyMiwiZXhwIjoxNzUyNTcyMzIyfQ.5rCSiaJ6SvPhDnqAXQPQeal-UvvbhYt8b5oSmG3YikI`, // ✅ 하드코딩된 토큰 사용
-                    },
-                });
+    const fetchProjects = async () => {
+        try {
+            const token = localStorage.getItem("accessToken");
 
-                if (!res.ok) throw new Error("서버 응답 오류");
-                const data = await res.json();
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/projects?page=${currentPage - 1}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
-                // ✅ content 안에서 필요한 정보 가공
-                const mappedProjects = data.content.map((item) => ({
-                    name: item.title,
-                    description: item.description.replace(/<[^>]+>/g, ""), // HTML 태그 제거
-                    creator: item.userId,
-                    category: item.categoryName,
-                    goal: item.goalAmount.toLocaleString("ko-KR", {style: "currency", currency: "KRW"}),
-                    status: convertStatus(item.productStatus),
-                    date: new Date(item.createdAt).toLocaleDateString("ko-KR"),
-                    thumbnail: item.thumbnailUrl,
-                }));
+            if (!res.ok) throw new Error("서버 응답 오류");
 
-                setAllProjects(mappedProjects);
-                setTotalPages(data.totalPages); // totalPages 저장
-            } catch (err) {
-                console.error("데이터 로딩 오류:", err);
-            }
-        };
+            const data = await res.json(); // ✅ data 선언
+
+            const mappedProjects = data.content.map((item) => ({
+                name: item.title,
+                description: item.description.replace(/<[^>]+>/g, ""),
+                creator: item.userId,
+                category: item.categoryName,
+                goal: item.goalAmount.toLocaleString("ko-KR", {
+                    style: "currency",
+                    currency: "KRW",
+                }),
+                status: convertStatus(item.productStatus),
+                date: new Date(item.createdAt).toLocaleDateString("ko-KR"),
+                thumbnail: item.thumbnailUrl,
+            }));
+
+            setAllProjects(mappedProjects);
+            setTotalPages(data.totalPages);
+        } catch (err) {
+            console.error("데이터 로딩 오류:", err);
+        }
+    };
 
 // ✅ 새로운 통계용 API 호출 함수
     const fetchProjectCounts = async () => {
         try {
-            const res = await fetch("http://localhost:8888/admin/projects/count", {
+            const token = localStorage.getItem("accessToken"); // ✅ 선언 추가
+
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/projects/count`, {
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1MTM2MjcyMiwiZXhwIjoxNzUyNTcyMzIyfQ.5rCSiaJ6SvPhDnqAXQPQeal-UvvbhYt8b5oSmG3YikI`,
+                    Authorization: `Bearer ${token}`,
                 },
             });
 
             if (!res.ok) throw new Error("통계 데이터 요청 실패");
             const data = await res.json();
 
-            setTotalCount(data.total); // 전체 수
+            setTotalCount(data.total);
             setStatusCounts({
                 pending: data.pending,
                 approved: data.approved,
@@ -83,6 +90,7 @@ useEffect(() => {
             console.error("통계 데이터 로딩 오류:", err);
         }
     };
+
 
     const convertStatus = (statusCode) => {
         switch (statusCode) {

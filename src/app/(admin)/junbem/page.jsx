@@ -43,13 +43,13 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* 빠른 액션 */}
-                    <div className="quick-actions-card">
+                    <div className="quick-actions-card ">
                         <h2>퀵 메뉴</h2>
                         <div className="quick-actions-list">
                             <ActionButton icon={<UserCheck className="mr-2 h-4 w-4" />} text="회원 관리" />
                             <ActionButton icon={<FolderOpen className="mr-2 h-4 w-4" />} text="프로젝트 검토" />
                             <ActionButton icon={<Wallet className="mr-2 h-4 w-4" />} text="펀딩 처리" />
-                            <ActionButton icon={<Settings className="mr-2 h-4 w-4" />} text="시스템 설정" />
+                            <ActionButton icon={<Settings className="mr-2 h-4 w-4" />} text="리뷰 조회" />
                         </div>
                     </div>
                 </div>
