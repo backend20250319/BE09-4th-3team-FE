@@ -96,21 +96,24 @@ export default function Section01() {
           </p>
         </div>
         <div className="w-[630px]">
-          <select
-            id="categoryNo"
-            value={categoryNo}
-            onChange={(e) => setCategoryNo(Number(e.target.value))}
-            className="w-full border px-3 py-2 rounded"
-          >
-            <option value="" disabled>
-              카테고리를 선택하세요
-            </option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
+          <p className="text-[11px] leading-[18px] mb-2 text-[#3d3d3d] font-bold">카테고리</p>
+          <span className="max-h-[41px] flex leading-6 items-center rounded-[1px] px-[18px] border border-[#e4e4e4]">
+            <select
+              id="categoryNo"
+              value={categoryNo}
+              onChange={(e) => setCategoryNo(Number(e.target.value))}
+              className="w-full border px-3 py-2 rounded border-none outline-0"
+            >
+              <option value="" disabled>
+                카테고리를 선택하세요
               </option>
-            ))}
-          </select>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </span>
         </div>
       </div>
 
@@ -137,6 +140,7 @@ export default function Section01() {
           />
         </div>
       </div>
+
       {/* 프로젝트 설명 */}
       <div className="space-y-1 flex justify-between pb-12 mb-14 border-b border-[#ddd]">
         <div className=" w-[351px]">
@@ -183,9 +187,10 @@ export default function Section01() {
               <p className="font-bold text-[11px] reading-[18px] mb-2 text-[#3d3d3d] flex">목표금액</p>
               <input
                 id="goalAmount"
-                type="number"
+                type="text"
                 value={numberWithCommas(goalAmount)}
                 required
+                min={500000}
                 autoCapitalize="off"
                 autoComplete="off"
                 onChange={handleGoalAmountChange}
