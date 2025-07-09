@@ -12,12 +12,14 @@ export default function ReviewsPage() {
 
     const fetchReviews = async (page) => {
         try {
-            const res = await fetch(`http://localhost:8888/admin/reviews?page=${page - 1}`, {
+            const token = localStorage.getItem("accessToken");
+
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/reviews?page=${page - 1}`, {
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1MTM2MjcyMiwiZXhwIjoxNzUyNTcyMzIyfQ.5rCSiaJ6SvPhDnqAXQPQeal-UvvbhYt8b5oSmG3YikI',
+                    Authorization: `Bearer ${token}`, // 👉 동적으로 토큰 삽입
                 },
-            })
+            });
 
             if (!res.ok) throw new Error("리뷰 로딩 실패")
             const data = await res.json()
