@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 import Image from "next/image";
+import { getDday } from "@/components/utils/dday";
 
 export default function Page() {
   const [projects, setProjects] = useState([]);
@@ -36,12 +37,6 @@ export default function Page() {
     if (newPage >= 0 && newPage < pagination.totalPages) {
       fetchProjects(newPage, pagination.size);
     }
-  };
-
-  // 남은 일수 계산
-  const getDday = (start, end) => {
-    const diff = new Date(end).getTime() - new Date(start).getTime();
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
   };
 
   return (
