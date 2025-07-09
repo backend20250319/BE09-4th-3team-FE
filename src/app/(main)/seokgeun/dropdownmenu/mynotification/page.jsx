@@ -45,7 +45,7 @@ export default function MyNotification() {
 
   // 마운트 시 알림 불러오기
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = sessionStorage.getItem("accessToken");
     if (!accessToken) {
       alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
       router.replace("/seokgeun/login");

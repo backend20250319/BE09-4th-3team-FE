@@ -21,7 +21,7 @@ export default function MainPage() {
         setError("");
 
         // 로컬스토리지에서 액세스 토큰 확인
-        const accessToken = localStorage.getItem("accessToken");
+        const accessToken = sessionStorage.getItem("accessToken");
         if (!accessToken) {
           setError("로그인 정보가 없습니다. 다시 로그인해주세요.");
           setLoading(false);
@@ -67,8 +67,8 @@ export default function MainPage() {
       console.warn("로그아웃 요청 실패:", error);
     } finally {
       // 클라이언트 측 정리
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("refreshToken");
       sessionStorage.clear();
       window.location.href = "/seokgeun/login";
     }

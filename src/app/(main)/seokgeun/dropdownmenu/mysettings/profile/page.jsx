@@ -30,12 +30,13 @@ export default function MySettingsPage() {
   const [editField, setEditField] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [editFile, setEditFile] = useState(null);
+  const [nameError, setNameError] = useState(""); // 석근 : 이름 에러 메시지 상태
 
   const pathname = usePathname();
 
   // 로그인 필요 페이지 진입 시 토큰 체크
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = sessionStorage.getItem("accessToken");
     if (!accessToken) {
       router.replace("/seokgeun/login");
     }
@@ -43,7 +44,7 @@ export default function MySettingsPage() {
 
   // 인증 만료/실패 시 자동 로그아웃 및 리다이렉트 fetch 유틸
   const fetchWithAuth = async (url, options = {}) => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = sessionStorage.getItem("accessToken");
     const res = await fetch(url, {
       ...options,
       headers: {
@@ -52,8 +53,8 @@ export default function MySettingsPage() {
       },
     });
     if (res.status === 401 || res.status === 419) {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("refreshToken");
       alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
       router.replace("/seokgeun/login");
       return null;
@@ -67,14 +68,10 @@ export default function MySettingsPage() {
     if (res && res.ok) {
       const user = await res.json();
       setNickname(user.nickname || "");
-      const localImg = localStorage.getItem("profileImg");
+      const localImg = sessionStorage.getItem("profileImg");
       setProfileImg(
         user.profileImg || localImg || "/images/default_login_icon.png"
       );
-      setUserUrl(user.userUrl || "");
-      setBio(user.bio || "");
-      setIdeus(user.ideus || "");
-      setWebsite(user.website || "");
     }
   };
 
@@ -83,10 +80,33 @@ export default function MySettingsPage() {
     fetchUserInfo();
   }, []);
 
+  // 석근 : 페이지 마운트 시 sessionStorage에서 bio, ideus, website, userUrl 값을 불러와 상태 초기화
+  useEffect(() => {
+    const localBio = sessionStorage.getItem("bio");
+    if (localBio !== null) setBio(localBio);
+    const localIdeus = sessionStorage.getItem("ideus");
+    if (localIdeus !== null) setIdeus(localIdeus);
+    const localWebsite = sessionStorage.getItem("website");
+    if (localWebsite !== null) setWebsite(localWebsite);
+    const localUserUrl = sessionStorage.getItem("userUrl");
+    if (localUserUrl !== null) setUserUrl(localUserUrl);
+  }, []);
+
   // 변경 버튼 클릭 시 에디트 모드 진입 (이전 에디트 모드는 자동 취소)
   const handleEditClick = (field, value) => {
     setEditField(field);
-    setEditValue(value || "");
+    if (field === "사용자 이름(URL)") {
+      const prefix = "tumblbug.com/u/";
+      if (value && !value.startsWith(prefix)) {
+        setEditValue(prefix + value);
+      } else if (value) {
+        setEditValue(value);
+      } else {
+        setEditValue(prefix);
+      }
+    } else {
+      setEditValue(value || "");
+    }
     setPreviewImg(null);
     setEditFile(null);
   };
@@ -97,7 +117,7 @@ export default function MySettingsPage() {
     setPreviewImg(null);
     setEditFile(null);
   };
-  // 프로필 이미지 업로드
+  // 프로필 이미지 업로드 (input에서 파일 선택 시)
   const handleImgChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -110,20 +130,75 @@ export default function MySettingsPage() {
   const handleImgClick = () => {
     fileInputRef.current?.click();
   };
-  // 저장 핸들러
+  // 이름 입력값 변경 시 유효성 검사
+  const handleNameChange = (e) => {
+    const value = e.target.value;
+    setEditValue(value);
+    if (!value.trim()) {
+      setNameError("비워두시면 안됩니다.");
+    } else if (value.trim().length < 2 || value.trim().length > 20) {
+      setNameError("2자 이상, 20자 이내로 입력해주세요.");
+    } else {
+      setNameError("");
+    }
+  };
+  // 저장 핸들러 (프로필 사진 포함)
   const handleSave = async (field) => {
     if (field === "프로필 사진") {
-      if (previewImg) {
+      if (editFile) {
+        // 실제 서버에 업로드
+        const accessToken = sessionStorage.getItem("accessToken");
+        const formData = new FormData();
+        formData.append("file", editFile);
+
+        try {
+          const uploadRes = await fetch("/api/register/user/me/profile-image", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: formData,
+          });
+          if (uploadRes.ok) {
+            const data = await uploadRes.json();
+            // 서버에서 리턴한 경로로 갱신
+            setProfileImg(data.imagePath);
+            sessionStorage.setItem("profileImg", data.imagePath);
+            window.dispatchEvent(new Event("storage"));
+            await fetchUserInfo();
+          } else {
+            alert("프로필 이미지 업로드에 실패했습니다.");
+          }
+        } catch (e) {
+          alert("이미지 업로드 중 에러가 발생했습니다.");
+        }
+      } else if (previewImg) {
+        // 파일 업로드가 아닌 단순 미리보기만 있을 때(비정상 케이스)
         setProfileImg(previewImg);
-        localStorage.setItem("profileImg", previewImg);
+        sessionStorage.setItem("profileImg", previewImg);
         window.dispatchEvent(new Event("storage"));
-        await fetchUserInfo(); // 변경 후 정보 갱신
+        await fetchUserInfo();
       }
+      setEditField(null);
+      setEditValue("");
+      setPreviewImg(null);
+      setEditFile(null);
+      return;
     } else if (field === "이름") {
+      // 이하 기존 닉네임 변경 로직 동일
+      if (!editValue.trim()) {
+        setNameError("비워두시면 안됩니다.");
+        return;
+      }
+      if (editValue.trim().length < 2 || editValue.trim().length > 20) {
+        setNameError("2자 이상, 20자 이내로 입력해주세요.");
+        return;
+      }
+      if (nameError) return;
       try {
-        const accessToken = localStorage.getItem("accessToken");
+        const accessToken = sessionStorage.getItem("accessToken");
         const userRes = await fetchWithAuth("/api/register/user/me");
-        if (!userRes) return; // fetchWithAuth에서 리다이렉트되었으면 저장 중단
+        if (!userRes) return;
         const user = await userRes.json();
         const updateData = {
           nickname: editValue,
@@ -140,35 +215,63 @@ export default function MySettingsPage() {
           },
           body: JSON.stringify(updateData),
         });
-        if (!patchRes) return; // fetchWithAuth에서 리다이렉트되었으면 저장 중단
+        if (!patchRes) return;
         if (!patchRes.ok) {
           const errorData = await patchRes.text();
           console.error("API 응답:", patchRes.status, errorData);
           throw new Error(`닉네임 변경 실패: ${patchRes.status}`);
         }
         const updatedUser = await patchRes.json();
-        console.log("업데이트 성공:", updatedUser);
         setNickname(editValue);
-        localStorage.setItem("nickname", editValue);
+        sessionStorage.setItem("nickname", editValue);
         window.dispatchEvent(new Event("storage"));
-        await fetchUserInfo(); // 변경 후 정보 갱신
+        await fetchUserInfo();
+        setNameError("");
       } catch (e) {
         console.error("닉네임 변경 에러:", e);
-        alert("닉네임 변경에 실패했습니다. 다시 시도해 주세요.");
+        setNameError("닉네임 변경에 실패했습니다. 다시 시도해 주세요.");
         return;
       }
+      setEditField(null);
+      setEditValue("");
+      setPreviewImg(null);
+      setEditFile(null);
+      return;
     } else if (field === "사용자 이름(URL)") {
-      setUserUrl(editValue);
-      await fetchUserInfo();
+      setUserUrl(editValue.replace(/^tumblbug.com\/u\//, ""));
+      sessionStorage.setItem(
+        "userUrl",
+        editValue.replace(/^tumblbug.com\/u\//, "")
+      );
+      setEditField(null);
+      setEditValue("");
+      setPreviewImg(null);
+      setEditFile(null);
+      return;
     } else if (field === "소개") {
       setBio(editValue);
-      await fetchUserInfo();
+      sessionStorage.setItem("bio", editValue);
+      setEditField(null);
+      setEditValue("");
+      setPreviewImg(null);
+      setEditFile(null);
+      return;
     } else if (field === "아이디어스 주소") {
       setIdeus(editValue);
-      await fetchUserInfo();
+      sessionStorage.setItem("ideus", editValue);
+      setEditField(null);
+      setEditValue("");
+      setPreviewImg(null);
+      setEditFile(null);
+      return;
     } else if (field === "웹사이트") {
       setWebsite(editValue);
-      await fetchUserInfo();
+      sessionStorage.setItem("website", editValue);
+      setEditField(null);
+      setEditValue("");
+      setPreviewImg(null);
+      setEditFile(null);
+      return;
     }
     setEditField(null);
     setEditValue("");
@@ -298,9 +401,17 @@ export default function MySettingsPage() {
                     <input
                       className="mysettings-profile-edit-input"
                       value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
+                      onChange={handleNameChange}
                       autoFocus
                     />
+                    {nameError && (
+                      <div
+                        className="mysettings-profile-error"
+                        style={{ color: "red", marginTop: 4 }}
+                      >
+                        {nameError}
+                      </div>
+                    )}
                     <div className="mysettings-profile-edit-actions">
                       <button
                         className="mysettings-save-btn"
@@ -577,7 +688,10 @@ export default function MySettingsPage() {
           <div className="mysettings-profile-info-desc">
             프로필 사진과 이름, URL, 소개글, 웹사이트가 프로필 페이지에 공개
             됩니다.{" "}
-            <a href="#" className="mysettings-profile-link">
+            <a
+              href="/seokgeun/dropdownmenu/mypage"
+              className="mysettings-profile-link"
+            >
               내 프로필 바로가기
             </a>
           </div>

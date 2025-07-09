@@ -69,10 +69,10 @@ export default function LoginPage() {
 
       // 응답에서 토큰 추출 및 저장
       if (response.data && response.data.accessToken) {
-        localStorage.setItem("accessToken", response.data.accessToken);
+        sessionStorage.setItem("accessToken", response.data.accessToken);
       }
       if (response.data && response.data.refreshToken) {
-        localStorage.setItem("refreshToken", response.data.refreshToken);
+        sessionStorage.setItem("refreshToken", response.data.refreshToken);
       }
 
       // 🚀 개선점: 로그인 성공 시 사용자에게 피드백 제공
@@ -115,11 +115,11 @@ export default function LoginPage() {
               name="userId"
               value={form.userId}
               onChange={handleChange}
-              onKeyPress={handleKeyPress} // 🚀 개선점: 엔터키 지원
+              onKeyDown={handleKeyPress}
               placeholder="아이디"
               className={styles.input}
               disabled={loading} // 로딩 중 입력 방지
-              autoComplete="username" // 🚀 개선점: 자동완성 지원
+              autoComplete="username"
             />
 
             {/* 비밀번호 입력 필드 */}
@@ -128,11 +128,11 @@ export default function LoginPage() {
               type="password"
               value={form.password}
               onChange={handleChange}
-              onKeyPress={handleKeyPress} // 🚀 개선점: 엔터키 지원
+              onKeyDown={handleKeyPress}
               placeholder="비밀번호"
               className={styles.input}
               disabled={loading} // 로딩 중 입력 방지
-              autoComplete="current-password" // 🚀 개선점: 자동완성 지원
+              autoComplete="current-password"
             />
 
             {/* 에러 메시지 출력 */}

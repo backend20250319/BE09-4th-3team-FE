@@ -91,3 +91,82 @@
 .mysettings-cancel-btn:hover {
   background: #444;
 }
+
+.mysettings-main-container {
+  max-width: 1160px;
+  margin: 60px auto 0 auto;
+  background: #fff;
+  padding: 0 0 40px 0;
+}
+.mysettings-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+  color: #191919;
+  text-align: left;
+}
+.mysettings-horizontal-tabs {
+  display: flex;
+  gap: 36px;
+  border-bottom: 2px solid #f3f3f3;
+  margin-bottom: 32px;
+  margin-top: 8px;
+  padding-left: 2px;
+}
+.mysettings-horizontal-tab {
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 20px;
+  font-weight: 500;
+  color: #bbb;
+  padding: 0 0 14px 0;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: color 0.2s, border-bottom 0.2s;
+}
+.mysettings-horizontal-tab.active {
+  color: #191919;
+  font-weight: 700;
+  border-bottom: 3px solid #191919;
+}
+.mysettings-profile-table-row-wrapper {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+.mysettings-profile-table {
+  flex: 1;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  padding: 0;
+  min-width: 0;
+}
+.mysettings-profile-guide-block {
+  min-width: 320px;
+  max-width: 380px;
+  border: 1px solid #eee;
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 20px;
+  font-size: 14px;
+  color: #444;
+}
+@media (max-width: 900px) {
+  .mysettings-profile-table-row-wrapper {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .mysettings-profile-guide-block {
+    margin-left: 0;
+    margin-top: 24px;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .mysettings-profile-table {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+}
