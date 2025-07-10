@@ -318,6 +318,10 @@ export default function MySettingsPage() {
                         height={80}
                         alt="프로필"
                         className="mysettings-profile-img-edit"
+                        onError={(e) => {
+                          e.target.src = "/images/default_login_icon.png";
+                        }}
+                        style={{ objectFit: "cover", borderRadius: "50%" }}
                       />
                       <input
                         type="file"
@@ -366,6 +370,10 @@ export default function MySettingsPage() {
                       height={56}
                       alt="프로필"
                       className="mysettings-profile-img"
+                      onError={(e) => {
+                        e.target.src = "/images/default_login_icon.png";
+                      }}
+                      style={{ objectFit: "cover", borderRadius: "50%" }}
                     />
                   </div>
                 </div>

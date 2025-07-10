@@ -17,7 +17,7 @@ export default function UsersPage() {
 
     const fetchUsers = async (page = currentPage) => {
         try {
-            const token = localStorage.getItem("accessToken");
+            const token = sessionStorage.getItem("accessToken");
 
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/users?page=${page - 1}`, {
                 headers: {
@@ -67,7 +67,7 @@ export default function UsersPage() {
 
     const handleUserStatusChange = async (id, status) => {
         try {
-            const token = localStorage.getItem("accessToken");
+            const token = sessionStorage.getItem("accessToken");
 
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/users/status`, {
                 method: "POST",

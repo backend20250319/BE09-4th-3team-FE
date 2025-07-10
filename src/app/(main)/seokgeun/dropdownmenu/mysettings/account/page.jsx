@@ -392,6 +392,36 @@ export default function AccountPage() {
     setPhoneSuccess("");
   };
 
+  // 탈퇴 처리 함수 추가
+  const handleWithdraw = async () => {
+    if (
+      !window.confirm(
+        "정말로 회원 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+      )
+    )
+      return;
+    const accessToken = sessionStorage.getItem("accessToken");
+    try {
+      const res = await fetch("/api/register/user/me_quit", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (res.ok) {
+        alert("회원 탈퇴가 완료되었습니다.");
+        // 로그아웃 처리 및 메인/로그인 페이지로 이동
+        sessionStorage.clear();
+        window.location.href = "/seokgeun/login";
+      } else {
+        const msg = await res.text();
+        alert("회원 탈퇴 실패: " + msg);
+      }
+    } catch (e) {
+      alert("회원 탈퇴 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
     <div className="mysettings-main-container">
       <h1 className="mysettings-title">설정</h1>
@@ -416,34 +446,7 @@ export default function AccountPage() {
           {/* 이메일 변경 영역 */}
           <div className="mysettings-profile-row email-row">
             <div className="mysettings-profile-col">
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div className="mysettings-profile-label">이메일</div>
-                {/* 석근 : 이메일 변경 버튼 토글 */}
-                {editField === "email" ? (
-                  <button
-                    className="mysettings-edit-btn"
-                    type="button"
-                    style={{ background: "#222", color: "#fff" }}
-                    onClick={() => setEditField(null)}
-                  >
-                    취소
-                  </button>
-                ) : (
-                  <button
-                    className="mysettings-edit-btn"
-                    type="button"
-                    onClick={() => setEditField("email")}
-                  >
-                    변경
-                  </button>
-                )}
-              </div>
+              <div className="mysettings-profile-label">이메일</div>
               <div style={{ marginTop: 8 }}>
                 {editField === "email" ? (
                   <>
@@ -475,7 +478,6 @@ export default function AccountPage() {
                           ? `재요청 (${emailVerificationTimer}s)`
                           : "인증메일 전송"}
                       </button>
-                      {/* 석근 : 아래 취소 버튼 제거됨 */}
                     </div>
                     <div
                       style={{
@@ -552,38 +554,31 @@ export default function AccountPage() {
                 )}
               </div>
             </div>
+            <div className="mysettings-profile-action-col">
+              {editField === "email" ? (
+                <button
+                  className="mysettings-edit-btn"
+                  type="button"
+                  style={{ background: "#222", color: "#fff" }}
+                  onClick={() => setEditField(null)}
+                >
+                  취소
+                </button>
+              ) : (
+                <button
+                  className="mysettings-edit-btn"
+                  type="button"
+                  onClick={() => setEditField("email")}
+                >
+                  변경
+                </button>
+              )}
+            </div>
           </div>
           {/* 비밀번호 */}
           <div className="mysettings-profile-row password-row">
             <div className="mysettings-profile-col">
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div className="mysettings-profile-label">비밀번호</div>
-                {/* 석근 : 비밀번호 변경 버튼 토글 */}
-                {editField === "password" ? (
-                  <button
-                    className="mysettings-edit-btn"
-                    type="button"
-                    style={{ background: "#222", color: "#fff" }}
-                    onClick={() => setEditField(null)}
-                  >
-                    취소
-                  </button>
-                ) : (
-                  <button
-                    className="mysettings-edit-btn"
-                    type="button"
-                    onClick={() => setEditField("password")}
-                  >
-                    변경
-                  </button>
-                )}
-              </div>
+              <div className="mysettings-profile-label">비밀번호</div>
               <div style={{ marginTop: 8 }}>
                 {/* 석근 : 비밀번호 변경 폼 */}
                 {editField === "password" ? (
@@ -618,25 +613,11 @@ export default function AccountPage() {
                           aria-label={
                             showCurrentPassword
                               ? "비밀번호 숨기기"
-                              : "비밀번호 보기"
+                              : "비밀번호 표시"
                           }
                         >
                           {showCurrentPassword ? "🙈" : "👁️"}
                         </button>
-                      </div>
-                      <div
-                        style={{ fontSize: 13, color: "#888", marginTop: 4 }}
-                      >
-                        비밀번호가 기억나지 않나요?{" "}
-                        <a
-                          href="#"
-                          style={{
-                            color: "#1976d2",
-                            textDecoration: "underline",
-                          }}
-                        >
-                          비밀번호 초기화
-                        </a>
                       </div>
                     </div>
                     <div style={{ marginBottom: 20 }}>
@@ -644,97 +625,144 @@ export default function AccountPage() {
                         className="mysettings-profile-label"
                         style={{ marginTop: 0 }}
                       >
-                        변경할 비밀번호
+                        새 비밀번호
                       </div>
-                      <div style={{ display: "flex", alignItems: "center" }}>
-                        <input
-                          type={showNewPassword ? "text" : "password"}
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          className="mysettings-profile-value"
-                          placeholder="변경할 비밀번호"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowNewPassword((v) => !v)}
-                          style={{
-                            marginLeft: 8,
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            fontSize: 20,
-                          }}
-                          tabIndex={-1}
-                          aria-label={
-                            showNewPassword
-                              ? "비밀번호 숨기기"
-                              : "비밀번호 보기"
-                          }
-                        >
-                          {showNewPassword ? "🙈" : "👁️"}
-                        </button>
-                      </div>
+                      <input
+                        type={showNewPassword ? "text" : "password"}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className="mysettings-profile-value"
+                        placeholder="새 비밀번호"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword((v) => !v)}
+                        style={{
+                          marginLeft: 8,
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          fontSize: 20,
+                        }}
+                        tabIndex={-1}
+                        aria-label={
+                          showNewPassword ? "비밀번호 숨기기" : "비밀번호 표시"
+                        }
+                      >
+                        {showNewPassword ? "🙈" : "👁️"}
+                      </button>
                     </div>
-                    <div style={{ marginBottom: 32 }}>
-                      <div style={{ display: "flex", alignItems: "center" }}>
-                        <input
-                          type={showConfirmPassword ? "text" : "password"}
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="mysettings-profile-value"
-                          placeholder="변경할 비밀번호 확인"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPassword((v) => !v)}
-                          style={{
-                            marginLeft: 8,
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            fontSize: 20,
-                          }}
-                          tabIndex={-1}
-                          aria-label={
-                            showConfirmPassword
-                              ? "비밀번호 숨기기"
-                              : "비밀번호 보기"
-                          }
-                        >
-                          {showConfirmPassword ? "🙈" : "👁️"}
-                        </button>
+                    <div style={{ marginBottom: 20 }}>
+                      <div
+                        className="mysettings-profile-label"
+                        style={{ marginTop: 0 }}
+                      >
+                        새 비밀번호 확인
                       </div>
-                      {passwordMatchError && (
-                        <div
-                          style={{ color: "red", fontSize: 13, marginTop: 4 }}
-                        >
-                          {passwordMatchError}
-                        </div>
-                      )}
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="mysettings-profile-value"
+                        placeholder="새 비밀번호 확인"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword((v) => !v)}
+                        style={{
+                          marginLeft: 8,
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          fontSize: 20,
+                        }}
+                        tabIndex={-1}
+                        aria-label={
+                          showConfirmPassword
+                            ? "비밀번호 숨기기"
+                            : "비밀번호 표시"
+                        }
+                      >
+                        {showConfirmPassword ? "🙈" : "👁️"}
+                      </button>
                     </div>
                     {passwordError && (
-                      <div style={{ color: "red", marginBottom: 8 }}>
+                      <div
+                        style={{
+                          color: "#d32f2f",
+                          fontSize: 13,
+                          marginBottom: 4,
+                        }}
+                      >
                         {passwordError}
                       </div>
                     )}
                     {passwordSuccess && (
-                      <div style={{ color: "green", marginBottom: 8 }}>
+                      <div
+                        style={{
+                          color: "green",
+                          fontSize: 13,
+                          marginBottom: 4,
+                        }}
+                      >
                         {passwordSuccess}
                       </div>
                     )}
-                    <button
-                      type="button"
-                      className="mysettings-save-btn"
-                      style={{ width: 120, height: 40, fontSize: 16 }}
-                      onClick={handleSavePassword}
-                    >
-                      저장
-                    </button>
+                    {passwordMatchError && (
+                      <div
+                        style={{
+                          color: "#d32f2f",
+                          fontSize: 13,
+                          marginBottom: 4,
+                        }}
+                      >
+                        {passwordMatchError}
+                      </div>
+                    )}
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button
+                        type="button"
+                        className="mysettings-edit-btn"
+                        style={{
+                          background: "#222",
+                          color: "#fff",
+                          minWidth: 120,
+                        }}
+                        onClick={handleSavePassword}
+                      >
+                        저장
+                      </button>
+                    </div>
                   </div>
                 ) : (
-                  <span className="mysettings-profile-value">********</span>
+                  <span
+                    className="mysettings-profile-value"
+                    style={{ color: "#222", fontWeight: 500 }}
+                  >
+                    ********
+                  </span>
                 )}
               </div>
+            </div>
+            <div className="mysettings-profile-action-col">
+              {editField === "password" ? (
+                <button
+                  className="mysettings-edit-btn"
+                  type="button"
+                  style={{ background: "#222", color: "#fff" }}
+                  onClick={() => setEditField(null)}
+                >
+                  취소
+                </button>
+              ) : (
+                <button
+                  className="mysettings-edit-btn"
+                  type="button"
+                  onClick={() => setEditField("password")}
+                >
+                  변경
+                </button>
+              )}
             </div>
           </div>
           {/* 연락처 */}
@@ -876,6 +904,7 @@ export default function AccountPage() {
                 className="mysettings-edit-btn"
                 type="button"
                 style={{ color: "#d32f2f", borderColor: "#d32f2f" }}
+                onClick={handleWithdraw}
               >
                 탈퇴
               </button>

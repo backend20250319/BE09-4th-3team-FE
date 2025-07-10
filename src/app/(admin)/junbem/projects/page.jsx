@@ -31,7 +31,7 @@ useEffect(() => {
 
     const fetchProjects = async () => {
         try {
-            const token = localStorage.getItem("accessToken");
+            const token = sessionStorage.getItem("accessToken");
 
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/projects?page=${currentPage - 1}`, {
                 headers: {
@@ -68,7 +68,7 @@ useEffect(() => {
 // ✅ 새로운 통계용 API 호출 함수
     const fetchProjectCounts = async () => {
         try {
-            const token = localStorage.getItem("accessToken"); // ✅ 선언 추가
+            const token = sessionStorage.getItem("accessToken"); // ✅ 선언 추가
 
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/projects/count`, {
                 headers: {

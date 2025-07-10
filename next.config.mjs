@@ -17,12 +17,28 @@ const nextConfig = {
       },
       {
         protocol: "http",
-        hostname: "dev.macacolabs.site", // ✅ 포트 없는 요청도 허용
+        hostname: "dev.macacolabs.site",
         pathname: "/images/**",
       },
+      // 석근 profile_images 패턴 추가
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8888",
+        pathname: "/profile_images/**",
+      },
+      {
+        protocol: "http",
+        hostname: "dev.macacolabs.site",
+        port: "8008",
+        pathname: "/profile_images/**",
+      },
+      {
+        protocol: "http",
+        hostname: "dev.macacolabs.site",
+        pathname: "/profile_images/**",
+      },
     ],
-    // 여기에 domains 배열 추가 (Image src에서 http://localhost:8888/ 경로 허용)
-    domains: ["localhost", "dev.macacolabs.site"],
   },
   async rewrites() {
     return [
