@@ -2,7 +2,7 @@
 
 import Header from "@/components/header/Header";
 import Image from "next/image";
-import React, { useState, useEffect } from "react"; // 🚀 개선점: useEffect 추가
+import React, { useState, useEffect } from "react"; // 개선점: useEffect 추가
 import styles from "./login.module.css";
 import api from "../api/axios"; // API 인스턴스 사용
 
@@ -19,8 +19,12 @@ export default function LoginPage() {
   // 에러 메시지 상태 관리
   const [errorMsg, setErrorMsg] = useState("");
 
-  // 🚀 개선점: URL 파라미터에서 리다이렉트 경로 가져오기
+  // 개선점: URL 파라미터에서 리다이렉트 경로 가져오기
   const [redirectPath, setRedirectPath] = useState("/seokgeun/main");
+
+  // 모달 상태 추가
+  const [modalMsg, setModalMsg] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   // 컴포넌트 마운트 시 URL 파라미터 확인
   useEffect(() => {
@@ -40,7 +44,7 @@ export default function LoginPage() {
     setErrorMsg(""); // 입력 시 에러 메시지 초기화 (사용자 경험 개선)
   };
 
-  // 🚀 개선점: 엔터키로 로그인 가능하게 개선
+  // 개선점: 엔터키로 로그인 가능하게 개선
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !loading) {
       handleSubmit(e);
@@ -51,7 +55,7 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault(); // 기본 폼 제출 동작 방지
 
-    // 🚀 개선점: 입력값 유효성 검사 추가
+    // 개선점: 입력값 유효성 검사 추가
     if (!form.userId.trim() || !form.password.trim()) {
       setErrorMsg("아이디와 비밀번호를 모두 입력해주세요.");
       return;
@@ -75,18 +79,24 @@ export default function LoginPage() {
         sessionStorage.setItem("refreshToken", response.data.refreshToken);
       }
 
-      // 🚀 개선점: 로그인 성공 시 사용자에게 피드백 제공
+      // 개선점: 로그인 성공 시 사용자에게 피드백 제공
       console.log("로그인 성공:", response.data);
 
       // 리다이렉트 경로로 이동
       window.location.href = redirectPath;
     } catch (err) {
-      // 에러 처리 - 서버 응답 에러 메시지 또는 기본 메시지 표시
-      setErrorMsg(
-        err.response?.data?.error ||
-          "로그인에 실패했습니다. 아이디/비밀번호를 확인하세요."
-      );
-      console.error("로그인 에러:", err);
+      console.log("에러 상세:", err.response); // 디버깅용
+
+      if (err.response?.status === 403) {
+        // 403 에러일 때 모달로 안내
+        setModalMsg(
+          "이미 회원탈퇴 처리된 계정입니다.\n이용 문의: choseokgeun@gmail.com"
+        );
+        setShowModal(true);
+      } else {
+        // 기타 에러는 기존 방식대로
+        setErrorMsg(err.response?.data?.error || "로그인에 실패했습니다.");
+      }
     } finally {
       setLoading(false); // 로딩 상태 비활성화
     }
@@ -172,6 +182,23 @@ export default function LoginPage() {
           backgroundImage: 'url("/login_register/login_register_image_2.jpg")',
         }}
       />
+
+      {/* 모달 */}
+      {showModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalContent}>
+              <p style={{ whiteSpace: "pre-line" }}>
+                {modalMsg
+                  .replace(/https?:\/\/[^\s]+/g, "")
+                  .replace(/localhost:\d+/g, "")
+                  .trim()}
+              </p>
+              <button onClick={() => setShowModal(false)}>확인</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

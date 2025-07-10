@@ -12,7 +12,7 @@ export default function ReviewsPage() {
 
     const fetchReviews = async (page) => {
         try {
-            const token = localStorage.getItem("accessToken");
+            const token = sessionStorage.getItem("accessToken");
 
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/reviews?page=${page - 1}`, {
                 headers: {

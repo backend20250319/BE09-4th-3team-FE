@@ -41,20 +41,20 @@ export default function MyPage() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("profile");
   // Header와 동일하게 프로필 이미지 상태 관리
-  const [profileImg, setProfileImg] = useState(
-    "/images/default_login_icon.png"
-  );
+  // const [profileImg, setProfileImg] = useState(
+  //   "/images/default_login_icon.png"
+  // );
   const router = useRouter();
 
-  useEffect(() => {
-    const updateProfileImg = () => {
-      const savedImg = sessionStorage.getItem("profileImg");
-      setProfileImg(savedImg || "/images/default_login_icon.png");
-    };
-    updateProfileImg();
-    window.addEventListener("storage", updateProfileImg);
-    return () => window.removeEventListener("storage", updateProfileImg);
-  }, []);
+  // useEffect(() => {
+  //   const updateProfileImg = () => {
+  //     const savedImg = sessionStorage.getItem("profileImg");
+  //     setProfileImg(savedImg || "/images/default_login_icon.png");
+  //   };
+  //   updateProfileImg();
+  //   window.addEventListener("storage", updateProfileImg);
+  //   return () => window.removeEventListener("storage", updateProfileImg);
+  // }, []);
 
   useEffect(() => {
     const accessToken = sessionStorage.getItem("accessToken");
@@ -115,7 +115,7 @@ export default function MyPage() {
       <div className="sponsored-divider"></div>
       <div className="mypage-profile-row">
         <div className="mypage-profile-img">
-          <Image src={profileImg} width={80} height={80} alt="프로필" />
+          {/* <Image src={profileImg} width={80} height={80} alt="프로필" /> */}
         </div>
         <div className="mypage-profile-info">
           <div className="mypage-nickname">{user?.nickname || "-"}</div>

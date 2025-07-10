@@ -32,7 +32,7 @@
   height: 32px;
   transition: border 0.2s, background 0.2s;
   margin-left: 0;
-  margin-right: 0;
+  margin-right: 0px;
 }
 .mysettings-edit-btn:hover {
   border: 1.5px solid #d32f2f;
