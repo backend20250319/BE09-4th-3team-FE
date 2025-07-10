@@ -2,8 +2,59 @@
 import { useEffect, useState } from "react";
 import ReviewForm from "./ReviewForm";
 import styles from "./page.module.css";
-import axios from "axios"; // ✅ axios 사용
+import axios from "axios";
 import { MoreHorizontal } from "lucide-react";
+
+// JWT 토큰에서 userId 추출 함수
+function getUserIdFromAccessToken() {
+  const token = sessionStorage.getItem("accessToken");
+  if (!token) return null;
+  try {
+    const base64Payload = token.split(".")[1];
+    const payload = JSON.parse(atob(base64Payload));
+    return payload.sub || payload.userId || payload.id || null;
+  } catch (e) {
+    console.error("토큰 디코딩 실패:", e);
+    return null;
+  }
+}
+
+// 평가 상태를 한글로 변환하는 함수 (숫자 1,2,3 기준)
+function getRatingLabel(category, value) {
+  const labels = {
+    quality: {
+      1: "아쉬워요",
+      2: "보통이에요",
+      3: "만족해요",
+    },
+    plan: {
+      1: "계획 준수 아쉬워요",
+      2: "계획 준수 보통이에요",
+      3: "계획 준수 잘 지켰어요",
+    },
+    communication: {
+      1: "소통 아쉬워요",
+      2: "소통 보통이에요",
+      3: "소통 친절했어요",
+    },
+  };
+
+  const numValue = Number(value);
+  if (!numValue || numValue < 1) return "";
+
+  return labels[category]?.[numValue] || "";
+}
+
+// 날짜가 오늘인지 체크하는 함수
+function isToday(dateStr) {
+  const today = new Date();
+  const date = new Date(dateStr);
+  return (
+    date.getFullYear() === today.getFullYear() &&
+    date.getMonth() === today.getMonth() &&
+    date.getDate() === today.getDate()
+  );
+}
 
 const Page = () => {
   const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
@@ -12,88 +63,177 @@ const Page = () => {
   const [writtenReviews, setWrittenReviews] = useState([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedReview, setSelectedReview] = useState(null);
-  const [activeDropdown, setActiveDropdown] = useState(null);
-  const userNo = 8; // 임시 하드코딩
 
-  // ✅ 후기 작성 가능한 프로젝트 불러오기
+  // 추가된 부분: 삭제 성공 모달 상태
+  const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
+
+  const [selectedReview, setSelectedReview] = useState(null);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // 토큰 헤더 설정 함수
+  const getAuthHeaders = () => {
+    const token = sessionStorage.getItem("accessToken");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  // 프로젝트 목록 불러오기 (작성 가능 프로젝트)
+  const fetchProjects = async () => {
+    if (!userId) return;
+
+    try {
+      const writableRes = await axios.get(
+        `http://localhost:8888/reviews/writable`,
+        { headers: getAuthHeaders() }
+      );
+
+      setProjects(writableRes.data);
+    } catch (err) {
+      console.error("리뷰 작성 가능 프로젝트 불러오기 실패", err);
+    }
+  };
+
+  // 작성한 후기 목록 불러오기
+  const fetchWrittenReviews = async () => {
+    if (!userId) return;
+
+    try {
+      const response = await axios.get(
+        `http://localhost:8888/reviews/written`,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+      setWrittenReviews(response.data);
+    } catch (err) {
+      console.error("작성한 후기 불러오기 실패", err);
+    }
+  };
+
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8888/reviews/writable?userNo=${userNo}`
-        );
-        setProjects(response.data);
-      } catch (err) {
-        console.error("리뷰 작성 가능 프로젝트 불러오기 실패", err);
-      }
-    };
-    fetchProjects();
+    const id = getUserIdFromAccessToken();
+    if (id) setUserId(id);
   }, []);
 
-  // ✅ 작성한 후기 불러오기
   useEffect(() => {
-    const fetchWrittenReviews = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8888/reviews/written?userNo=${userNo}`
+    if (!userId) return;
+    fetchProjects();
+    if (activeTab === "written") fetchWrittenReviews();
+  }, [userId, activeTab]);
+
+  // 후기 작성 또는 수정 제출 핸들러
+  const handleReviewSubmit = async (reviewData) => {
+    try {
+      if (isEditing && selectedReview) {
+        const response = await axios.put(
+          `http://localhost:8888/reviews/${selectedReview.reviewNo}`,
+          reviewData,
+          { headers: getAuthHeaders() }
         );
-        setWrittenReviews(response.data);
-      } catch (err) {
-        console.error("작성한 후기 불러오기 실패", err);
+        setWrittenReviews((prev) =>
+          prev.map((r) =>
+            r.reviewNo === selectedReview.reviewNo
+              ? response.data.afterUpdate
+              : r
+          )
+        );
+      } else {
+        const response = await axios.post(
+          `http://localhost:8888/reviews`,
+          reviewData,
+          { headers: getAuthHeaders() }
+        );
+        setWrittenReviews((prev) => [response.data, ...prev]);
+        setProjects((prev) =>
+          prev.filter((p) => p.projectNo !== reviewData.projectNo)
+        );
       }
-    };
-    if (activeTab === "written") {
-      fetchWrittenReviews();
+
+      setIsReviewFormOpen(false);
+      setSelectedProject(null);
+      setSelectedReview(null);
+      setIsEditing(false);
+      setShowSuccessModal(true);
+      setActiveTab("written");
+    } catch (err) {
+      console.error("후기 등록/수정 실패", err.response || err);
+      alert("후기 등록/수정에 실패했습니다.");
     }
-  }, [activeTab]);
+  };
 
-  // 후기 작성 완료 처리
-  const handleReviewSubmit = (newReview) => {
+  const handleWriteReviewClick = (project) => {
+    setSelectedProject(project);
+    setSelectedReview(null);
+    setIsEditing(false);
+    setIsReviewFormOpen(true);
+  };
+
+  const handleEditClick = (review) => {
+    setSelectedReview(review);
+    setSelectedProject({
+      projectNo: review.projectNo,
+      title: review.projectTitle,
+    });
+    setIsEditing(true);
+    setIsReviewFormOpen(true);
+    setActiveDropdown(null);
+  };
+
+  const handleReviewFormClose = () => {
     setIsReviewFormOpen(false);
-    setShowSuccessModal(true);
-    // 작성한 후기 목록에 새 후기 추가
-    setWrittenReviews((prev) => [newReview, ...prev]);
+    setSelectedProject(null);
+    setSelectedReview(null);
+    setIsEditing(false);
   };
 
-  // 성공 모달 닫기
-  const handleSuccessModalClose = () => {
-    setShowSuccessModal(false);
-    setActiveTab("written"); // 작성한 후기 탭으로 이동
-  };
-
-  // 더보기 메뉴 토글
   const toggleDropdown = (reviewNo) => {
     setActiveDropdown(activeDropdown === reviewNo ? null : reviewNo);
   };
 
-  // 후기 삭제 확인 모달 열기
   const handleDeleteClick = (review) => {
     setSelectedReview(review);
     setShowDeleteModal(true);
     setActiveDropdown(null);
   };
 
-  // 후기 삭제 실행
   const handleDeleteConfirm = async () => {
     try {
       await axios.delete(
-        `http://localhost:8888/reviews/${selectedReview.reviewNo}`
+        `http://localhost:8888/reviews/${selectedReview.reviewNo}`,
+        { headers: getAuthHeaders() }
       );
+
       setWrittenReviews((prev) =>
-        prev.filter((review) => review.reviewNo !== selectedReview.reviewNo)
+        prev.filter((r) => r.reviewNo !== selectedReview.reviewNo)
       );
+
+      await fetchProjects();
+
       setShowDeleteModal(false);
       setSelectedReview(null);
+
+      // 삭제 완료 모달 띄우기
+      setShowDeleteSuccessModal(true);
     } catch (err) {
-      console.error("후기 삭제 실패", err);
+      console.error("후기 삭제 실패", err.response || err);
+      alert("후기 삭제에 실패했습니다.");
     }
   };
 
-  // 후기 삭제 취소
   const handleDeleteCancel = () => {
     setShowDeleteModal(false);
     setSelectedReview(null);
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+  };
+
+  // 삭제 완료 모달 닫기 핸들러
+  const handleDeleteSuccessModalClose = () => {
+    setShowDeleteSuccessModal(false);
   };
 
   return (
@@ -119,7 +259,6 @@ const Page = () => {
           </button>
         </div>
 
-        {/* 후기 작성 탭 */}
         {activeTab === "write" && (
           <>
             <div className={styles.alert}>
@@ -142,45 +281,50 @@ const Page = () => {
               </div>
             </div>
             <div>
-              {projects.map((project) => (
-                <div key={project.projectNo} className={styles.projectCard}>
-                  <div className={styles.projectContent}>
-                    <img
-                      src={project.thumbnailUrl || "/placeholder.svg"}
-                      alt={project.title}
-                      className={styles.projectImage}
-                    />
-                    <div className={styles.projectInfo}>
-                      <div className={styles.meta}>
-                        <span>{project.endDate}</span>
-                      </div>
-                      <h3 className={styles.projectTitle}>{project.title}</h3>
-                      <p className={styles.projectSubtitle}>
-                        {project.rewardName}
-                      </p>
-                      <div className={styles.priceInfo}>
-                        <span className={styles.price}>
-                          {project.priceText}
-                        </span>
-                        <span className={styles.delivery}>
-                          마감일: {project.endDate}
-                        </span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setIsReviewFormOpen(true)}
-                      className={styles.reviewButton}
-                    >
-                      후기 작성
-                    </button>
-                  </div>
+              {projects.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <p>후기를 작성할 수 있는 프로젝트가 없습니다.</p>
                 </div>
-              ))}
+              ) : (
+                projects.map((project) => (
+                  <div key={project.projectNo} className={styles.projectCard}>
+                    <div className={styles.projectContent}>
+                      <img
+                        src={project.thumbnailUrl || "/placeholder.svg"}
+                        alt={project.title}
+                        className={styles.projectImage}
+                      />
+                      <div className={styles.projectInfo}>
+                        <div className={styles.meta}>
+                          <span>{project.deadLine}</span>
+                        </div>
+                        <h3 className={styles.projectTitle}>{project.title}</h3>
+                        <p className={styles.projectSubtitle}>
+                          {project.rewardName}
+                        </p>
+                        <div className={styles.priceInfo}>
+                          <span className={styles.price}>
+                            {project.priceText}
+                          </span>
+                          <span className={styles.delivery}>
+                            마감일: {project.deadLine}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleWriteReviewClick(project)}
+                        className={styles.reviewButton}
+                      >
+                        후기 작성
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </>
         )}
 
-        {/* 작성한 후기 탭 */}
         {activeTab === "written" && (
           <div>
             {writtenReviews.length === 0 ? (
@@ -217,9 +361,8 @@ const Page = () => {
                         gap: "12px",
                       }}
                     >
-                      {/* 프로젝트 이미지 */}
-                      <img
-                        src="/placeholder.svg?height=60&width=60"
+                      {/* <img
+                        src={review.projectThumbnailUrl || "/placeholder.svg"}
                         alt="프로젝트 이미지"
                         style={{
                           width: "60px",
@@ -228,9 +371,7 @@ const Page = () => {
                           objectFit: "cover",
                           flexShrink: 0,
                         }}
-                      />
-
-                      {/* 후기 내용 */}
+                      /> 추후 추가 */}
                       <div style={{ flex: 1 }}>
                         <div
                           style={{
@@ -243,207 +384,152 @@ const Page = () => {
                           <div>
                             <div
                               style={{
-                                fontSize: "14px",
-                                color: "#666",
-                                marginBottom: "4px",
-                              }}
-                            >
-                              네이버웹툰
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "14px",
-                                fontWeight: "500",
+                                fontSize: "15px",
+                                fontWeight: "700",
                                 color: "#333",
-                                lineHeight: "1.4",
+                                marginBottom: "4px",
                               }}
                             >
                               {review.projectTitle}
                             </div>
+                            <div
+                              style={{
+                                fontSize: "12px",
+                                color: "#999",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              {review.reviewDate}{" "}
+                              {isToday(review.reviewDate)
+                                ? "(오늘 작성됨)"
+                                : ""}
+                            </div>
                           </div>
-
-                          {/* 더보기 메뉴 */}
                           <div style={{ position: "relative" }}>
                             <button
                               onClick={() => toggleDropdown(review.reviewNo)}
                               style={{
-                                background: "none",
+                                background: "transparent",
                                 border: "none",
                                 cursor: "pointer",
-                                padding: "4px",
-                                borderRadius: "4px",
-                                color: "#999",
+                                padding: 0,
+                                margin: 0,
                               }}
                             >
-                              <MoreHorizontal size={16} />
+                              <MoreHorizontal size={20} />
                             </button>
                             {activeDropdown === review.reviewNo && (
-                              <div
+                              <ul
                                 style={{
                                   position: "absolute",
-                                  top: "100%",
-                                  right: "0",
+                                  top: "24px",
+                                  right: 0,
                                   background: "white",
-                                  border: "1px solid #e0e0e0",
-                                  borderRadius: "8px",
-                                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                                  zIndex: 10,
-                                  minWidth: "80px",
+                                  border: "1px solid #ddd",
+                                  borderRadius: "4px",
+                                  boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                                  padding: "8px 0",
+                                  listStyle: "none",
+                                  margin: 0,
+                                  width: "120px",
+                                  zIndex: 100,
                                 }}
                               >
-                                <button
-                                  onClick={() => console.log("수정 클릭")}
+                                <li
+                                  onClick={() => handleEditClick(review)}
                                   style={{
-                                    display: "block",
-                                    width: "100%",
-                                    padding: "12px 16px",
-                                    border: "none",
-                                    background: "none",
-                                    textAlign: "left",
+                                    padding: "8px 16px",
                                     cursor: "pointer",
                                     fontSize: "14px",
                                     color: "#333",
+                                    borderBottom: "1px solid #eee",
                                   }}
                                 >
                                   수정
-                                </button>
-                                <button
+                                </li>
+                                <li
                                   onClick={() => handleDeleteClick(review)}
                                   style={{
-                                    display: "block",
-                                    width: "100%",
-                                    padding: "12px 16px",
-                                    border: "none",
-                                    background: "none",
-                                    textAlign: "left",
+                                    padding: "8px 16px",
                                     cursor: "pointer",
                                     fontSize: "14px",
-                                    color: "#333",
+                                    color: "red",
                                   }}
                                 >
                                   삭제
-                                </button>
-                              </div>
+                                </li>
+                              </ul>
                             )}
                           </div>
                         </div>
-
-                        {/* 평가 태그들 */}
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "6px",
-                            marginBottom: "12px",
-                            flexWrap: "wrap",
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontSize: "12px",
-                              color: "#666",
-                              background: "#f8f9fa",
-                              padding: "4px 8px",
-                              borderRadius: "12px",
-                              border: "1px solid #e9ecef",
-                            }}
-                          >
-                            프로젝트 만족해요
-                          </span>
-                          <span
-                            style={{
-                              fontSize: "12px",
-                              color: "#666",
-                              background: "#f8f9fa",
-                              padding: "4px 8px",
-                              borderRadius: "12px",
-                              border: "1px solid #e9ecef",
-                            }}
-                          >
-                            계획 준수 잘 지켰어요
-                          </span>
-                          <span
-                            style={{
-                              fontSize: "12px",
-                              color: "#666",
-                              background: "#f8f9fa",
-                              padding: "4px 8px",
-                              borderRadius: "12px",
-                              border: "1px solid #e9ecef",
-                            }}
-                          >
-                            소통 친절했어요
-                          </span>
-                        </div>
-
-                        {/* 후기 텍스트 */}
                         <div
                           style={{
                             fontSize: "14px",
-                            color: "#333",
-                            lineHeight: "1.5",
+                            color: "#555",
+                            whiteSpace: "pre-wrap",
                             marginBottom: "12px",
                           }}
                         >
                           {review.content}
                         </div>
-
-                        {/* 하단 정보 */}
                         <div
                           style={{
                             display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
+                            gap: "12px",
+                            fontSize: "12px",
+                            color: "#666",
                           }}
                         >
-                          <span
-                            style={{
-                              fontSize: "12px",
-                              color: "#999",
-                            }}
-                          >
-                            {new Date(
-                              review.createdDate
-                            ).toLocaleDateString() ===
-                            new Date().toLocaleDateString()
-                              ? "1초 전"
-                              : new Date(
-                                  review.createdDate
-                                ).toLocaleDateString()}
-                          </span>
-
-                          {/* 좋아요/싫어요 버튼 */}
                           <div
                             style={{
                               display: "flex",
-                              gap: "8px",
+                              gap: "6px",
+                              marginBottom: "12px",
+                              flexWrap: "wrap",
                             }}
                           >
-                            <button
+                            <span
                               style={{
-                                background: "none",
-                                border: "none",
-                                cursor: "pointer",
-                                padding: "4px",
-                                color: "#999",
-                                display: "flex",
-                                alignItems: "center",
+                                fontSize: "12px",
+                                color: "#666",
+                                background: "#f8f9fa",
+                                padding: "4px 8px",
+                                borderRadius: "12px",
+                                border: "1px solid #e9ecef",
                               }}
                             >
-                              👍
-                            </button>
-                            <button
+                              프로젝트{" "}
+                              {getRatingLabel("quality", review.rewardStatus)}
+                            </span>
+                            <span
                               style={{
-                                background: "none",
-                                border: "none",
-                                cursor: "pointer",
-                                padding: "4px",
-                                color: "#999",
-                                display: "flex",
-                                alignItems: "center",
+                                fontSize: "12px",
+                                color: "#666",
+                                background: "#f8f9fa",
+                                padding: "4px 8px",
+                                borderRadius: "12px",
+                                border: "1px solid #e9ecef",
                               }}
                             >
-                              👎
-                            </button>
+                              {" "}
+                              {getRatingLabel("plan", review.planStatus)}
+                            </span>
+                            <span
+                              style={{
+                                fontSize: "12px",
+                                color: "#666",
+                                background: "#f8f9fa",
+                                padding: "4px 8px",
+                                borderRadius: "12px",
+                                border: "1px solid #e9ecef",
+                              }}
+                            >
+                              {" "}
+                              {getRatingLabel(
+                                "communication",
+                                review.commStatus
+                              )}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -456,15 +542,16 @@ const Page = () => {
         )}
       </div>
 
-      {isReviewFormOpen && (
+      {isReviewFormOpen && (selectedProject || selectedReview) && (
         <ReviewForm
-          isOpen={isReviewFormOpen}
-          onClose={() => setIsReviewFormOpen(false)}
+          project={selectedProject}
+          review={isEditing ? selectedReview : null}
+          onClose={handleReviewFormClose}
           onSubmit={handleReviewSubmit}
+          isEditing={isEditing}
         />
       )}
 
-      {/* 후기 등록 완료 모달 */}
       {showSuccessModal && (
         <div
           style={{
@@ -479,15 +566,17 @@ const Page = () => {
             justifyContent: "center",
             zIndex: 1000,
           }}
+          onClick={handleSuccessModalClose}
         >
           <div
             style={{
               background: "white",
               borderRadius: "8px",
-              padding: "0",
+              padding: 0,
               maxWidth: "400px",
               width: "90%",
             }}
+            onClick={(e) => e.stopPropagation()}
           >
             <div
               style={{
@@ -498,12 +587,12 @@ const Page = () => {
               <p
                 style={{
                   fontSize: "16px",
-                  lineHeight: "1.5",
+                  lineHeight: 1.5,
                   margin: "0 0 20px 0",
                   color: "#333",
                 }}
               >
-                후기 등록이 완료되었습니다.
+                후기 {isEditing ? "수정" : "등록"}이 완료되었습니다.
                 <br />
                 다른 후원자들에게 힘이 되는 후기가 될 거에요.
               </p>
@@ -517,8 +606,16 @@ const Page = () => {
                   borderRadius: "4px",
                   cursor: "pointer",
                   fontSize: "14px",
-                  minWidth: "80px",
+                  fontWeight: "700",
+                  boxShadow: "0 2px 8px rgb(255 107 53 / 0.3)",
+                  transition: "background-color 0.3s ease",
                 }}
+                onMouseOver={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#f03e00")
+                }
+                onMouseOut={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#ff6b35")
+                }
               >
                 확인
               </button>
@@ -527,8 +624,7 @@ const Page = () => {
         </div>
       )}
 
-      {/* 후기 삭제 확인 모달 */}
-      {showDeleteModal && (
+      {showDeleteModal && selectedReview && (
         <div
           style={{
             position: "fixed",
@@ -542,15 +638,17 @@ const Page = () => {
             justifyContent: "center",
             zIndex: 1000,
           }}
+          onClick={handleDeleteCancel}
         >
           <div
             style={{
               background: "white",
               borderRadius: "8px",
-              padding: "0",
+              padding: 0,
               maxWidth: "400px",
               width: "90%",
             }}
+            onClick={(e) => e.stopPropagation()}
           >
             <div
               style={{
@@ -561,51 +659,133 @@ const Page = () => {
               <p
                 style={{
                   fontSize: "16px",
-                  lineHeight: "1.5",
+                  lineHeight: 1.5,
                   margin: "0 0 20px 0",
                   color: "#333",
                 }}
               >
-                작성한 후기를 삭제하시겠습니까?
+                해당 후기를 삭제하시겠습니까?
               </p>
-              <div
+              <button
+                onClick={handleDeleteConfirm}
                 style={{
-                  display: "flex",
-                  gap: "12px",
-                  justifyContent: "center",
+                  backgroundColor: "#ff6b35",
+                  color: "white",
+                  border: "none",
+                  padding: "12px 24px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  boxShadow: "0 2px 8px rgb(255 107 53 / 0.3)",
+                  marginRight: "8px",
+                  transition: "background-color 0.3s ease",
+                }}
+                onMouseOver={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#f03e00")
+                }
+                onMouseOut={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#ff6b35")
+                }
+              >
+                삭제
+              </button>
+              <button
+                onClick={handleDeleteCancel}
+                style={{
+                  backgroundColor: "#ddd",
+                  color: "#666",
+                  border: "none",
+                  padding: "12px 24px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  boxShadow: "0 2px 8px rgb(0 0 0 / 0.1)",
+                  transition: "background-color 0.3s ease",
+                }}
+                onMouseOver={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#ccc")
+                }
+                onMouseOut={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#ddd")
+                }
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 추가된 삭제 성공 모달 */}
+      {showDeleteSuccessModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+          onClick={handleDeleteSuccessModalClose}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: "8px",
+              padding: 0,
+              maxWidth: "400px",
+              width: "90%",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              style={{
+                padding: "24px",
+                textAlign: "center",
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "16px",
+                  lineHeight: 1.5,
+                  margin: "0 0 20px 0",
+                  color: "#333",
                 }}
               >
-                <button
-                  onClick={handleDeleteCancel}
-                  style={{
-                    padding: "12px 24px",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    minWidth: "80px",
-                    border: "none",
-                    backgroundColor: "#f5f5f5",
-                    color: "#333",
-                  }}
-                >
-                  취소
-                </button>
-                <button
-                  onClick={handleDeleteConfirm}
-                  style={{
-                    padding: "12px 24px",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    minWidth: "80px",
-                    border: "none",
-                    backgroundColor: "#ff6b35",
-                    color: "white",
-                  }}
-                >
-                  확인
-                </button>
-              </div>
+                후기 삭제가 완료되었습니다.
+                <br />
+                다른 후원자들에게 더 나은 경험을 제공해요.
+              </p>
+              <button
+                onClick={handleDeleteSuccessModalClose}
+                style={{
+                  backgroundColor: "#ff6b35",
+                  color: "white",
+                  border: "none",
+                  padding: "12px 24px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  boxShadow: "0 2px 8px rgb(255 107 53 / 0.3)",
+                  transition: "background-color 0.3s ease",
+                }}
+                onMouseOver={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#f03e00")
+                }
+                onMouseOut={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#ff6b35")
+                }
+              >
+                확인
+              </button>
             </div>
           </div>
         </div>
