@@ -21,6 +21,8 @@ const nextConfig = {
         pathname: "/images/**",
       },
     ],
+    // 여기에 domains 배열 추가 (Image src에서 http://localhost:8888/ 경로 허용)
+    domains: ["localhost", "dev.macacolabs.site"],
   },
   async rewrites() {
     return [

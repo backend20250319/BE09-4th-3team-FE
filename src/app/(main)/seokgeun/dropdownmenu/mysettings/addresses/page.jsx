@@ -44,7 +44,7 @@ export default function AddressesPage() {
 
   // 로그인 필요 페이지 진입 시 토큰 체크
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = sessionStorage.getItem("accessToken");
     if (!accessToken) {
       router.replace("/seokgeun/login");
     }
@@ -52,7 +52,7 @@ export default function AddressesPage() {
 
   // 인증 만료/실패 시 자동 로그아웃 및 리다이렉트 fetch 유틸
   const fetchWithAuth = async (url, options = {}) => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = sessionStorage.getItem("accessToken");
     const res = await fetch(url, {
       ...options,
       headers: {
@@ -61,8 +61,8 @@ export default function AddressesPage() {
       },
     });
     if (res.status === 401 || res.status === 419) {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("refreshToken");
       alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
       router.replace("/seokgeun/login");
       return null;
@@ -118,7 +118,7 @@ export default function AddressesPage() {
 
     setSaving(true);
     try {
-      const accessToken = localStorage.getItem("accessToken");
+      const accessToken = sessionStorage.getItem("accessToken");
       console.log("1. 토큰 확인:", accessToken ? "토큰 존재" : "토큰 없음");
 
       if (!accessToken) {
@@ -220,7 +220,7 @@ export default function AddressesPage() {
     const fetchAddresses = async () => {
       setLoading(true);
       try {
-        const accessToken = localStorage.getItem("accessToken");
+        const accessToken = sessionStorage.getItem("accessToken");
         if (!accessToken) {
           console.log("로그인 토큰이 없습니다.");
           setLoading(false);
@@ -291,7 +291,7 @@ export default function AddressesPage() {
     }
 
     try {
-      const accessToken = localStorage.getItem("accessToken");
+      const accessToken = sessionStorage.getItem("accessToken");
       if (!accessToken) {
         alert("로그인이 필요합니다.");
         return;

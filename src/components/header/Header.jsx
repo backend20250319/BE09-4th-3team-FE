@@ -3,8 +3,22 @@
 import { Bell, Heart, Menu, Search, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
+
+// 프로필 이미지 경로 안전하게 처리하는 함수
+const getProfileImgUrl = (img) => {
+  if (!img || img === "null" || typeof img !== "string")
+    return "/images/default_login_icon.png";
+  // base64는 미리보기 용
+  if (img.startsWith("data:")) return img;
+  // 절대경로(http/https)
+  if (img.startsWith("http")) return img;
+  // 상대경로(/profile_images/xxx.png) -> 도메인 붙여서 (한글, 공백 등 인코딩)
+  if (img.startsWith("/")) return "http://localhost:8888" + encodeURI(img);
+  // 그 외엔 기본 이미지
+  return "/images/default_login_icon.png";
+};
 
 export default function Header() {
   const pathname = usePathname();
@@ -13,24 +27,29 @@ export default function Header() {
   const hiddenPaths = ["/seokgeun/login", "/seokgeun/register", "/seokgeun"];
   const shouldShow = !hiddenPaths.includes(pathname);
 
-  // 모든 Hook은 최상단에서 선언
   const [isMounted, setIsMounted] = useState(false);
   const [nickname, setNickname] = useState("");
   const [isLogin, setIsLogin] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [profileImg, setProfileImg] = useState("/images/default_login_icon.png");
+  const [profileImg, setProfileImg] = useState(
+    "/images/default_login_icon.png"
+  );
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  // sessionStorage에서 이미지, 닉네임 동기화 (storage 이벤트 포함)
   useEffect(() => {
     const updateProfileImg = () => {
-      const savedImg = localStorage.getItem("profileImg");
-      setProfileImg(savedImg || "/images/default_login_icon.png");
+      const savedImg = sessionStorage.getItem("profileImg");
+      setProfileImg(
+        getProfileImgUrl(savedImg) || "/images/default_login_icon.png"
+      );
     };
     updateProfileImg();
     window.addEventListener("storage", updateProfileImg);
@@ -39,7 +58,7 @@ export default function Header() {
 
   useEffect(() => {
     const updateNickname = () => {
-      const savedNickname = localStorage.getItem("nickname");
+      const savedNickname = sessionStorage.getItem("nickname");
       if (savedNickname) setNickname(savedNickname);
     };
     updateNickname();
@@ -47,30 +66,66 @@ export default function Header() {
     return () => window.removeEventListener("storage", updateNickname);
   }, []);
 
-  useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
+  // 사용자 정보 fetch
+  const fetchUserInfo = async () => {
+    const accessToken = sessionStorage.getItem("accessToken");
     if (!accessToken) {
       setIsLogin(false);
+      setNickname("");
       return;
     }
+    try {
+      const response = await fetch("/api/register/user/me", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!response.ok) throw new Error("not logged in");
+      const data = await response.json();
 
-    fetch("/api/register/user/me", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("not logged in");
-        return res.json();
-      })
-      .then((data) => {
-        const savedNickname = localStorage.getItem("nickname");
-        if (!savedNickname) {
-          setNickname(data.nickname);
-          localStorage.setItem("nickname", data.nickname);
-        }
-        setIsLogin(true);
-      })
-      .catch(() => setIsLogin(false));
+      // 닉네임 처리
+      const savedNickname = sessionStorage.getItem("nickname");
+      if (data.nickname && data.nickname !== savedNickname) {
+        setNickname(data.nickname);
+        sessionStorage.setItem("nickname", data.nickname);
+      } else if (data.nickname && !savedNickname) {
+        setNickname(data.nickname);
+        sessionStorage.setItem("nickname", data.nickname);
+      }
+      // 프로필 이미지 처리 (항상 가공 후 저장)
+      if (data.profileImg) {
+        const url = getProfileImgUrl(data.profileImg);
+        setProfileImg(url);
+        sessionStorage.setItem("profileImg", url);
+      }
+
+      setIsLogin(true);
+    } catch (error) {
+      setIsLogin(false);
+      setNickname("");
+      setProfileImg("/images/default_login_icon.png");
+      sessionStorage.setItem("profileImg", "/images/default_login_icon.png");
+    }
+  };
+
+  // 초기 로드
+  useEffect(() => {
+    fetchUserInfo();
   }, []);
+
+  // 30초마다 갱신
+  useEffect(() => {
+    if (!isLogin) return;
+    const interval = setInterval(() => fetchUserInfo(), 30000);
+    return () => clearInterval(interval);
+  }, [isLogin]);
+
+  // 포커스 시 갱신
+  useEffect(() => {
+    const handleFocus = () => {
+      if (isLogin) fetchUserInfo();
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [isLogin]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -82,54 +137,42 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // useEffect(() => {
-  //   if (!isMounted || !isLogin) {
-  //     setUnreadCount(0);
-  //     return;
-  //   }
-
-  //   const fetchUnreadCount = async () => {
-  //     try {
-  //       const userNo = 8; // TODO: 실제 유저 번호 적용
-  //       const res = await fetch(`http://localhost:8888/notifications/unread-count?userNo=${userNo}`);
-  //       if (!res.ok) throw new Error("Failed to fetch unread count");
-  //       const data = await res.json();
-  //       setUnreadCount(Number(data));
-  //     } catch (e) {
-  //       console.error("알림 수 조회 실패:", e);
-  //       setUnreadCount(0);
-  //     }
-  //   };
-
-  //   fetchUnreadCount();
-  //   const handleNotificationRead = () => fetchUnreadCount();
-  //   window.addEventListener("notificationRead", handleNotificationRead);
-  //   return () => window.removeEventListener("notificationRead", handleNotificationRead);
-  // }, [isMounted, isLogin]);
-
   const handleLogout = async () => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = sessionStorage.getItem("accessToken");
     try {
       await fetch("/api/register/user/me/logout", {
         method: "POST",
         headers: { Authorization: `Bearer ${accessToken}` },
       });
     } catch (e) {}
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    sessionStorage.removeItem("accessToken");
+    sessionStorage.removeItem("refreshToken");
+    sessionStorage.removeItem("nickname");
+    sessionStorage.removeItem("profileImg");
     setIsLogin(false);
     setNickname("");
+    setProfileImg("/images/default_login_icon.png");
     router.push("/seokgeun/main");
   };
 
-  const handleNicknameClick = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
+  const handleNicknameClick = () => setDropdownOpen(!dropdownOpen);
+
+  // 드롭다운 바깥 클릭 시 자동 닫힘
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [dropdownOpen]);
 
   if (!isMounted || !shouldShow) return null;
 
+  // 카테고리 메뉴 데이터 (생략 없이 전체)
   const categoryData = [
-    // 첫 번째 열
     [
       {
         label: "전체",
@@ -164,8 +207,6 @@ export default function Header() {
         iconType: "img",
       },
     ],
-
-    // 두 번째 열
     [
       {
         label: "디자인 문구",
@@ -193,8 +234,6 @@ export default function Header() {
         iconType: "img",
       },
     ],
-
-    // 세 번째 열
     [
       {
         label: "푸드",
@@ -222,8 +261,6 @@ export default function Header() {
         iconType: "img",
       },
     ],
-
-    // 네 번째 열
     [
       {
         label: "출판",
@@ -251,8 +288,6 @@ export default function Header() {
         iconType: "img",
       },
     ],
-
-    // 다섯 번째 열
     [
       {
         label: "영화 · 비디오",
@@ -268,40 +303,67 @@ export default function Header() {
   ];
 
   return (
-    <div className={`mx-auto h-[116px] ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"}`}>
+    <div
+      className={`mx-auto h-[116px] ${
+        isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"
+      }`}
+    >
       {/* 1번째 헤더 */}
       <div className="max-w-[1160px] w-full mx-auto flex justify-between items-center h-[60px] mt-[10px]">
         <div className="w-[132px] h-[60px] flex items-center">
           <Link href={"/"}>
-            <Image src="/images/tumblbug_logo.png" alt="텀블벅 로고" width={132} height={36} />
+            <Image
+              src="/images/tumblbug_logo.png"
+              alt="텀블벅 로고"
+              width={132}
+              height={36}
+            />
           </Link>
         </div>
         <ul className="flex items-center">
           <li className="p-4">
             <Link href={"/project/intro"}>
-              <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">프로젝트 올리기</span>
+              <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">
+                프로젝트 올리기
+              </span>
             </Link>
           </li>
           {isLogin ? (
             <>
               <li className="p-4">
-                <Heart />
+                <Link href="/seokgeun/dropdownmenu/myliked">
+                  <Heart />
+                </Link>
               </li>
               <li className="p-4">
-                <Bell />
+                <Link href="/seokgeun/dropdownmenu/mynotification">
+                  <Bell />
+                </Link>
               </li>
               <li className="relative">
                 <button
                   className="flex cursor-pointer items-center border-1 ml-[10px] p-4 border-[#dfdfdf] rounded-[4px] min-w-[30px] max-h-[44px]"
                   onClick={handleNicknameClick}
                 >
-                  <Image src={profileImg} width={24} height={24} alt="기본 로그인 아이콘" />
-                  <div className="font-bold text-[12px] ml-[10px]">{nickname}</div>
+                  <Link href="/seokgeun/dropdownmenu/mypage">
+                    <Image
+                      src={
+                        getProfileImgUrl(profileImg) ||
+                        "/images/default_login_icon.png"
+                      }
+                      width={24}
+                      height={24}
+                      alt="프로필"
+                    />
+                  </Link>
+                  <div className="font-bold text-[12px] ml-[10px]">
+                    {nickname}
+                  </div>
                 </button>
                 {dropdownOpen && (
                   <div
+                    ref={dropdownRef}
                     className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-[9999]"
-                    onClick={(e) => e.stopPropagation()}
                   >
                     <ul>
                       <li>
@@ -360,7 +422,6 @@ export default function Header() {
                           메시지
                         </Link>
                       </li>
-
                       <li>
                         <Link
                           href="/seokgeun/dropdownmenu/myproject"
@@ -377,7 +438,10 @@ export default function Header() {
                           설정
                         </Link>
                       </li>
-                      <li className="block px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={handleLogout}>
+                      <li
+                        className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={handleLogout}
+                      >
                         로그아웃
                       </li>
                     </ul>
@@ -392,7 +456,9 @@ export default function Header() {
                 href={"/seokgeun"}
               >
                 <User className="bg-[#ddd] rounded-3xl" color="#fff" />
-                <div className="font-bold text-[12px] ml-[10px]">로그인/회원가입</div>
+                <div className="font-bold text-[12px] ml-[10px]">
+                  로그인/회원가입
+                </div>
               </Link>
             </li>
           )}
@@ -402,7 +468,11 @@ export default function Header() {
       {/* 2번째 헤더 */}
       <div
         className={`w-full bg-white ${
-          isScrolled ? `fixed top-0 left-0 z-50 ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"}` : ""
+          isScrolled
+            ? `fixed top-0 left-0 z-50 ${
+                isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"
+              }`
+            : ""
         }`}
         style={{ overflow: "visible" }}
       >
@@ -414,9 +484,10 @@ export default function Header() {
               onMouseLeave={() => setIsCategoryOpen(false)}
             >
               <Menu className="mr-[8px] group-hover:text-[#FF5757] transition-all duration-300" />
-              <span className="pt-[1px] px-[6px] group-hover:text-[#FF5757] transition-all duration-300">카테고리</span>
-
-              {/* 카테고리 메뉴 */}
+              <span className="pt-[1px] px-[6px] group-hover:text-[#FF5757] transition-all duration-300">
+                카테고리
+              </span>
+              {/* 카테고리 메뉴 전체 */}
               {isCategoryOpen && (
                 <div
                   className="absolute top-[24px] left-[575px] -translate-x-1/2 w-[1530px] z-10 pt-[40px] pb-[30px] bg-white shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"
@@ -425,7 +496,10 @@ export default function Header() {
                 >
                   <div className="w-[1160px] mx-auto relative flex justify-between mt-[16px] px-[10px] after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:shadow-[0_6px_7px_rgba(0,0,0,0.08)] after:pointer-events-none">
                     {categoryData.map((column, colIndex) => (
-                      <div key={colIndex} className="flex-grow flex-shrink-0 basis-[20%]">
+                      <div
+                        key={colIndex}
+                        className="flex-grow flex-shrink-0 basis-[20%]"
+                      >
                         {column.map((item, itemIndex) => (
                           <div
                             key={itemIndex}
@@ -461,17 +535,26 @@ export default function Header() {
               )}
             </li>
             <li>
-              <Link href={"#"} className="hover:text-[#FF5757] transition-all duration-300">
+              <Link
+                href={"#"}
+                className="hover:text-[#FF5757] transition-all duration-300"
+              >
                 <span className="pt-[1px] px-[6px]">홈</span>
               </Link>
             </li>
             <li>
-              <Link href={"#"} className="hover:text-[#FF5757] transition-all duration-300">
+              <Link
+                href={"#"}
+                className="hover:text-[#FF5757] transition-all duration-300"
+              >
                 <span className="pt-[1px] px-[6px]">인기</span>
               </Link>
             </li>
             <li>
-              <Link href={"#"} className="hover:text-[#FF5757] transition-all duration-300">
+              <Link
+                href={"#"}
+                className="hover:text-[#FF5757] transition-all duration-300"
+              >
                 <span className="pt-[1px] px-[6px]">신규</span>
               </Link>
             </li>

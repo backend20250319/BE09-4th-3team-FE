@@ -46,7 +46,7 @@ export default function NotificationsPage() {
 
   // 로그인 필요 페이지 진입 시 토큰 체크
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = sessionStorage.getItem("accessToken");
     if (!accessToken) {
       router.replace("/seokgeun/login");
     }
@@ -54,7 +54,7 @@ export default function NotificationsPage() {
 
   // 인증 만료/실패 시 자동 로그아웃 및 리다이렉트 fetch 유틸
   const fetchWithAuth = async (url, options = {}) => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = sessionStorage.getItem("accessToken");
     const res = await fetch(url, {
       ...options,
       headers: {
@@ -63,8 +63,8 @@ export default function NotificationsPage() {
       },
     });
     if (res.status === 401 || res.status === 419) {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("refreshToken");
       alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
       router.replace("/seokgeun/login");
       return null;

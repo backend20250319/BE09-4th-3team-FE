@@ -34,9 +34,25 @@ export default function AccountPage() {
   const [emailVerificationTimer, setEmailVerificationTimer] = useState(0);
   const timerRef = React.useRef(null);
 
+  // 비밀번호 변경 관련 상태
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordMatchError, setPasswordMatchError] = useState("");
+
+  // 연락처 변경 관련 상태
+  const [editPhone, setEditPhone] = useState(false);
+  const [phoneInput, setPhoneInput] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [phoneSuccess, setPhoneSuccess] = useState("");
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+
   // 로그인 필요 페이지 진입 시 토큰 체크 및 이메일 불러오기
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = sessionStorage.getItem("accessToken");
     if (!accessToken) {
       router.replace("/seokgeun/login");
       return;
@@ -50,9 +66,23 @@ export default function AccountPage() {
       });
   }, [router]);
 
+  useEffect(() => {
+    if (!confirmPassword) {
+      setPasswordMatchError("");
+    } else if (newPassword !== confirmPassword) {
+      setPasswordMatchError("비밀번호가 일치하지 않습니다.");
+    } else {
+      setPasswordMatchError("");
+    }
+  }, [newPassword, confirmPassword]);
+
+  useEffect(() => {
+    setPhoneInput(phone || "");
+  }, [phone]);
+
   // 인증 만료/실패 시 자동 로그아웃 및 리다이렉트 fetch 유틸
   const fetchWithAuth = async (url, options = {}) => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = sessionStorage.getItem("accessToken");
     const fullUrl = url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
     const res = await fetch(fullUrl, {
       ...options,
@@ -62,8 +92,8 @@ export default function AccountPage() {
       },
     });
     if (res.status === 401 || res.status === 419) {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("refreshToken");
       alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
       router.replace("/seokgeun/login");
       return null;
@@ -178,74 +208,23 @@ export default function AccountPage() {
       return;
     }
     try {
-      // 먼저 현재 사용자 정보를 가져와서 다른 필드들도 포함
+      // 현재 사용자 정보 가져오기
       const userRes = await fetchWithAuth("/api/register/user/me");
       if (!userRes) return;
       const user = await userRes.json();
 
-      // 이메일 변경 API 시도 (여러 가능한 엔드포인트)
-      let res = null;
-
-      // 방법 1: 기존 profile 업데이트
-      try {
-        res = await fetchWithAuth("/api/register/user/me/profile", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            nickname: user.nickname || "",
-            phone: user.phone || "",
-            address: user.address || "",
-            addressDetail: user.addressDetail || "",
-          }),
-        });
-      } catch (e) {
-        console.log("방법 1 실패:", e);
-      }
-
-      // 방법 2: 별도 이메일 변경 엔드포인트
-      if (!res || !res.ok) {
-        try {
-          res = await fetchWithAuth("/api/register/user/me/email", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email }),
-          });
-        } catch (e) {
-          console.log("방법 2 실패:", e);
-        }
-      }
-
-      // 방법 3: PUT 메서드로 시도
-      if (!res || !res.ok) {
-        try {
-          res = await fetchWithAuth("/api/register/user/me/profile", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email,
-              nickname: user.nickname || "",
-              phone: user.phone || "",
-              address: user.address || "",
-              addressDetail: user.addressDetail || "",
-            }),
-          });
-        } catch (e) {
-          console.log("방법 3 실패:", e);
-        }
-      }
-
-      if (!res) {
-        alert(
-          "이메일 변경 API에 연결할 수 없습니다. 백엔드 서버를 확인해주세요."
-        );
-        return;
-      }
-
-      if (res.status === 409) {
-        alert("이미 사용 중인 이메일입니다.");
-        return;
-      }
+      // 석근 : PATCH만 시도 (PUT, /email 엔드포인트는 사용하지 않음)
+      const res = await fetchWithAuth("/api/register/user/me/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          nickname: user.nickname || "",
+          phone: user.phone || "",
+          address: user.address || "",
+          addressDetail: user.addressDetail || "",
+        }),
+      });
 
       if (!res.ok) {
         const errorText = await res.text();
@@ -266,11 +245,151 @@ export default function AccountPage() {
   };
 
   // 비밀번호 저장 핸들러
-  const handleSavePassword = () => {
-    setEditField(null);
-    setPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+  const handleSavePassword = async () => {
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    // 1. 입력값 검증
+    if (!password || !newPassword || !confirmPassword) {
+      setPasswordError("모든 항목을 입력해주세요.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("변경할 비밀번호가 일치하지 않습니다.");
+      return;
+    }
+    if (
+      !/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(
+        newPassword
+      )
+    ) {
+      setPasswordError("비밀번호는 영문+숫자+특수문자 포함 8~20자여야 합니다.");
+      return;
+    }
+
+    // 2. API 요청
+    try {
+      const accessToken = sessionStorage.getItem("accessToken");
+      const res = await fetch("/api/register/user/me/password_update", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          currentPassword: password,
+          newPassword: newPassword,
+        }),
+      });
+      if (!res.ok) {
+        let data;
+        try {
+          data = await res.json();
+        } catch {
+          data = {};
+        }
+        setPasswordError(data.message || "비밀번호 변경에 실패했습니다.");
+        return;
+      }
+      setPasswordSuccess("비밀번호가 성공적으로 변경되었습니다.");
+      setShowPasswordModal(true);
+      setEditField(null);
+      setPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (e) {
+      setPasswordError("비밀번호 변경 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handlePhoneInputChange = async (e) => {
+    const value = e.target.value;
+    setPhoneInput(value);
+    setPhoneError("");
+    setPhoneSuccess("");
+
+    // 000-0000-0000 형식 체크
+    const phoneRegex = /^\d{3}-\d{3,4}-\d{4}$/;
+    if (!phoneRegex.test(value)) {
+      setPhoneError("연락처는 000-0000-0000 형식으로 입력해주세요.");
+      return;
+    }
+
+    // DB 저장
+    try {
+      const accessToken = sessionStorage.getItem("accessToken");
+      const res = await fetch("/api/register/user/me/profile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ phone: value }),
+      });
+      if (!res.ok) {
+        setPhoneError("연락처 변경에 실패했습니다.");
+        return;
+      }
+      setPhoneSuccess("연락처가 성공적으로 변경되었습니다.");
+      setPhone(value);
+      setEditPhone(false);
+    } catch {
+      setPhoneError("연락처 변경 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handlePhoneSave = async () => {
+    setPhoneError("");
+    setPhoneSuccess("");
+    const phoneRegex = /^\d{3}-\d{3,4}-\d{4}$/;
+    if (!phoneRegex.test(phoneInput)) {
+      setPhoneError("연락처는 000-0000-0000 형식으로 입력해주세요.");
+      return;
+    }
+    try {
+      const accessToken = sessionStorage.getItem("accessToken");
+      // 기존 사용자 정보 불러오기
+      const userRes = await fetch("/api/register/user/me", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!userRes.ok) {
+        setPhoneError("사용자 정보를 불러오지 못했습니다.");
+        return;
+      }
+      const user = await userRes.json();
+      // PATCH 요청에 모든 필수 필드 포함
+      const res = await fetch("/api/register/user/me/profile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          nickname: user.nickname,
+          email: user.email,
+          phone: phoneInput,
+          address: user.address || "",
+          addressDetail: user.addressDetail || "",
+        }),
+      });
+      if (!res.ok) {
+        setPhoneError("연락처 변경에 실패했습니다.");
+        return;
+      }
+      setPhoneSuccess("연락처가 성공적으로 변경되었습니다.");
+      setPhone(phoneInput);
+      setEditPhone(false);
+      setShowPhoneModal(true);
+    } catch {
+      setPhoneError("연락처 변경 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handlePhoneCancel = () => {
+    setEditPhone(false);
+    setPhoneInput(phone || "");
+    setPhoneError("");
+    setPhoneSuccess("");
   };
 
   return (
@@ -305,13 +424,25 @@ export default function AccountPage() {
                 }}
               >
                 <div className="mysettings-profile-label">이메일</div>
-                <button
-                  className="mysettings-edit-btn"
-                  type="button"
-                  onClick={() => setEditField("email")}
-                >
-                  변경
-                </button>
+                {/* 석근 : 이메일 변경 버튼 토글 */}
+                {editField === "email" ? (
+                  <button
+                    className="mysettings-edit-btn"
+                    type="button"
+                    style={{ background: "#222", color: "#fff" }}
+                    onClick={() => setEditField(null)}
+                  >
+                    취소
+                  </button>
+                ) : (
+                  <button
+                    className="mysettings-edit-btn"
+                    type="button"
+                    onClick={() => setEditField("email")}
+                  >
+                    변경
+                  </button>
+                )}
               </div>
               <div style={{ marginTop: 8 }}>
                 {editField === "email" ? (
@@ -344,18 +475,7 @@ export default function AccountPage() {
                           ? `재요청 (${emailVerificationTimer}s)`
                           : "인증메일 전송"}
                       </button>
-                      <button
-                        type="button"
-                        className="mysettings-edit-btn"
-                        style={{
-                          background: "#222",
-                          color: "#fff",
-                          minWidth: 80,
-                        }}
-                        onClick={() => setEditField(null)}
-                      >
-                        취소
-                      </button>
+                      {/* 석근 : 아래 취소 버튼 제거됨 */}
                     </div>
                     <div
                       style={{
@@ -444,16 +564,176 @@ export default function AccountPage() {
                 }}
               >
                 <div className="mysettings-profile-label">비밀번호</div>
-                <button
-                  className="mysettings-edit-btn"
-                  type="button"
-                  onClick={() => setEditField("password")}
-                >
-                  변경
-                </button>
+                {/* 석근 : 비밀번호 변경 버튼 토글 */}
+                {editField === "password" ? (
+                  <button
+                    className="mysettings-edit-btn"
+                    type="button"
+                    style={{ background: "#222", color: "#fff" }}
+                    onClick={() => setEditField(null)}
+                  >
+                    취소
+                  </button>
+                ) : (
+                  <button
+                    className="mysettings-edit-btn"
+                    type="button"
+                    onClick={() => setEditField("password")}
+                  >
+                    변경
+                  </button>
+                )}
               </div>
               <div style={{ marginTop: 8 }}>
-                <span className="mysettings-profile-value">********</span>
+                {/* 석근 : 비밀번호 변경 폼 */}
+                {editField === "password" ? (
+                  <div style={{ maxWidth: 400, marginTop: 16 }}>
+                    <div style={{ marginBottom: 20 }}>
+                      <div
+                        className="mysettings-profile-label"
+                        style={{ marginTop: 0 }}
+                      >
+                        현재 비밀번호
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <input
+                          type={showCurrentPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="mysettings-profile-value"
+                          placeholder="현재 비밀번호"
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowCurrentPassword((v) => !v)}
+                          style={{
+                            marginLeft: 8,
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            fontSize: 20,
+                          }}
+                          tabIndex={-1}
+                          aria-label={
+                            showCurrentPassword
+                              ? "비밀번호 숨기기"
+                              : "비밀번호 보기"
+                          }
+                        >
+                          {showCurrentPassword ? "🙈" : "👁️"}
+                        </button>
+                      </div>
+                      <div
+                        style={{ fontSize: 13, color: "#888", marginTop: 4 }}
+                      >
+                        비밀번호가 기억나지 않나요?{" "}
+                        <a
+                          href="#"
+                          style={{
+                            color: "#1976d2",
+                            textDecoration: "underline",
+                          }}
+                        >
+                          비밀번호 초기화
+                        </a>
+                      </div>
+                    </div>
+                    <div style={{ marginBottom: 20 }}>
+                      <div
+                        className="mysettings-profile-label"
+                        style={{ marginTop: 0 }}
+                      >
+                        변경할 비밀번호
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <input
+                          type={showNewPassword ? "text" : "password"}
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="mysettings-profile-value"
+                          placeholder="변경할 비밀번호"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword((v) => !v)}
+                          style={{
+                            marginLeft: 8,
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            fontSize: 20,
+                          }}
+                          tabIndex={-1}
+                          aria-label={
+                            showNewPassword
+                              ? "비밀번호 숨기기"
+                              : "비밀번호 보기"
+                          }
+                        >
+                          {showNewPassword ? "🙈" : "👁️"}
+                        </button>
+                      </div>
+                    </div>
+                    <div style={{ marginBottom: 32 }}>
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <input
+                          type={showConfirmPassword ? "text" : "password"}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="mysettings-profile-value"
+                          placeholder="변경할 비밀번호 확인"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword((v) => !v)}
+                          style={{
+                            marginLeft: 8,
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            fontSize: 20,
+                          }}
+                          tabIndex={-1}
+                          aria-label={
+                            showConfirmPassword
+                              ? "비밀번호 숨기기"
+                              : "비밀번호 보기"
+                          }
+                        >
+                          {showConfirmPassword ? "🙈" : "👁️"}
+                        </button>
+                      </div>
+                      {passwordMatchError && (
+                        <div
+                          style={{ color: "red", fontSize: 13, marginTop: 4 }}
+                        >
+                          {passwordMatchError}
+                        </div>
+                      )}
+                    </div>
+                    {passwordError && (
+                      <div style={{ color: "red", marginBottom: 8 }}>
+                        {passwordError}
+                      </div>
+                    )}
+                    {passwordSuccess && (
+                      <div style={{ color: "green", marginBottom: 8 }}>
+                        {passwordSuccess}
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      className="mysettings-save-btn"
+                      style={{ width: 120, height: 40, fontSize: 16 }}
+                      onClick={handleSavePassword}
+                    >
+                      저장
+                    </button>
+                  </div>
+                ) : (
+                  <span className="mysettings-profile-value">********</span>
+                )}
               </div>
             </div>
           </div>
@@ -461,17 +741,71 @@ export default function AccountPage() {
           <div className="mysettings-profile-row">
             <div className="mysettings-profile-col">
               <div className="mysettings-profile-label">연락처</div>
-              <div className="mysettings-profile-value">
-                {phone || "-"}
-                <br />
-                <span style={{ color: "#aaa", fontSize: 13 }}>
-                  연락처는 한 번 1회 변경 가능합니다.
-                </span>
-              </div>
+              {editPhone ? (
+                <div>
+                  <div
+                    className="mysettings-profile-label"
+                    style={{ marginBottom: 8 }}
+                  >
+                    변경할 연락처
+                  </div>
+                  <input
+                    value={phoneInput}
+                    onChange={(e) => setPhoneInput(e.target.value)}
+                    className="mysettings-profile-value"
+                    placeholder="000-0000-0000"
+                    autoFocus
+                  />
+                  {phoneError && (
+                    <div style={{ color: "red", fontSize: 13 }}>
+                      {phoneError}
+                    </div>
+                  )}
+                  {phoneSuccess && (
+                    <div style={{ color: "green", fontSize: 13 }}>
+                      {phoneSuccess}
+                    </div>
+                  )}
+                  <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                    <button
+                      className="mysettings-save-btn"
+                      type="button"
+                      onClick={handlePhoneSave}
+                      disabled={!/^\d{3}-\d{3,4}-\d{4}$/.test(phoneInput)}
+                    >
+                      저장
+                    </button>
+                    <button
+                      className="mysettings-cancel-btn"
+                      type="button"
+                      onClick={handlePhoneCancel}
+                    >
+                      취소
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <span className="mysettings-profile-value">{phone || "-"}</span>
+              )}
+              <br />
             </div>
             <div className="mysettings-profile-action-col">
-              <button className="mysettings-edit-btn" type="button">
-                변경
+              <button
+                className="mysettings-edit-btn"
+                type="button"
+                onClick={() => {
+                  if (editPhone) {
+                    setEditPhone(false);
+                    setPhoneInput(phone || "");
+                    setPhoneError("");
+                    setPhoneSuccess("");
+                  } else {
+                    setEditPhone(true);
+                  }
+                }}
+                style={editPhone ? { background: "#222", color: "#fff" } : {}}
+              >
+                {editPhone ? "취소" : "변경"}
               </button>
             </div>
           </div>
@@ -559,7 +893,7 @@ export default function AccountPage() {
             배송 받는 문의 연락처는 개별 후원내역에서 설정해주세요.
             <br />
             <a
-              href="#"
+              href="/seokgeun/dropdownmenu/sponsoredprojects"
               style={{
                 color: "#1976d2",
                 textDecoration: "underline",
@@ -571,6 +905,82 @@ export default function AccountPage() {
           </div>
         </div>
       </div>
+      {/* 모달창: 비밀번호 변경 성공 */}
+      {showPasswordModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.3)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 12,
+              padding: "32px 40px",
+              boxShadow: "0 2px 16px rgba(0,0,0,0.15)",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 24 }}>
+              비밀번호가 성공적으로 변경되었습니다.
+            </div>
+            <button
+              className="mysettings-save-btn"
+              style={{ minWidth: 100, fontSize: 16 }}
+              onClick={() => setShowPasswordModal(false)}
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
+      {/* 모달창: 연락처 변경 성공 */}
+      {showPhoneModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.3)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 12,
+              padding: "32px 40px",
+              boxShadow: "0 2px 16px rgba(0,0,0,0.15)",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 24 }}>
+              연락처가 성공적으로 변경되었습니다.
+            </div>
+            <button
+              className="mysettings-save-btn"
+              style={{ minWidth: 100, fontSize: 16 }}
+              onClick={() => setShowPhoneModal(false)}
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
