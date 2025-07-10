@@ -25,7 +25,7 @@ const cleanupCache = () => {
 
 // JWT 토큰에서 userId 추출 함수
 function getUserIdFromAccessToken() {
-  const token = localStorage.getItem("accessToken");
+  const token = sessionStorage.getItem("accessToken"); // sessionStorage로 변경
   if (!token) return null;
 
   try {
@@ -73,7 +73,7 @@ export default function NotificationPage() {
     if (!userId) return;
 
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken"); // 변경
       const response = await fetch(
         `http://localhost:8888/notifications/mark-all-read?userId=${userId}`,
         {
@@ -120,7 +120,7 @@ export default function NotificationPage() {
     }
 
     setIsLoading(true);
-    const token = localStorage.getItem("accessToken");
+    const token = sessionStorage.getItem("accessToken"); // 변경
     const url = `http://localhost:8888/notifications?${buildQueryParams()}`;
 
     fetch(url, {
@@ -145,52 +145,31 @@ export default function NotificationPage() {
       });
   }, [currentTab, page, hasMarkedAsRead, userId]);
 
-  // 알림 삭제
   const handleDelete = async (notificationNo) => {
     if (!userId) return;
 
-    const token = localStorage.getItem("accessToken");
-    const url = `http://localhost:8888/notifications/${notificationNo}?userId=${userId}`;
+    const token = sessionStorage.getItem("accessToken");
+    const url = `http://localhost:8888/notifications/${notificationNo}/delete`;
 
     try {
       const res = await fetch(url, {
-        method: "DELETE",
+        method: "PATCH",
         headers: {
+          "Content-Type": "application/json",
           ...(token && { Authorization: `Bearer ${token}` }),
         },
       });
+
       if (!res.ok) {
         alert("알림 삭제 실패");
         return;
       }
 
+      // 캐시 및 상태 갱신
       cache.delete(`${currentTab}-${page}`);
-
-      setNotifications((prev) => {
-        const newNotifications = prev.filter(
-          (n) => n.notificationNo !== notificationNo
-        );
-
-        if (newNotifications.length < 5 && page < totalPages - 1) {
-          const nextPageKey = `${currentTab}-${page + 1}`;
-          const nextPageData = cache.get(nextPageKey);
-
-          if (nextPageData && nextPageData.content.length > 0) {
-            const [firstOfNext, ...restNext] = nextPageData.content;
-
-            cache.set(nextPageKey, {
-              ...nextPageData,
-              content: restNext,
-              totalPages: nextPageData.totalPages,
-              timestamp: Date.now(),
-            });
-
-            return [...newNotifications, firstOfNext];
-          }
-        }
-
-        return newNotifications;
-      });
+      setNotifications((prev) =>
+        prev.filter((n) => n.notificationNo !== notificationNo)
+      );
     } catch (err) {
       console.error("삭제 중 오류 발생", err);
       alert("삭제 중 오류 발생");
