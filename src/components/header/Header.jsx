@@ -7,18 +7,18 @@ import React, { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 // 프로필 이미지 경로 안전하게 처리하는 함수
-const getProfileImgUrl = (img) => {
-  if (!img || img === "null" || typeof img !== "string")
-    return "/images/default_login_icon.png";
-  // base64는 미리보기 용
-  if (img.startsWith("data:")) return img;
-  // 절대경로(http/https)
-  if (img.startsWith("http")) return img;
-  // 상대경로(/profile_images/xxx.png) -> 도메인 붙여서 (한글, 공백 등 인코딩)
-  if (img.startsWith("/")) return "http://localhost:8888" + encodeURI(img);
-  // 그 외엔 기본 이미지
-  return "/images/default_login_icon.png";
-};
+// const getProfileImgUrl = (img) => {
+//   if (!img || img === "null" || typeof img !== "string")
+//     return "/images/default_login_icon.png";
+//   // base64는 미리보기 용
+//   if (img.startsWith("data:")) return img;
+//   // 절대경로(http/https)
+//   if (img.startsWith("http")) return img;
+//   // 상대경로(/profile_images/xxx.png) -> 도메인 붙여서 (한글, 공백 등 인코딩)
+//   if (img.startsWith("/")) return "http://localhost:8888" + encodeURI(img);
+//   // 그 외엔 기본 이미지
+//   return "/images/default_login_icon.png";
+// };
 
 export default function Header() {
   const pathname = usePathname();
@@ -36,9 +36,9 @@ export default function Header() {
   const [nickname, setNickname] = useState("");
   const [isLogin, setIsLogin] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [profileImg, setProfileImg] = useState(
-    "/images/default_login_icon.png"
-  );
+  // const [profileImg, setProfileImg] = useState(
+  //   "/images/default_login_icon.png"
+  // );
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -49,17 +49,17 @@ export default function Header() {
   }, []);
 
   // sessionStorage에서 이미지, 닉네임 동기화 (storage 이벤트 포함)
-  useEffect(() => {
-    const updateProfileImg = () => {
-      const savedImg = sessionStorage.getItem("profileImg");
-      setProfileImg(
-        getProfileImgUrl(savedImg) || "/images/default_login_icon.png"
-      );
-    };
-    updateProfileImg();
-    window.addEventListener("storage", updateProfileImg);
-    return () => window.removeEventListener("storage", updateProfileImg);
-  }, []);
+  // useEffect(() => {
+  //   const updateProfileImg = () => {
+  //     const savedImg = sessionStorage.getItem("profileImg");
+  //     setProfileImg(
+  //       getProfileImgUrl(savedImg) || "/images/default_login_icon.png"
+  //     );
+  //   };
+  //   updateProfileImg();
+  //   window.addEventListener("storage", updateProfileImg);
+  //   return () => window.removeEventListener("storage", updateProfileImg);
+  // }, []);
 
   useEffect(() => {
     const updateNickname = () => {
@@ -96,18 +96,18 @@ export default function Header() {
         sessionStorage.setItem("nickname", data.nickname);
       }
       // 프로필 이미지 처리 (항상 가공 후 저장)
-      if (data.profileImg) {
-        const url = getProfileImgUrl(data.profileImg);
-        setProfileImg(url);
-        sessionStorage.setItem("profileImg", url);
-      }
+      // if (data.profileImg) {
+      //   const url = getProfileImgUrl(data.profileImg);
+      //   setProfileImg(url);
+      //   sessionStorage.setItem("profileImg", url);
+      // }
 
       setIsLogin(true);
     } catch (error) {
       setIsLogin(false);
       setNickname("");
       setProfileImg("/images/default_login_icon.png");
-      sessionStorage.setItem("profileImg", "/images/default_login_icon.png");
+      // sessionStorage.setItem("profileImg", "/images/default_login_icon.png");
     }
   };
 
@@ -153,10 +153,10 @@ export default function Header() {
     sessionStorage.removeItem("accessToken");
     sessionStorage.removeItem("refreshToken");
     sessionStorage.removeItem("nickname");
-    sessionStorage.removeItem("profileImg");
+    // sessionStorage.removeItem("profileImg");
     setIsLogin(false);
     setNickname("");
-    setProfileImg("/images/default_login_icon.png");
+    // setProfileImg("/images/default_login_icon.png");
     router.push("/seokgeun/main");
   };
 
@@ -352,10 +352,7 @@ export default function Header() {
                 >
                   <Link href="/seokgeun/dropdownmenu/mypage">
                     <Image
-                      src={
-                        getProfileImgUrl(profileImg) ||
-                        "/images/default_login_icon.png"
-                      }
+                      src={"/images/default_login_icon.png"}
                       width={24}
                       height={24}
                       alt="프로필"

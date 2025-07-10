@@ -6,7 +6,7 @@ export default function Section01() {
   const [isLogin, setIsLogin] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
+    const token = sessionStorage.getItem("accessToken");
 
     if (token) {
       setIsLogin(true); // 토큰이 있을 경우에만 로그인 상태로 설정
