@@ -3,10 +3,10 @@
 
 "use client";
 
-import React, { useEffect, useState } from "react"; // 🚀 개선점: useEffect, useState 추가
+import React, { useEffect, useState } from "react"; // 개선점: useEffect, useState 추가
 
 export default function HomePage() {
-  // 🚀 개선점: 사용자 정보 상태 관리 추가
+  // 개선점: 사용자 정보 상태 관리 추가
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -88,7 +88,7 @@ export default function HomePage() {
           수 있습니다.
         </p>
 
-        {/* 🚀 개선점: 토큰 정보 표시 */}
+        {/* 개선점: 토큰 정보 표시 */}
         {!loading && userInfo && (
           <div
             style={{
@@ -103,7 +103,7 @@ export default function HomePage() {
             {userInfo.hasToken ? (
               <div>
                 <p style={{ marginBottom: "10px" }}>
-                  <strong>✅ 토큰 상태:</strong> 정상
+                  <strong>토큰 상태:</strong> 정상
                 </p>
                 <p style={{ marginBottom: "10px", fontSize: "0.9rem" }}>
                   <strong>Access Token:</strong>{" "}
@@ -116,13 +116,13 @@ export default function HomePage() {
               </div>
             ) : (
               <p style={{ color: "#ff6b6b" }}>
-                <strong>❌ 토큰 상태:</strong> 토큰이 없습니다.
+                <strong>토큰 상태:</strong> 토큰이 없습니다.
               </p>
             )}
           </div>
         )}
 
-        {/* 🚀 개선점: 네비게이션 버튼들 */}
+        {/* 개선점: 네비게이션 버튼들 */}
         <div
           style={{
             display: "flex",
@@ -171,7 +171,7 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* 🚀 개선점: 추가 정보 */}
+        {/* 개선점: 추가 정보 */}
         <div
           style={{
             marginTop: "30px",

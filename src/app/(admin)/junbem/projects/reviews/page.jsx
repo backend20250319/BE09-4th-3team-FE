@@ -38,7 +38,7 @@ export default function ProjectReviewPage() {
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                const token = localStorage.getItem("accessToken"); // ✅ 선언 추가
+                const token = sessionStorage.getItem("accessToken"); // ✅ 선언 추가
 
                 const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/projects?status=WAITING_APPROVAL`, {
                     headers: {

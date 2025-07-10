@@ -28,7 +28,7 @@ export default function MainPage() {
           return;
         }
 
-        // 🚀 개선점: API 인터셉터에서 자동으로 토큰을 첨부하므로 헤더 설정 불필요
+        // 개선점: API 인터셉터에서 자동으로 토큰을 첨부하므로 헤더 설정 불필요
         // const response = await api.get("/api/register/user/me", {
         //   headers: { Authorization: `Bearer ${accessToken}` },
         // });
@@ -39,7 +39,7 @@ export default function MainPage() {
       } catch (err) {
         console.error("사용자 정보 조회 실패:", err);
 
-        // 🚀 개선점: 더 구체적인 에러 메시지 제공
+        // 개선점: 더 구체적인 에러 메시지 제공
         if (err.response?.status === 401) {
           setError("인증이 만료되었습니다. 다시 로그인해주세요.");
         } else if (err.response?.status === 404) {
@@ -118,7 +118,7 @@ export default function MainPage() {
             <p>
               <strong>이메일:</strong> {user.email}
             </p>
-            {/* 🚀 개선점: 추가 사용자 정보 표시 */}
+            {/* 개선점: 추가 사용자 정보 표시 */}
             {user.userId && (
               <p>
                 <strong>아이디:</strong> {user.userId}
@@ -136,7 +136,7 @@ export default function MainPage() {
             )}
           </div>
 
-          {/* 🚀 개선점: 로그아웃 버튼 추가 */}
+          {/* 개선점: 로그아웃 버튼 추가 */}
           <button
             onClick={handleLogout}
             style={{

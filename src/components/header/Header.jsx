@@ -28,7 +28,7 @@ export default function Header() {
     /^\/seokgeun\/login$/,
     /^\/seokgeun\/register$/,
     /^\/seokgeun$/,
-    /^\/project(?:\/[^/]+)*\/pledge$/,
+    /^\/project(?:\/[^/]+)*\/pledge(?:\/[^/]+)*$/,
   ];
   const shouldShow = !hiddenPaths.some((pattern) => pattern.test(pathname));
 
@@ -359,6 +359,9 @@ export default function Header() {
                       width={24}
                       height={24}
                       alt="프로필"
+                      onError={(e) => {
+                        e.target.src = "/images/default_login_icon.png";
+                      }}
                     />
                   </Link>
                   <div className="font-bold text-[12px] ml-[10px]">
