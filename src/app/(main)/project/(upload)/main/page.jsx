@@ -115,25 +115,25 @@ export default function Page() {
             <TabsList className="grid w-full grid-cols-4 mb-[50px] border-b border-gray-200">
               <TabsTrigger
                 value="section01"
-                className="h-[40px] border-transparent data-[state=active]:border-b data-[state=active]:border-[#f86453]"
+                className="h-[40px] border-0 rounded-[2px] data-[state=active]:border-b-[3px] data-[state=active]:border-[#f86453]"
               >
                 기본정보
               </TabsTrigger>
               <TabsTrigger
                 value="section02"
-                className="h-[40px] border-transparent data-[state=active]:border-b data-[state=active]:border-[#f86453]"
+                className="h-[40px] border-0 rounded-[2px] data-[state=active]:border-b-[3px] data-[state=active]:border-[#f86453]"
               >
                 목표 금액 및 일정
               </TabsTrigger>
               <TabsTrigger
                 value="section03"
-                className="h-[40px] border-transparent data-[state=active]:border-b data-[state=active]:border-[#f86453]"
+                className="h-[40px] border-0 rounded-[2px] data-[state=active]:border-b-[3px] data-[state=active]:border-[#f86453]"
               >
                 선물구성
               </TabsTrigger>
               <TabsTrigger
                 value="section04"
-                className="h-[40px] border-transparent data-[state=active]:border-b data-[state=active]:border-[#f86453]"
+                className="h-[40px] border-0 rounded-[2px] data-[state=active]:border-b-[3px] data-[state=active]:border-[#f86453]"
               >
                 창작자 정보
               </TabsTrigger>
