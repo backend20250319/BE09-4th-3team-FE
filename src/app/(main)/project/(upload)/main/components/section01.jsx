@@ -37,7 +37,7 @@ export default function Section01({
     formData.append("file", file);
 
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
       const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/project/images/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",

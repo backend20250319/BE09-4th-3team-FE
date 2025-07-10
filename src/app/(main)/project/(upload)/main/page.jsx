@@ -37,8 +37,8 @@ export default function Page() {
 
   const router = useRouter();
 
-  const clearLocalStorage = () => {
-    localStorage.removeItem("accessToken");
+  const clearSessionStorage = () => {
+    sessionStorage.removeItem("accessToken");
   };
 
   const handleSubmit = async (e) => {
@@ -89,7 +89,7 @@ export default function Page() {
     };
 
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
 
       const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/project/upload`, payload, {
         headers: {
@@ -99,7 +99,7 @@ export default function Page() {
       });
 
       alert("프로젝트가 성공적으로 등록되었습니다!");
-      clearLocalStorage();
+      clearSessionStorage();
       router.push("/project/list");
     } catch (err) {
       console.error("프로젝트 등록 실패", err);
