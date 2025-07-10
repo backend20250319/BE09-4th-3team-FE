@@ -24,8 +24,13 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const hiddenPaths = ["/seokgeun/login", "/seokgeun/register", "/seokgeun"];
-  const shouldShow = !hiddenPaths.includes(pathname);
+  const hiddenPaths = [
+    /^\/seokgeun\/login$/,
+    /^\/seokgeun\/register$/,
+    /^\/seokgeun$/,
+    /^\/project(?:\/[^/]+)*\/pledge$/,
+  ];
+  const shouldShow = !hiddenPaths.some((pattern) => pattern.test(pathname));
 
   const [isMounted, setIsMounted] = useState(false);
   const [nickname, setNickname] = useState("");
