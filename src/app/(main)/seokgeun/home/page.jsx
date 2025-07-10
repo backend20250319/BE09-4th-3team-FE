@@ -15,8 +15,8 @@ export default function HomePage() {
     const checkUserInfo = () => {
       try {
         // 로컬스토리지에서 토큰 확인
-        const accessToken = localStorage.getItem("accessToken");
-        const refreshToken = localStorage.getItem("refreshToken");
+        const accessToken = sessionStorage.getItem("accessToken");
+        const refreshToken = sessionStorage.getItem("refreshToken");
 
         if (accessToken && refreshToken) {
           setUserInfo({
@@ -47,8 +47,8 @@ export default function HomePage() {
 
   // 🚀 개선점: 로그아웃 핸들러
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    sessionStorage.removeItem("accessToken");
+    sessionStorage.removeItem("refreshToken");
     sessionStorage.clear();
     window.location.href = "/seokgeun/login";
   };
@@ -186,7 +186,7 @@ export default function HomePage() {
           <ul style={{ textAlign: "left", listStyle: "none", padding: 0 }}>
             <li>• 이 페이지는 로그인 성공 후 임시로 표시됩니다</li>
             <li>• 실제 프로덕션에서는 메인 페이지로 리다이렉트됩니다</li>
-            <li>• 토큰은 localStorage에 안전하게 저장됩니다</li>
+            <li>• 토큰은 sessionStorage에 안전하게 저장됩니다</li>
             <li>• API 호출 시 자동으로 토큰이 첨부됩니다</li>
           </ul>
         </div>

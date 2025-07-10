@@ -48,7 +48,7 @@ export default function MyPage() {
 
   useEffect(() => {
     const updateProfileImg = () => {
-      const savedImg = localStorage.getItem("profileImg");
+      const savedImg = sessionStorage.getItem("profileImg");
       setProfileImg(savedImg || "/images/default_login_icon.png");
     };
     updateProfileImg();
@@ -57,7 +57,7 @@ export default function MyPage() {
   }, []);
 
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = sessionStorage.getItem("accessToken");
     if (!accessToken) {
       alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
       router.replace("/seokgeun/login");
@@ -128,7 +128,7 @@ export default function MyPage() {
             ))}
           </div>
         </div>
-        <Link href="/seokgeun/dropdownmenu/mysettings">
+        <Link href="/seokgeun/dropdownmenu/mysettings/profile">
           <button className="mypage-edit-btn">프로필 편집</button>
         </Link>
       </div>

@@ -22,7 +22,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // 로컬스토리지에서 액세스 토큰 가져오기
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = sessionStorage.getItem("accessToken");
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -51,8 +51,8 @@ api.interceptors.response.use(
       }
 
       // 2. 클라이언트 측 인증 정보 정리
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("refreshToken");
 
       // 🚀 개선점: 세션스토리지도 정리 (보안 강화)
       sessionStorage.clear();

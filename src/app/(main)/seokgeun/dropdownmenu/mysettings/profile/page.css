@@ -293,6 +293,10 @@
   margin-left: 0;
 }
 
+.mysettings-profile-link {
+  color: #0000ff;
+}
+
 @media (max-width: 900px) {
   .mysettings-profile-table-row-wrapper {
     flex-direction: column;
