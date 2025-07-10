@@ -22,6 +22,10 @@ export default function LoginPage() {
   // 개선점: URL 파라미터에서 리다이렉트 경로 가져오기
   const [redirectPath, setRedirectPath] = useState("/seokgeun/main");
 
+  // 모달 상태 추가
+  const [modalMsg, setModalMsg] = useState("");
+  const [showModal, setShowModal] = useState(false);
+
   // 컴포넌트 마운트 시 URL 파라미터 확인
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -81,12 +85,18 @@ export default function LoginPage() {
       // 리다이렉트 경로로 이동
       window.location.href = redirectPath;
     } catch (err) {
-      // 에러 처리 - 서버 응답 에러 메시지 또는 기본 메시지 표시
-      setErrorMsg(
-        err.response?.data?.error ||
-          "로그인에 실패했습니다. 아이디/비밀번호를 확인하세요."
-      );
-      console.error("로그인 에러:", err);
+      console.log("에러 상세:", err.response); // 디버깅용
+
+      if (err.response?.status === 403) {
+        // 403 에러일 때 모달로 안내
+        setModalMsg(
+          "이미 회원탈퇴 처리된 계정입니다.\n이용 문의: choseokgeun@gmail.com"
+        );
+        setShowModal(true);
+      } else {
+        // 기타 에러는 기존 방식대로
+        setErrorMsg(err.response?.data?.error || "로그인에 실패했습니다.");
+      }
     } finally {
       setLoading(false); // 로딩 상태 비활성화
     }
@@ -172,6 +182,23 @@ export default function LoginPage() {
           backgroundImage: 'url("/login_register/login_register_image_2.jpg")',
         }}
       />
+
+      {/* 모달 */}
+      {showModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalContent}>
+              <p style={{ whiteSpace: "pre-line" }}>
+                {modalMsg
+                  .replace(/https?:\/\/[^\s]+/g, "")
+                  .replace(/localhost:\d+/g, "")
+                  .trim()}
+              </p>
+              <button onClick={() => setShowModal(false)}>확인</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

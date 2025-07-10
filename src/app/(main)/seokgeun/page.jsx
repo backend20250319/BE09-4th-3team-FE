@@ -2,7 +2,7 @@
 
 import Header from "@/components/header/Header";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import styles from "./main.module.css";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;

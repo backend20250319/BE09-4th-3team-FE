@@ -107,7 +107,7 @@
   background-repeat: no-repeat; /* 배경 이미지 반복 없음 */
 }
 
-/* 🚀 개선점: 반응형 디자인을 위한 미디어 쿼리 */
+/* 개선점: 반응형 디자인을 위한 미디어 쿼리 */
 @media (max-width: 768px) {
   .container {
     flex-direction: column; /* 모바일에서는 세로 배치 */
@@ -131,7 +131,7 @@
   }
 }
 
-/* 🚀 개선점: 다크 모드 지원 */
+/* 개선점: 다크 모드 지원 */
 @media (prefers-color-scheme: dark) {
   .input {
     background-color: #333; /* 어두운 배경 */
@@ -146,4 +146,46 @@
   .signup {
     color: #ccc; /* 밝은 회색 텍스트 */
   }
+}
+
+/* 모달 기능 지원 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+.modalContent p {
+  white-space: pre-line;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.modalButton {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modalButton:hover {
+  background: #0056b3;
 }
