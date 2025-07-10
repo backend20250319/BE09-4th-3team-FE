@@ -28,7 +28,7 @@ export default function Header() {
     /^\/seokgeun\/login$/,
     /^\/seokgeun\/register$/,
     /^\/seokgeun$/,
-    /^\/project(?:\/[^/]+)*\/pledge$/,
+    /^\/project(?:\/[^/]+)*\/pledge(?:\/[^/]+)*$/,
   ];
   const shouldShow = !hiddenPaths.some((pattern) => pattern.test(pathname));
 

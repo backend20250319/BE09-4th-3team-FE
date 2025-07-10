@@ -11,9 +11,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import { ChevronUp, ChevronDown, Heart } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
+import PledgeHeader from "@/components/header/PledgeHeader"
+import { useRouter } from "next/navigation"
 
-export default function TumblbugSupportPage() {
+export default function PledgePage() {
   const [additionalDonation, setAdditionalDonation] = useState("")
   const [personalInfoConsent, setPersonalInfoConsent] = useState(false)
   const [termsConsent, setTermsConsent] = useState(false)
@@ -29,6 +30,7 @@ export default function TumblbugSupportPage() {
   const searchParams = useSearchParams();
   const rewardId = searchParams.get('rewardId');
   const [project, setProject] = useState(null);
+  const router = useRouter();
 
   // 사용자 정보 가져오기
   useEffect(() => {
@@ -86,21 +88,7 @@ export default function TumblbugSupportPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center">
-          <Link href="/">
-            <Image
-              src="/images/tumblbug_logo.png"
-              alt="텀블벅 로고"
-              width={132}
-              height={36}
-              className="h-9 w-auto cursor-pointer"
-            />
-          </Link>
-          <div className="ml-4 text-gray-600">프로젝트 후원하기</div>
-        </div>
-      </header>
+      <PledgeHeader />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -390,8 +378,8 @@ export default function TumblbugSupportPage() {
                       );
 
                       if (response.status === 200) {
-                        alert('후원이 성공적으로 완료되었습니다!');
-                        // 성공 후 리다이렉트 또는 다른 처리
+                        // alert('후원이 성공적으로 완료되었습니다!');
+                        router.push(`/project/detail/${projectNo}/pledge/completed/${response.data.pledgeNo}`);
                       }
                     } catch (error) {
                       console.error('후원 요청 실패:', error);
