@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import { ChevronUp, ChevronDown, Heart } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 
 export default function TumblbugSupportPage() {
   const [additionalDonation, setAdditionalDonation] = useState("")
@@ -88,13 +89,15 @@ export default function TumblbugSupportPage() {
       {/* Header */}
       <header className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center">
-          <Image
-            src="/images/tumblbug_logo.png"
-            alt="텀블벅 로고"
-            width={132}
-            height={36}
-            className="h-9 w-auto"
-          />
+          <Link href="/">
+            <Image
+              src="/images/tumblbug_logo.png"
+              alt="텀블벅 로고"
+              width={132}
+              height={36}
+              className="h-9 w-auto cursor-pointer"
+            />
+          </Link>
           <div className="ml-4 text-gray-600">프로젝트 후원하기</div>
         </div>
       </header>
@@ -162,7 +165,9 @@ export default function TumblbugSupportPage() {
 
             {/* Additional Donation */}
             <div>
-              <h2 className="text-lg font-bold mb-4">추가 후원금 (선택)</h2>
+              <h2 className="text-lg font-bold mb-4">
+                추가 후원금 <span className="text-gray-400">(선택)</span>
+              </h2>
               <Card>
                 <CardContent>
                   <div className="flex items-center gap-4">
