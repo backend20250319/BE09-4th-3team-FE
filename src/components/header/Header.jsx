@@ -384,7 +384,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/sponsoredprojects"
+                          href="/pledges"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           후원한 프로젝트
