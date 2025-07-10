@@ -9,11 +9,11 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function LoginPage() {
   // 환경 변수 확인용 로그
-  console.log("✅ API BASE URL:", API_BASE_URL);
+  console.log("API BASE URL:", API_BASE_URL);
 
   // 미정의 예외 처리
   if (!API_BASE_URL) {
-    console.warn("⚠️ API_BASE_URL 환경 변수가 정의되지 않았습니다.");
+    console.warn("API_BASE_URL 환경 변수가 정의되지 않았습니다.");
   }
 
   // 로그인 핸들러

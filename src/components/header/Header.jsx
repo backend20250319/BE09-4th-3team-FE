@@ -354,6 +354,9 @@ export default function Header() {
                       width={24}
                       height={24}
                       alt="프로필"
+                      onError={(e) => {
+                        e.target.src = "/images/default_login_icon.png";
+                      }}
                     />
                   </Link>
                   <div className="font-bold text-[12px] ml-[10px]">

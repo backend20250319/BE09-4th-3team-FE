@@ -2,7 +2,7 @@
 
 import Header from "@/components/header/Header";
 import Image from "next/image";
-import React, { useState, useEffect } from "react"; // 🚀 개선점: useEffect 추가
+import React, { useState, useEffect } from "react"; // 개선점: useEffect 추가
 import styles from "./login.module.css";
 import api from "../api/axios"; // API 인스턴스 사용
 
@@ -19,7 +19,7 @@ export default function LoginPage() {
   // 에러 메시지 상태 관리
   const [errorMsg, setErrorMsg] = useState("");
 
-  // 🚀 개선점: URL 파라미터에서 리다이렉트 경로 가져오기
+  // 개선점: URL 파라미터에서 리다이렉트 경로 가져오기
   const [redirectPath, setRedirectPath] = useState("/seokgeun/main");
 
   // 컴포넌트 마운트 시 URL 파라미터 확인
@@ -40,7 +40,7 @@ export default function LoginPage() {
     setErrorMsg(""); // 입력 시 에러 메시지 초기화 (사용자 경험 개선)
   };
 
-  // 🚀 개선점: 엔터키로 로그인 가능하게 개선
+  // 개선점: 엔터키로 로그인 가능하게 개선
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !loading) {
       handleSubmit(e);
@@ -51,7 +51,7 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault(); // 기본 폼 제출 동작 방지
 
-    // 🚀 개선점: 입력값 유효성 검사 추가
+    // 개선점: 입력값 유효성 검사 추가
     if (!form.userId.trim() || !form.password.trim()) {
       setErrorMsg("아이디와 비밀번호를 모두 입력해주세요.");
       return;
@@ -75,7 +75,7 @@ export default function LoginPage() {
         sessionStorage.setItem("refreshToken", response.data.refreshToken);
       }
 
-      // 🚀 개선점: 로그인 성공 시 사용자에게 피드백 제공
+      // 개선점: 로그인 성공 시 사용자에게 피드백 제공
       console.log("로그인 성공:", response.data);
 
       // 리다이렉트 경로로 이동
