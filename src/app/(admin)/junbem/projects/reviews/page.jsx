@@ -15,16 +15,13 @@ export default function ProjectReviewPage() {
         const statusCode = status === "approved" ? "APPROVED" : "REJECTED";
 
         try {
-            const res = await fetch("http://localhost:8888/admin/projects/status", {
-                method: "POST",
+            const token = localStorage.getItem("accessToken"); // ✅ 선언 추가
+
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/projects?status=WAITING_APPROVAL`, {
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1MTM2MjcyMiwiZXhwIjoxNzUyNTcyMzIyfQ.5rCSiaJ6SvPhDnqAXQPQeal-UvvbhYt8b5oSmG3YikI`, // 토큰은 실제 값으로 대체
+                    Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                    projectId: projectId,
-                    productStatus: statusCode,
-                }),
             });
 
             if (!res.ok) throw new Error("상태 변경 실패");
@@ -41,10 +38,12 @@ export default function ProjectReviewPage() {
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                const res = await fetch("http://localhost:8888/admin/projects", {
+                const token = localStorage.getItem("accessToken"); // ✅ 선언 추가
+
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/projects?status=WAITING_APPROVAL`, {
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1MTM2MjcyMiwiZXhwIjoxNzUyNTcyMzIyfQ.5rCSiaJ6SvPhDnqAXQPQeal-UvvbhYt8b5oSmG3YikI`, // ✅ 직접 입력한 유효한 토큰으로 교체
+                        Authorization: `Bearer ${token}`,
                     },
                 });
 

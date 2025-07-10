@@ -14,8 +14,8 @@ const getProfileImgUrl = (img) => {
   if (img.startsWith("data:")) return img;
   // 절대경로(http/https)
   if (img.startsWith("http")) return img;
-  // 상대경로(/profile_images/xxx.png) -> 도메인 붙여서
-  if (img.startsWith("/")) return "http://localhost:8888" + img;
+  // 상대경로(/profile_images/xxx.png) -> 도메인 붙여서 (한글, 공백 등 인코딩)
+  if (img.startsWith("/")) return "http://localhost:8888" + encodeURI(img);
   // 그 외엔 기본 이미지
   return "/images/default_login_icon.png";
 };
@@ -347,7 +347,10 @@ export default function Header() {
                 >
                   <Link href="/seokgeun/dropdownmenu/mypage">
                     <Image
-                      src={getProfileImgUrl(profileImg)}
+                      src={
+                        getProfileImgUrl(profileImg) ||
+                        "/images/default_login_icon.png"
+                      }
                       width={24}
                       height={24}
                       alt="프로필"

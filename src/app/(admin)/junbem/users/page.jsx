@@ -17,10 +17,12 @@ export default function UsersPage() {
 
     const fetchUsers = async (page = currentPage) => {
         try {
-            const res = await fetch(`http://localhost:8888/admin/users?page=${page - 1}`, {
+            const token = localStorage.getItem("accessToken");
+
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/users?page=${page - 1}`, {
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1MTM2MjcyMiwiZXhwIjoxNzUyNTcyMzIyfQ.5rCSiaJ6SvPhDnqAXQPQeal-UvvbhYt8b5oSmG3YikI`,
+                    Authorization: `Bearer ${token}`, // 👉 동적으로 토큰 삽입
                 },
             });
 
@@ -65,12 +67,15 @@ export default function UsersPage() {
 
     const handleUserStatusChange = async (id, status) => {
         try {
-            const res = await fetch("http://localhost:8888/admin/users/status", {
+            const token = localStorage.getItem("accessToken");
+
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/users/status`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1MTM2MjcyMiwiZXhwIjoxNzUyNTcyMzIyfQ.5rCSiaJ6SvPhDnqAXQPQeal-UvvbhYt8b5oSmG3YikI`, // 실제 토큰
+                    Authorization: `Bearer ${token}`, // 👉 동적으로 토큰 삽입
                 },
+
                 body: JSON.stringify({userNo: id, userStatus: status === "BANNED" ? "BAN" : "LOGOUT"}),
             });
 
