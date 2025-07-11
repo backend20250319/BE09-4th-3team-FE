@@ -14,6 +14,7 @@ export default function Page() {
     totalPages: 0,
     totalElements: 0,
   });
+  const [approvedCount, setApprovedCount] = useState(0);
 
   const fetchProjects = async (page = 0, size = 12) => {
     try {
@@ -23,6 +24,9 @@ export default function Page() {
       if (response.data.success) {
         setProjects(response.data.data);
         setPagination(response.data.pagination);
+        setApprovedCount(response.data.approvedCount);
+
+        console.log(response);
       }
     } catch (error) {
       console.error("프로젝트 목록 조회 실패:", error);
@@ -40,33 +44,54 @@ export default function Page() {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-bold mb-4">프로젝트 목록</h1>
+    <div className="p-6 w-[1160px] mx-auto">
+      <div className="text-base leading-[27px] mx-auto pt-4 pr-5 pb-3">
+        <span className="text-[#ff5757]">{approvedCount}</span>개의 프로젝트가 있습니다.
+      </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      {/* 썸네일 이미지 */}
+      <div className="grid grid-cols-4 gap-4">
         {projects.map((project) => (
           <Link key={project.projectNo} href={`/project/detail/${project.projectNo}`}>
-            <div className="border rounded p-4 shadow">
+            <div className="border rounded-[8px] shadow">
               {project.thumbnailUrl ? (
-                <Image
-                  src={project.thumbnailUrl}
-                  alt={project.title}
-                  width={300}
-                  height={300}
-                  className="object-cover mb-2"
-                />
+                <div className="overflow-hidden rounded-t-[8px]">
+                  <Image
+                    src={project.thumbnailUrl}
+                    alt={project.title}
+                    width={300}
+                    height={300}
+                    className="object-cover transition-transform duration-300 ease-in-out hover:scale-110"
+                  />
+                </div>
               ) : (
-                <div className="w-[275px] h-[275px] bg-gray-200 flex items-center justify-center text-sm text-gray-500">
+                <div className="h-[264px] bg-gray-200 flex mb-2 items-center justify-center text-sm text-gray-500 rounded-t-[8px]">
                   이미지 없음
                 </div>
               )}
-              <p>{project.categoryName}</p>
-              <h2 className="text-lg font-semibold">{project.title}</h2>
-              <p>목표 금액: {project.goalAmount.toLocaleString()}원</p>
-              <p>모금액: {project.currentAmount.toLocaleString()}원</p>
-              <p>마감일: {project.deadLine}</p>
-              <p>상태: {project.status}</p>
-              <p>{getDday(project.startLine, project.deadLine)}일 남음</p>
+              {/* 프로젝트 정보 */}
+
+              <div className="px-4 pt-4 pb-2">
+                <p className="text-xs leading-[120%] text-[#545454]">{project.creatorName}</p>
+                <h2 className="text-base pb-4 text-[#1c1c1c] mb-[6px] border-b border-[#6d6d6d]">{project.title}</h2>
+              </div>
+              <div className="pb-4 px-4">
+                <p className="text-base text-[#1c1c1c] mb-[6px] flex gap-2 items-center">
+                  목표 금액:
+                  <span className="text-[#545454] text-[15px]">{project.goalAmount.toLocaleString()}원</span>
+                </p>
+                <p className="text-base text-[#1c1c1c] mb-[6px] flex gap-2 items-center">
+                  모인 금액:
+                  <span className="text-[#545454] text-[15px]">{project.currentAmount.toLocaleString()}원</span>
+                </p>
+                <p className="text-base text-[#1c1c1c] mb-[6px] flex gap-2 items-center">
+                  마감일:
+                  <span className="text-[#545454] text-[15px]">{project.deadLine}</span>
+                </p>
+                <p className="text-base text-[#1c1c1c] mb-[6px] flex gap-2 items-center">
+                  {getDday(project.startLine, project.deadLine)}일 남음
+                </p>
+              </div>
             </div>
           </Link>
         ))}
