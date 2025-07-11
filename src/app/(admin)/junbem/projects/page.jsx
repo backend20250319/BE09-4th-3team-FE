@@ -95,11 +95,17 @@ useEffect(() => {
     const convertStatus = (statusCode) => {
         switch (statusCode) {
             case "WAITING_APPROVAL":
-                return "pending";
+                return "PENDING";
             case "APPROVED":
-                return "approved";
+                return "APPROVED";
             case "REJECTED":
-                return "rejected";
+                return "REJECTED";
+            case "IN_PROGRESS" :
+                return "IN_PROGRESS";
+            case "COMPLETED" :
+                return "COMPLETED"
+            case "FAILED" :
+                return "FAILED"
             default:
                 return "unknown";
         }

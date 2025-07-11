@@ -76,18 +76,29 @@
     @apply px-2 py-1 text-xs font-semibold rounded-full;
 }
 
-.status-pending {
+.status-PENDING {
     @apply bg-yellow-100 text-yellow-600;
 }
 
-.status-approved {
+.status-APPROVED {
     @apply bg-green-100 text-green-600;
 }
 
-.status-rejected {
+.status-REJECTED {
     @apply bg-red-100 text-red-500;
 }
 
+.status-IN_PROGRESS {
+    @apply bg-blue-100 text-blue-600;
+}
+
+.status-COMPLETED {
+    @apply bg-teal-100 text-teal-600;
+}
+
+.status-FAILED {
+    @apply bg-gray-200 text-gray-600;
+}
 
 .action-button {
     @apply bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-blue-700;
