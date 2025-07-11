@@ -8,6 +8,7 @@ import Link from "next/link"
 import axios from "axios"
 import { requireAccessTokenOrRedirect } from "@/lib/utils"
 
+
 export default function MyPledgesPage() {
   const [pledges, setPledges] = useState([])
   const [loading, setLoading] = useState(true)
