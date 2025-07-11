@@ -40,21 +40,19 @@ export default function MyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("profile");
-  // Header와 동일하게 프로필 이미지 상태 관리
-  // const [profileImg, setProfileImg] = useState(
-  //   "/images/default_login_icon.png"
-  // );
+  const [bio, setBio] = useState(""); // 소개 정보 상태 추가
   const router = useRouter();
 
-  // useEffect(() => {
-  //   const updateProfileImg = () => {
-  //     const savedImg = sessionStorage.getItem("profileImg");
-  //     setProfileImg(savedImg || "/images/default_login_icon.png");
-  //   };
-  //   updateProfileImg();
-  //   window.addEventListener("storage", updateProfileImg);
-  //   return () => window.removeEventListener("storage", updateProfileImg);
-  // }, []);
+  // sessionStorage에서 bio 정보 동기화
+  useEffect(() => {
+    const updateBio = () => {
+      const savedBio = sessionStorage.getItem("bio");
+      if (savedBio !== null) setBio(savedBio);
+    };
+    updateBio();
+    window.addEventListener("storage", updateBio);
+    return () => window.removeEventListener("storage", updateBio);
+  }, []);
 
   useEffect(() => {
     const accessToken = sessionStorage.getItem("accessToken");
@@ -97,7 +95,36 @@ export default function MyPage() {
   // 탭별 내용
   let tabContent = null;
   if (activeTab === "profile") {
-    tabContent = <div className="mypage-desc">등록된 소개가 없습니다.</div>;
+    tabContent = (
+      <div className="mypage-desc">
+        {bio ? (
+          <div>
+            <p style={{ whiteSpace: "pre-wrap", lineHeight: "1.6" }}>{bio}</p>
+          </div>
+        ) : (
+          <div>
+            <p>등록된 소개가 없습니다.</p>
+            <div style={{ marginTop: "20px" }}>
+              <Link href="/seokgeun/dropdownmenu/mysettings/profile">
+                <button
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "#f86453",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                  }}
+                >
+                  소개 작성하기
+                </button>
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+    );
   } else if (activeTab === "review") {
     tabContent = <div className="mypage-desc">작성한 후기가 없습니다.</div>;
   } else if (activeTab === "contribution") {

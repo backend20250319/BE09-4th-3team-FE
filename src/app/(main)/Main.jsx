@@ -4,7 +4,7 @@ import React from "react";
 export default function Main() {
   return (
     <>
-      <ul className="text-3xl flex flex-col gap-5">
+      {/* <ul className="text-3xl flex flex-col gap-5">
         <li className="hover:text-[#f00]">
           <Link href="/nayeon">임나연</Link>
         </li>
@@ -20,7 +20,7 @@ export default function Main() {
         <li className="hover:text-[#8446ff]">
           <Link href="/project">지정호</Link>
         </li>
-      </ul>
+      </ul> */}
     </>
   );
 }
