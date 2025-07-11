@@ -20,11 +20,12 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState("");
 
   // 개선점: URL 파라미터에서 리다이렉트 경로 가져오기
-  const [redirectPath, setRedirectPath] = useState("/seokgeun/main");
+  const [redirectPath, setRedirectPath] = useState("http://localhost:3000");
 
   // 모달 상태 추가
   const [modalMsg, setModalMsg] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [modalReload, setModalReload] = useState(false); // 새로고침 여부
 
   // 컴포넌트 마운트 시 URL 파라미터 확인
   useEffect(() => {
@@ -55,9 +56,15 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault(); // 기본 폼 제출 동작 방지
 
-    // 개선점: 입력값 유효성 검사 추가
-    if (!form.userId.trim() || !form.password.trim()) {
-      setErrorMsg("아이디와 비밀번호를 모두 입력해주세요.");
+    // 입력값 유효성 검사 추가
+    if (!form.userId.trim()) {
+      setModalMsg("아이디를 입력해 주세요.");
+      setShowModal(true);
+      return;
+    }
+    if (!form.password.trim()) {
+      setModalMsg("비밀번호를 입력해 주세요.");
+      setShowModal(true);
       return;
     }
 
@@ -79,26 +86,42 @@ export default function LoginPage() {
         sessionStorage.setItem("refreshToken", response.data.refreshToken);
       }
 
-      // 개선점: 로그인 성공 시 사용자에게 피드백 제공
+      // 로그인 성공 시 사용자에게 피드백 제공
       console.log("로그인 성공:", response.data);
 
       // 리다이렉트 경로로 이동
       window.location.href = redirectPath;
     } catch (err) {
       console.log("에러 상세:", err.response); // 디버깅용
+      console.log("에러 상태:", err.response?.status); // 상태 코드 확인
+      console.log("에러 메시지:", err.message); // 에러 메시지 확인
+      console.log("전체 에러 객체:", err); // 전체 에러 객체 확인
+
+      // 로그인 실패 시 토큰 삭제
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("refreshToken");
 
       if (err.response?.status === 403) {
-        // 403 에러일 때 모달로 안내
         setModalMsg(
           "이미 회원탈퇴 처리된 계정입니다.\n이용 문의: choseokgeun@gmail.com"
         );
         setShowModal(true);
+        setModalReload(true); // 새로고침 O
+      } else if (err.response?.status === 401) {
+        setModalMsg(
+          "등록되지 않은 아이디이거나 아이디 또는 비밀번호를 잘못 입력했습니다. 새로고침 후 다시 이용해 주세요."
+        );
+        setShowModal(true);
+        setModalReload(true); // 새로고침 O
       } else {
-        // 기타 에러는 기존 방식대로
-        setErrorMsg(err.response?.data?.error || "로그인에 실패했습니다.");
+        setModalMsg(
+          "등록되지 않은 아이디이거나 아이디 또는 비밀번호를 잘못 입력했습니다. 새로고침 후 다시 이용해 주세요."
+        );
+        setShowModal(true);
+        setModalReload(true); // 기타 에러만 새로고침
       }
     } finally {
-      setLoading(false); // 로딩 상태 비활성화
+      setLoading(false);
     }
   };
 
@@ -144,14 +167,6 @@ export default function LoginPage() {
               disabled={loading} // 로딩 중 입력 방지
               autoComplete="current-password"
             />
-
-            {/* 에러 메시지 출력 */}
-            {errorMsg && (
-              <div style={{ color: "red", margin: "10px 0", fontSize: "14px" }}>
-                {errorMsg}
-              </div>
-            )}
-
             {/* 로그인 버튼 */}
             <button
               type="submit"
@@ -194,7 +209,16 @@ export default function LoginPage() {
                   .replace(/localhost:\d+/g, "")
                   .trim()}
               </p>
-              <button onClick={() => setShowModal(false)}>확인</button>
+              <button
+                className={styles.modalButton}
+                onClick={() => {
+                  setShowModal(false);
+                  setLoading(false); // 모달 닫을 때 로딩 해제
+                  if (modalReload) window.location.reload();
+                }}
+              >
+                확인
+              </button>
             </div>
           </div>
         </div>
