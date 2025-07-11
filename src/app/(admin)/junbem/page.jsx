@@ -10,19 +10,57 @@ import {
     Settings,
 } from 'lucide-react'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import './dashboard.css'
+import PieChart from "@/app/(admin)/junbem/piechart";
+
 
 export default function AdminDashboard() {
+    const [stats, setStats] = useState({
+        totalProjects: 0,
+        totalUsers: 0,
+    })
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const token = sessionStorage.getItem("accessToken")
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/dashboard/stats`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                })
+
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`)
+                }
+
+                const data = await res.json()
+                setStats({
+                    totalProjects: data.totalProjects,
+                    totalUsers: data.totalUsers,
+                })
+            } catch (error) {
+                console.error('📛 대시보드 통계 로드 실패:', error)
+            }
+        }
+
+        fetchStats()
+    }, [])
+
     return (
         <div className="dashboard-container">
             <main className="dashboard-main">
                 {/* 상단 통계 카드 */}
                 <div className="dashboard-grid">
-                    <StatCard title="Total Projects" value="1,247" icon={<FolderOpen />} change="+12%" />
-                    <StatCard title="Total Users" value="8,432" icon={<Users />} change="+18%" />
+                    <StatCard title="Total Projects" value={stats.totalProjects} icon={<FolderOpen />} change="+12%" />
+                    <StatCard title="Total Users" value={stats.totalUsers} icon={<Users />} change="+18%" />
                     <StatCard title="Total Funding" value="$2,847,392" icon={<DollarSign />} change="+25%" />
                     <StatCard title="Active Projects" value="892" icon={<BarChart3 />} change="+8%" />
                 </div>
+
+                {/* 파이 차트 삽입 */}
+                <PieChart />
 
                 {/* 활동 및 빠른 액션 */}
                 <div className="dashboard-content">

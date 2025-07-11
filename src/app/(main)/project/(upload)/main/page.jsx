@@ -37,8 +37,8 @@ export default function Page() {
 
   const router = useRouter();
 
-  const clearLocalStorage = () => {
-    localStorage.removeItem("accessToken");
+  const clearSessionStorage = () => {
+    sessionStorage.removeItem("accessToken");
   };
 
   const handleSubmit = async (e) => {
@@ -89,7 +89,7 @@ export default function Page() {
     };
 
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
 
       const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/project/upload`, payload, {
         headers: {
@@ -99,7 +99,7 @@ export default function Page() {
       });
 
       alert("프로젝트가 성공적으로 등록되었습니다!");
-      clearLocalStorage();
+      clearSessionStorage();
       router.push("/project/list");
     } catch (err) {
       console.error("프로젝트 등록 실패", err);
@@ -115,25 +115,25 @@ export default function Page() {
             <TabsList className="grid w-full grid-cols-4 mb-[50px] border-b border-gray-200">
               <TabsTrigger
                 value="section01"
-                className="h-[40px] border-transparent data-[state=active]:border-b data-[state=active]:border-[#f86453]"
+                className="h-[40px] border-0 rounded-[2px] data-[state=active]:border-b-[3px] data-[state=active]:border-[#f86453]"
               >
                 기본정보
               </TabsTrigger>
               <TabsTrigger
                 value="section02"
-                className="h-[40px] border-transparent data-[state=active]:border-b data-[state=active]:border-[#f86453]"
+                className="h-[40px] border-0 rounded-[2px] data-[state=active]:border-b-[3px] data-[state=active]:border-[#f86453]"
               >
                 목표 금액 및 일정
               </TabsTrigger>
               <TabsTrigger
                 value="section03"
-                className="h-[40px] border-transparent data-[state=active]:border-b data-[state=active]:border-[#f86453]"
+                className="h-[40px] border-0 rounded-[2px] data-[state=active]:border-b-[3px] data-[state=active]:border-[#f86453]"
               >
                 선물구성
               </TabsTrigger>
               <TabsTrigger
                 value="section04"
-                className="h-[40px] border-transparent data-[state=active]:border-b data-[state=active]:border-[#f86453]"
+                className="h-[40px] border-0 rounded-[2px] data-[state=active]:border-b-[3px] data-[state=active]:border-[#f86453]"
               >
                 창작자 정보
               </TabsTrigger>
