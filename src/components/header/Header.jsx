@@ -436,7 +436,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/myreview"
+                          href="/review"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           내 후기
@@ -460,7 +460,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/mynotification"
+                          href="/notification"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           알림

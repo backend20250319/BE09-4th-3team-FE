@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import ReviewForm from "./ReviewForm";
+import ReviewForm from "../../review/ReviewForm";
 import styles from "./reviewModal.module.css";
 import { X } from "lucide-react";
 
