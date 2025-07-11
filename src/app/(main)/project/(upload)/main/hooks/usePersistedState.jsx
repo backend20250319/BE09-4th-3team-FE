@@ -4,7 +4,7 @@ const usePersistedState = (key, initialValue) => {
   const [value, setValue] = useState(initialValue);
 
   useEffect(() => {
-    const stored = localStorage.getItem(key);
+    const stored = sessionStorage.getItem(key);
     if (stored !== null) {
       try {
         // JSON 파싱이 가능한 값이면 파싱
@@ -19,9 +19,9 @@ const usePersistedState = (key, initialValue) => {
 
   useEffect(() => {
     if (typeof value === "string") {
-      localStorage.setItem(key, value); // 문자열은 그대로 저장
+      sessionStorage.setItem(key, value); // 문자열은 그대로 저장
     } else {
-      localStorage.setItem(key, JSON.stringify(value)); // 객체/배열 등은 JSON 저장
+      sessionStorage.setItem(key, JSON.stringify(value)); // 객체/배열 등은 JSON 저장
     }
   }, [key, value]);
 
