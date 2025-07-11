@@ -31,6 +31,8 @@ export default function MySettingsPage() {
   const [editValue, setEditValue] = useState("");
   const [editFile, setEditFile] = useState(null);
   const [nameError, setNameError] = useState(""); // 석근 : 이름 에러 메시지 상태
+  const [modalMsg, setModalMsg] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   const pathname = usePathname();
 
@@ -55,7 +57,8 @@ export default function MySettingsPage() {
     if (res.status === 401 || res.status === 419) {
       sessionStorage.removeItem("accessToken");
       sessionStorage.removeItem("refreshToken");
-      alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+      setModalMsg("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+      setShowModal(true);
       router.replace("/seokgeun/login");
       return null;
     }
@@ -68,10 +71,8 @@ export default function MySettingsPage() {
     if (res && res.ok) {
       const user = await res.json();
       setNickname(user.nickname || "");
-      const localImg = sessionStorage.getItem("profileImg");
-      setProfileImg(
-        user.profileImg || localImg || "/images/default_login_icon.png"
-      );
+      // 항상 기본 이미지 사용
+      setProfileImg("/images/default_login_icon.png");
     }
   };
 
@@ -90,6 +91,9 @@ export default function MySettingsPage() {
     if (localWebsite !== null) setWebsite(localWebsite);
     const localUserUrl = sessionStorage.getItem("userUrl");
     if (localUserUrl !== null) setUserUrl(localUserUrl);
+
+    // 프로필 이미지는 항상 기본 이미지 사용
+    setProfileImg("/images/default_login_icon.png");
   }, []);
 
   // 변경 버튼 클릭 시 에디트 모드 진입 (이전 에디트 모드는 자동 취소)
@@ -161,23 +165,28 @@ export default function MySettingsPage() {
           });
           if (uploadRes.ok) {
             const data = await uploadRes.json();
-            // 서버에서 리턴한 경로로 갱신
-            setProfileImg(data.imagePath);
-            sessionStorage.setItem("profileImg", data.imagePath);
+            setProfileImg("/images/default_login_icon.png");
+            sessionStorage.setItem(
+              "profileImg",
+              "/images/default_login_icon.png"
+            );
             window.dispatchEvent(new Event("storage"));
-            await fetchUserInfo();
+            setModalMsg("프로필 이미지가 성공적으로 업로드되었습니다!");
+            setShowModal(true);
           } else {
-            alert("프로필 이미지 업로드에 실패했습니다.");
+            setModalMsg("프로필 이미지 업로드에 실패했습니다.");
+            setShowModal(true);
           }
         } catch (e) {
-          alert("이미지 업로드 중 에러가 발생했습니다.");
+          setModalMsg("이미지 업로드 중 에러가 발생했습니다.");
+          setShowModal(true);
         }
       } else if (previewImg) {
-        // 파일 업로드가 아닌 단순 미리보기만 있을 때(비정상 케이스)
-        setProfileImg(previewImg);
-        sessionStorage.setItem("profileImg", previewImg);
+        setProfileImg("/images/default_login_icon.png");
+        sessionStorage.setItem("profileImg", "/images/default_login_icon.png");
         window.dispatchEvent(new Event("storage"));
-        await fetchUserInfo();
+        setModalMsg("프로필 이미지가 성공적으로 업로드되었습니다!");
+        setShowModal(true);
       }
       setEditField(null);
       setEditValue("");
@@ -366,8 +375,8 @@ export default function MySettingsPage() {
                   >
                     <Image
                       src={profileImg}
-                      width={56}
-                      height={56}
+                      width={80}
+                      height={80}
                       alt="프로필"
                       className="mysettings-profile-img"
                       onError={(e) => {
@@ -705,6 +714,16 @@ export default function MySettingsPage() {
           </div>
         </div>
       </div>
+      {showModal && (
+        <div className="modalOverlay">
+          <div className="modal">
+            <div className="modalContent">
+              <p style={{ whiteSpace: "pre-line" }}>{modalMsg}</p>
+              <button onClick={() => setShowModal(false)}>확인</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

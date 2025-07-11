@@ -59,7 +59,7 @@ export default function MainPage() {
     fetchUserInfo();
   }, []); // 빈 의존성 배열로 컴포넌트 마운트 시에만 실행
 
-  // 🚀 개선점: 로그아웃 핸들러 추가
+  //  개선점: 로그아웃 핸들러 추가
   const handleLogout = async () => {
     try {
       await api.post("/api/register/user/me/logout");
