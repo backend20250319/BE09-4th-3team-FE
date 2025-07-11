@@ -1,29 +1,76 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { ChevronRight, Download, Heart, Share2 } from "lucide-react";
+import { ChevronRight, Download, Heart, Share2, Plus, Minus } from "lucide-react";
 import Image from "next/image";
 import { getDday } from "@/components/utils/dday";
 import { numberWithCommas } from "@/components/utils/number";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import ProjectPlan from "../components/projectPlan";
 import ProjectReview from "../components/projectReview";
 import ProjectUpdate from "../components/projectUpdate";
 import ProjectCommunity from "../components/projectCommunity";
 import ProjectInfo from "../components/projectInfo";
 import ScrollToTopButton from "@/components/scrollTopBtn/ScrollToTopButton";
+import { v4 as uuidv4 } from "uuid";
 
 export default function Page() {
   const { projectNo } = useParams();
   const [project, setProject] = useState(null);
+  const [selectedRewards, setSelectedRewards] = useState([]);
+  const router = useRouter();
+
+  // 선물 수량 변경
+  const updateRewardQuantity = (rewardId, newQuantity) => {
+    if (newQuantity < 1) return;
+    
+    setSelectedRewards(prev => 
+      prev.map(reward => 
+        reward.id === rewardId 
+          ? { ...reward, quantity: newQuantity }
+          : reward
+      )
+    );
+  };
+
+  // 선물 제거
+  const removeReward = (rewardId) => {
+    setSelectedRewards(prev => prev.filter(reward => reward.id !== rewardId));
+  };
+
+  // 선물 추가
+  const addReward = (reward) => {
+    const existingReward = selectedRewards.find(r => r.id === reward.id);
+    if (existingReward) {
+      updateRewardQuantity(reward.id, existingReward.quantity + 1);
+    } else {
+      setSelectedRewards(prev => [...prev, { ...reward, quantity: 1 }]);
+    }
+  };
+
+  // 선택된 선물들의 총 금액 계산
+  const selectedRewardsTotal = selectedRewards.reduce((sum, reward) => {
+    return sum + (reward.amount * reward.quantity);
+  }, 0);
 
   const onClickGoPledge = () => {
     window.scrollTo({
       top: 1090,
       behavior: "smooth", // 부드러운 스크롤
     });
+  };
+
+  const handlePledge = () => {
+    if (selectedRewards.length === 0) {
+      alert('최소 1개 이상의 선물을 선택해주세요.');
+      return;
+    }
+    const cartId = uuidv4();
+    sessionStorage.setItem(`selectedRewards_${cartId}`, JSON.stringify(selectedRewards));
+    router.push(`/project/detail/${projectNo}/pledge?cartId=${cartId}`);
   };
 
   // 결제 진행 날짜 +1일
@@ -164,7 +211,15 @@ export default function Page() {
             </TabsList>
             <TabsContent value="section01" className="flex gap-[38px]">
               <ProjectPlan project={project} />
-              <ProjectInfo project={project} />
+              <ProjectInfo 
+                project={project} 
+                selectedRewards={selectedRewards}
+                onAddReward={addReward}
+                onUpdateQuantity={updateRewardQuantity}
+                onRemoveReward={removeReward}
+                onPledge={handlePledge}
+                selectedRewardsTotal={selectedRewardsTotal}
+              />
             </TabsContent>
             <TabsContent value="section02" className="w-[1040px]">
               <ProjectUpdate project={project} />
@@ -174,7 +229,15 @@ export default function Page() {
             </TabsContent>
             <TabsContent value="section04" className="flex gap-[38px]">
               <ProjectReview project={project} />
-              <ProjectInfo project={project} />
+              <ProjectInfo 
+                project={project} 
+                selectedRewards={selectedRewards}
+                onAddReward={addReward}
+                onUpdateQuantity={updateRewardQuantity}
+                onRemoveReward={removeReward}
+                onPledge={handlePledge}
+                selectedRewardsTotal={selectedRewardsTotal}
+              />
             </TabsContent>
           </Tabs>
         </div>
