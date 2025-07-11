@@ -77,7 +77,7 @@ export default function ProjectInfo({
           }`}
         >
           <p className="text-sm text-[#3d3d3d] font-semibold mb-[0.5rem]">선물 선택</p>
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-5 select-none">
             <button className="text-left" onClick={(e) => alert("준비중입니다")}>
               <div className="border p-5 rounded-md shadow-[0px_1px_0px_rgba(0,0,0,0.1),_0px_2px_4px_rgba(0,0,0,0.04)]">
                 <p className="text-2xl leading-[36px] mb-[6px] tracking-[-0.025em]">1000원 +</p>
