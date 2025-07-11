@@ -53,34 +53,10 @@ export default function MyPledgesPage() {
     fetchPledges()
   }, [])
 
-  // 리워드 정보를 표시할 텍스트 생성
-  const getRewardsDisplayText = (pledge) => {
-    if (pledge.rewards && pledge.rewards.length > 0) {
-      if (pledge.rewards.length === 1) {
-        const reward = pledge.rewards[0]
-        return `${reward.rewardTitle} (${reward.quantity}개)`
-      } else {
-        const totalQuantity = pledge.rewards.reduce((sum, reward) => sum + reward.quantity, 0)
-        return `${pledge.rewards.length}개 리워드 (총 ${totalQuantity}개)`
-      }
-    }
-    return "리워드 없음"
-  }
+
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Back Button */}
-      <div className="mb-6">
-        <Button 
-          variant="ghost" 
-          onClick={() => window.history.back()}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          뒤로가기
-        </Button>
-      </div>
-
       {/* Page Title */}
       <h1 className="text-2xl font-bold text-gray-800 mb-8">후원한 프로젝트</h1>
 
@@ -135,9 +111,21 @@ export default function MyPledgesPage() {
                         <ExternalLink className="w-4 h-4 text-gray-400" />
                       </div>
                       <h3 className="font-bold text-gray-800 mb-1">{pledge.project?.title || "제목 없음"}</h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                        <Package className="w-4 h-4" />
-                        <span>{getRewardsDisplayText(pledge)}</span>
+                      <div className="text-sm text-gray-600 mb-2">
+                        <div className="flex items-start gap-2">
+                          <Package className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                          <div className="space-y-1">
+                            {pledge.rewards && pledge.rewards.length > 0 ? (
+                              pledge.rewards.map((reward, index) => (
+                                <div key={reward.rewardNo} className="text-gray-600">
+                                  {reward.rewardTitle} (x{reward.quantity})
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-gray-600">리워드 없음</div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                       <div className="flex items-center gap-4">
                         <span className="font-bold text-gray-800">
