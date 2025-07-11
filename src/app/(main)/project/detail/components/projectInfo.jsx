@@ -4,8 +4,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Plus, Minus } from "lucide-react";
 
-export default function ProjectInfo({ project }) {
+export default function ProjectInfo({ 
+  project, 
+  selectedRewards = [], 
+  onAddReward, 
+  onUpdateQuantity, 
+  onRemoveReward, 
+  onPledge,
+  selectedRewardsTotal = 0
+}) {
   const router = useRouter();
   const token = sessionStorage.getItem("accessToken");
   const [isScrolled, setIsScrolled] = useState(false);
@@ -20,12 +30,18 @@ export default function ProjectInfo({ project }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handlePledge = (rewardId) => {
-    if (token) {
-      router.push(`/project/detail/${project.projectNo}/pledge?rewardId=${rewardId}`);
-    } else {
+  const handlePledge = () => {
+    if (!token) {
       router.push("/seokgeun");
+      return;
     }
+    
+    if (selectedRewards.length === 0) {
+      alert('최소 1개 이상의 선물을 선택해주세요.');
+      return;
+    }
+    
+    onPledge?.();
   };
 
   return (
@@ -68,22 +84,88 @@ export default function ProjectInfo({ project }) {
             </button>
             {project.rewards && project.rewards.length > 0 ? (
               project.rewards.map((item) => (
-                <button
+                <div
                   key={item.id}
-                  className="border p-5 rounded-md text-left shadow-[0px_1px_0px_rgba(0,0,0,0.1),_0px_2px_4px_rgba(0,0,0,0.04)]"
-                  onClick={(e) => handlePledge(item.id)}
+                  className="border p-5 rounded-md shadow-[0px_1px_0px_rgba(0,0,0,0.1),_0px_2px_4px_rgba(0,0,0,0.04)] cursor-pointer hover:border-gray-400 transition-colors"
+                  onClick={() => onAddReward?.(item)}
                 >
-                  <p className="font-semibold">{item.title}</p>
-                  <p className="text-2xl leading-[36px] mb-[6px] tracking-[-0.025em]">
-                    {item.amount.toLocaleString()}원 +
-                  </p>
-                  <p className="text-sm text-gray-500">{item.description}</p>
-                </button>
+                  <div className="flex-1">
+                    <p className="font-semibold">{item.title}</p>
+                    <p className="text-2xl leading-[36px] mb-[6px] tracking-[-0.025em]">
+                      {item.amount.toLocaleString()}원 +
+                    </p>
+                    <p className="text-sm text-gray-500">{item.description}</p>
+                  </div>
+                  
+                  {/* 선택된 선물이 있으면 수량 조절 UI 표시 */}
+                  {selectedRewards.find(r => r.id === item.id) && (
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">
+                          수량: {selectedRewards.find(r => r.id === item.id)?.quantity || 0}개
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onUpdateQuantity?.(item.id, (selectedRewards.find(r => r.id === item.id)?.quantity || 1) - 1);
+                            }}
+                            disabled={(selectedRewards.find(r => r.id === item.id)?.quantity || 1) <= 1}
+                          >
+                            <Minus className="w-3 h-3" />
+                          </Button>
+                          <span className="w-8 text-center text-sm">
+                            {selectedRewards.find(r => r.id === item.id)?.quantity || 1}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onUpdateQuantity?.(item.id, (selectedRewards.find(r => r.id === item.id)?.quantity || 1) + 1);
+                            }}
+                          >
+                            <Plus className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onRemoveReward?.(item.id);
+                            }}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            삭제
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))
             ) : (
               <p className="text-sm text-gray-500">등록된 리워드가 없습니다.</p>
             )}
           </div>
+
+          {/* 선택된 선물 요약 */}
+          {selectedRewards.length > 0 && (
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <div className="text-sm font-medium mb-2">선택된 선물: {selectedRewards.length}개</div>
+              <div className="text-sm text-gray-600 mb-3">
+                총액: {selectedRewardsTotal.toLocaleString()}원
+              </div>
+              <button
+                onClick={handlePledge}
+                className="w-full h-[48px] cursor-pointer py-[14px] px-5 rounded-[8px] gap-1 flex items-center justify-center border-0 text-base bg-[#1c1c1c] text-white hover:bg-[#333] transition-colors"
+              >
+                후원하기
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </section>

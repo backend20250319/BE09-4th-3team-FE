@@ -2,15 +2,13 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Search, ExternalLink } from "lucide-react"
+import { Package } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import axios from "axios"
-import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
+import { requireAccessTokenOrRedirect } from "@/lib/utils"
 
-export default function MyProjectsPage() {
+export default function MyPledgesPage() {
   const [pledges, setPledges] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -19,14 +17,11 @@ export default function MyProjectsPage() {
     async function fetchPledges() {
       setLoading(true)
       setError(null)
-      try {
-        const token = sessionStorage.getItem("accessToken")
-        if (!token) {
-          setError("로그인이 필요합니다.")
-          setLoading(false)
-          return
-        }
 
+      const token = requireAccessTokenOrRedirect()
+      if (!token) return
+
+      try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/pledge/my`, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -53,20 +48,10 @@ export default function MyProjectsPage() {
     fetchPledges()
   }, [])
 
+
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Back Button */}
-      <div className="mb-6">
-        <Button 
-          variant="ghost" 
-          onClick={() => window.history.back()}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          뒤로가기
-        </Button>
-      </div>
-
       {/* Page Title */}
       <h1 className="text-2xl font-bold text-gray-800 mb-8">후원한 프로젝트</h1>
 
@@ -106,8 +91,8 @@ export default function MyProjectsPage() {
                   <div className="flex gap-4">
                     <div className="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
                       <Image
-                        src={pledge.projectThumbnail || "/placeholder.svg"}
-                        alt={pledge.projectTitle}
+                        src={pledge.project?.thumbnailUrl || "/placeholder.svg"}
+                        alt={pledge.project?.title || "프로젝트 이미지"}
                         width={96}
                         height={96}
                         className="w-full h-full object-cover"
@@ -118,14 +103,33 @@ export default function MyProjectsPage() {
                         <div className="text-xs text-gray-500">
                           후원일 {pledge.createdAt ? new Date(pledge.createdAt).toLocaleDateString('ko-KR') : "-"} | 후원번호 {pledge.pledgeNo}
                         </div>
-                        <ExternalLink className="w-4 h-4 text-gray-400" />
                       </div>
-                      <h3 className="font-bold text-gray-800 mb-1">{pledge.projectTitle}</h3>
-                      <p className="text-sm text-gray-600 mb-2">{pledge.rewardTitle}</p>
+                      <h3 className="font-bold text-gray-800 mb-1">{pledge.project?.title || "제목 없음"}</h3>
+                      <div className="text-sm text-gray-600 mb-2">
+                        <div className="flex items-start gap-2">
+                          <Package className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                          <div className="space-y-1">
+                            {pledge.rewards && pledge.rewards.length > 0 ? (
+                              pledge.rewards.map((reward, index) => (
+                                <div key={reward.rewardNo} className="text-gray-600">
+                                  {reward.rewardTitle} (x{reward.quantity})
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-gray-600">리워드 없음</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                       <div className="flex items-center gap-4">
                         <span className="font-bold text-gray-800">
                           {pledge.totalAmount?.toLocaleString()}원
                         </span>
+                        {pledge.additionalAmount > 0 && (
+                          <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                            +{pledge.additionalAmount.toLocaleString()}원 추가 후원
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
