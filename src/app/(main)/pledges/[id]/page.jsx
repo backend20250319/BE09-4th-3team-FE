@@ -9,7 +9,6 @@ import Image from "next/image"
 import axios from "axios"
 import { useParams } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
 
 export default function PledgeDetailPage() {
   const { id } = useParams()
@@ -106,7 +105,7 @@ export default function PledgeDetailPage() {
   const rewards = pledgeDetail.rewards || []
   const project = pledgeDetail.project || {}
 
-  // 리워드 총 금액 계산
+  // 선물 총 금액 계산
   const rewardsTotalAmount = rewards.reduce((sum, reward) => {
     return sum + (reward.rewardAmount * reward.quantity)
   }, 0)
@@ -187,12 +186,12 @@ export default function PledgeDetailPage() {
             </CardContent>
           </Card>
 
-          {/* 리워드 정보 */}
+          {/* 선물 정보 */}
           <Card>
             <CardContent className="p-6">
               <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <Package className="w-5 h-5" />
-                선택한 리워드
+                선택한 선물
               </h2>
               {rewards.length > 0 ? (
                 <div className="space-y-4">
@@ -227,7 +226,7 @@ export default function PledgeDetailPage() {
                   
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">리워드 총액</span>
+                      <span className="text-gray-600">선물 총액</span>
                       <span className="font-medium">{rewardsTotalAmount.toLocaleString()}원</span>
                     </div>
                     {additionalAmount > 0 && (
@@ -245,7 +244,7 @@ export default function PledgeDetailPage() {
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <Package className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                  <p>선택된 리워드가 없습니다.</p>
+                  <p>선택된 선물이 없습니다.</p>
                 </div>
               )}
             </CardContent>

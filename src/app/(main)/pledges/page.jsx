@@ -2,13 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Search, ExternalLink, Package } from "lucide-react"
+import { Package } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import axios from "axios"
-import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
 
 export default function MyPledgesPage() {
   const [pledges, setPledges] = useState([])
@@ -108,7 +105,6 @@ export default function MyPledgesPage() {
                         <div className="text-xs text-gray-500">
                           후원일 {pledge.createdAt ? new Date(pledge.createdAt).toLocaleDateString('ko-KR') : "-"} | 후원번호 {pledge.pledgeNo}
                         </div>
-                        <ExternalLink className="w-4 h-4 text-gray-400" />
                       </div>
                       <h3 className="font-bold text-gray-800 mb-1">{pledge.project?.title || "제목 없음"}</h3>
                       <div className="text-sm text-gray-600 mb-2">
