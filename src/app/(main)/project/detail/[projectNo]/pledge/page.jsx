@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
-import { ChevronUp, ChevronDown, Heart } from "lucide-react"
+import { ChevronUp, ChevronDown, Heart, Package, Plus, Minus } from "lucide-react"
 import Image from "next/image"
 import PledgeHeader from "@/components/header/PledgeHeader"
 import { useRouter } from "next/navigation"
@@ -25,6 +25,7 @@ export default function PledgePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [personalInfoModalOpen, setPersonalInfoModalOpen] = useState(false)
   const [userInfo, setUserInfo] = useState(null)
+  const [selectedRewards, setSelectedRewards] = useState([]) // 선택된 리워드들
 
   const { projectNo } = useParams();
   const searchParams = useSearchParams();
@@ -64,27 +65,53 @@ export default function PledgePage() {
     }
   }, [projectNo]);
 
+  // URL 파라미터로 전달된 리워드가 있으면 초기 선택
+  useEffect(() => {
+    if (project && rewardId) {
+      const reward = project.rewards?.find(r => r.id === parseInt(rewardId));
+      if (reward) {
+        setSelectedRewards([{ ...reward, quantity: 1 }]);
+      }
+    }
+  }, [project, rewardId]);
+
   if (!project) return <div>로딩 중...</div>;
 
-  // rewardId에 따라 선택된 리워드 찾기
-  const selectedReward = rewardId 
-    ? project.rewards?.find(reward => reward.id === parseInt(rewardId))
-    : project.rewards?.[0]; // rewardId가 없으면 첫 번째 리워드 사용
+  // 선택된 리워드들의 총 금액 계산
+  const selectedRewardsTotal = selectedRewards.reduce((sum, reward) => {
+    return sum + (reward.amount * reward.quantity);
+  }, 0);
 
-  // 선택된 리워드가 없으면 에러 처리
-  if (!selectedReward) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <h2 className="text-xl font-bold mb-2">리워드를 찾을 수 없습니다</h2>
-        <p className="text-gray-600">올바른 리워드를 선택해주세요.</p>
-      </div>
-    </div>;
-  }
+  const additionalAmount = Number.parseInt(additionalDonation) || 0;
+  const totalAmount = selectedRewardsTotal + additionalAmount;
 
-  // 선택된 리워드의 금액을 기본 금액으로 사용
-  const baseAmount = selectedReward.amount || 0;
-  const additionalAmount = Number.parseInt(additionalDonation) || 0
-  const totalAmount = baseAmount + additionalAmount
+  // 리워드 수량 변경
+  const updateRewardQuantity = (rewardId, newQuantity) => {
+    if (newQuantity < 1) return;
+    
+    setSelectedRewards(prev => 
+      prev.map(reward => 
+        reward.id === rewardId 
+          ? { ...reward, quantity: newQuantity }
+          : reward
+      )
+    );
+  };
+
+  // 리워드 제거
+  const removeReward = (rewardId) => {
+    setSelectedRewards(prev => prev.filter(reward => reward.id !== rewardId));
+  };
+
+  // 리워드 추가
+  const addReward = (reward) => {
+    const existingReward = selectedRewards.find(r => r.id === reward.id);
+    if (existingReward) {
+      updateRewardQuantity(reward.id, existingReward.quantity + 1);
+    } else {
+      setSelectedRewards(prev => [...prev, { ...reward, quantity: 1 }]);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -121,34 +148,103 @@ export default function PledgePage() {
               </CardContent>
             </Card>
 
-            {/* Gift Selection */}
+            {/* Rewards Selection */}
             <div>
-              <h2 className="text-lg font-bold mb-4">선물 정보</h2>
-              <Card>
-                <CardContent>
-                  <div className="mb-4">
-                    <div className="font-medium mb-2">선물 구성</div>
-                    <div className="text-sm text-gray-600 mb-2">
-                      {selectedReward.title || '리워드 정보 없음'}
-                    </div>
-                    {selectedReward.description && (
-                      <ul className="text-sm text-gray-600 ml-4 space-y-1">
-                        {selectedReward.description.split('\n').map((item, index) => (
-                          <li key={index}>• {item}</li>
-                        ))}
-                      </ul>
-                    )}
-                    <div className="text-sm text-gray-500 mt-2">
-                      예상 전달일 {selectedReward.deliveryDate || '미정'}
-                    </div>
+              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <Package className="w-5 h-5" />
+                리워드 선택
+              </h2>
+              
+              {/* Available Rewards */}
+              <div className="space-y-3 mb-6">
+                {project.rewards && project.rewards.length > 0 ? (
+                  project.rewards.map((reward) => (
+                    <Card key={reward.id} className="border-2 hover:border-red-200 transition-colors">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-800 mb-2">{reward.title}</h3>
+                            {reward.description && (
+                              <p className="text-sm text-gray-600 mb-2">{reward.description}</p>
+                            )}
+                            <div className="flex items-center justify-between">
+                              <span className="text-lg font-bold text-red-500">
+                                {reward.amount.toLocaleString()}원
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                예상 전달일: {reward.deliveryDate || '미정'}
+                              </span>
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => addReward(reward)}
+                            className="ml-4"
+                          >
+                            선택
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Package className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                    <p>등록된 리워드가 없습니다.</p>
                   </div>
-                  <Separator className="my-4" />
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">선물 금액</span>
-                    <span className="font-bold">{baseAmount.toLocaleString()}원</span>
-                  </div>
-                </CardContent>
-              </Card>
+                )}
+              </div>
+
+              {/* Selected Rewards */}
+              {selectedRewards.length > 0 && (
+                <Card className="border-red-200 bg-red-50">
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                      <Package className="w-4 h-4" />
+                      선택한 리워드
+                    </h3>
+                    <div className="space-y-3">
+                      {selectedRewards.map((reward) => (
+                        <div key={reward.id} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-800">{reward.title}</h4>
+                            <p className="text-sm text-gray-600">
+                              {reward.amount.toLocaleString()}원 × {reward.quantity}개 = {(reward.amount * reward.quantity).toLocaleString()}원
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => updateRewardQuantity(reward.id, reward.quantity - 1)}
+                              disabled={reward.quantity <= 1}
+                            >
+                              <Minus className="w-3 h-3" />
+                            </Button>
+                            <span className="w-8 text-center">{reward.quantity}</span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => updateRewardQuantity(reward.id, reward.quantity + 1)}
+                            >
+                              <Plus className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => removeReward(reward.id)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              삭제
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* Additional Donation */}
@@ -261,6 +357,35 @@ export default function PledgePage() {
                   <div className="text-2xl font-bold">{totalAmount.toLocaleString()} 원</div>
                 </div>
 
+                {/* Selected Rewards Summary */}
+                {selectedRewards.length > 0 && (
+                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="text-sm font-medium mb-2">선택한 리워드</div>
+                    <div className="space-y-1">
+                      {selectedRewards.map((reward) => (
+                        <div key={reward.id} className="flex justify-between text-sm">
+                          <span className="text-gray-600">{reward.title} × {reward.quantity}</span>
+                          <span>{(reward.amount * reward.quantity).toLocaleString()}원</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Separator className="my-2" />
+                    <div className="flex justify-between text-sm font-medium">
+                      <span>리워드 총액</span>
+                      <span>{selectedRewardsTotal.toLocaleString()}원</span>
+                    </div>
+                    {additionalAmount > 0 && (
+                      <>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-blue-600">추가 후원금</span>
+                          <span className="text-blue-600">+{additionalAmount.toLocaleString()}원</span>
+                        </div>
+                        <Separator className="my-2" />
+                      </>
+                    )}
+                  </div>
+                )}
+
                 <div className="text-xs text-gray-500 mb-6">
                   프로젝트 성공 시, 결제는 <span className="font-medium">{project.deadline}</span> 에 진행됩니다. 프로젝트가
                   무산되거나 중단된 경우, 예약된 결제는 자동으로 취소됩니다.
@@ -340,8 +465,13 @@ export default function PledgePage() {
                 {/* Support Button */}
                 <Button
                   className="w-full bg-red-500 hover:bg-red-600 text-white py-3"
-                  disabled={!personalInfoConsent || !termsConsent || !recipientName || !deliveryPhone || !shippingAddress || isSubmitting}
+                  disabled={!personalInfoConsent || !termsConsent || !recipientName || !deliveryPhone || !shippingAddress || isSubmitting || selectedRewards.length === 0}
                   onClick={async () => {
+                    if (selectedRewards.length === 0) {
+                      alert('최소 1개 이상의 리워드를 선택해주세요.');
+                      return;
+                    }
+
                     if (!recipientName || !deliveryPhone || !shippingAddress) {
                       alert('배송 정보를 모두 입력해주세요.');
                       return;
@@ -352,7 +482,10 @@ export default function PledgePage() {
                     try {
                       const pledgeData = {
                         projectNo: parseInt(projectNo),
-                        rewardNo: selectedReward.id,
+                        rewards: selectedRewards.map(reward => ({
+                          rewardNo: reward.id,
+                          quantity: reward.quantity
+                        })),
                         additionalAmount: additionalAmount,
                         deliveryAddress: shippingAddress,
                         deliveryPhone: deliveryPhone,

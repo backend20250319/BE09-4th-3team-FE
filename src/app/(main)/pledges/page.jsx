@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Search, ExternalLink } from "lucide-react"
+import { Search, ExternalLink, Package } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import axios from "axios"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 
-export default function MyProjectsPage() {
+export default function MyPledgesPage() {
   const [pledges, setPledges] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -52,6 +52,20 @@ export default function MyProjectsPage() {
     }
     fetchPledges()
   }, [])
+
+  // 리워드 정보를 표시할 텍스트 생성
+  const getRewardsDisplayText = (pledge) => {
+    if (pledge.rewards && pledge.rewards.length > 0) {
+      if (pledge.rewards.length === 1) {
+        const reward = pledge.rewards[0]
+        return `${reward.rewardTitle} (${reward.quantity}개)`
+      } else {
+        const totalQuantity = pledge.rewards.reduce((sum, reward) => sum + reward.quantity, 0)
+        return `${pledge.rewards.length}개 리워드 (총 ${totalQuantity}개)`
+      }
+    }
+    return "리워드 없음"
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -106,8 +120,8 @@ export default function MyProjectsPage() {
                   <div className="flex gap-4">
                     <div className="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
                       <Image
-                        src={pledge.projectThumbnail || "/placeholder.svg"}
-                        alt={pledge.projectTitle}
+                        src={pledge.project?.thumbnailUrl || "/placeholder.svg"}
+                        alt={pledge.project?.title || "프로젝트 이미지"}
                         width={96}
                         height={96}
                         className="w-full h-full object-cover"
@@ -120,12 +134,20 @@ export default function MyProjectsPage() {
                         </div>
                         <ExternalLink className="w-4 h-4 text-gray-400" />
                       </div>
-                      <h3 className="font-bold text-gray-800 mb-1">{pledge.projectTitle}</h3>
-                      <p className="text-sm text-gray-600 mb-2">{pledge.rewardTitle}</p>
+                      <h3 className="font-bold text-gray-800 mb-1">{pledge.project?.title || "제목 없음"}</h3>
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                        <Package className="w-4 h-4" />
+                        <span>{getRewardsDisplayText(pledge)}</span>
+                      </div>
                       <div className="flex items-center gap-4">
                         <span className="font-bold text-gray-800">
                           {pledge.totalAmount?.toLocaleString()}원
                         </span>
+                        {pledge.additionalAmount > 0 && (
+                          <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                            +{pledge.additionalAmount.toLocaleString()}원 추가 후원
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

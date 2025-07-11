@@ -4,21 +4,21 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { MessageCircle } from "lucide-react"
+import { MessageCircle, Package, Plus } from "lucide-react"
 import Image from "next/image"
 import axios from "axios"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
-export default function SupportDetailPage() {
+export default function PledgeDetailPage() {
   const { id } = useParams()
-  const [supportDetail, setSupportDetail] = useState(null)
+  const [pledgeDetail, setPledgeDetail] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    const fetchSupportDetail = async () => {
+    const fetchPledgeDetail = async () => {
       try {
         setLoading(true)
         setError(null)
@@ -41,10 +41,10 @@ export default function SupportDetailPage() {
 
         // 다양한 응답 구조에 대응
         if (response.data.success && response.data.data) {
-          setSupportDetail(response.data.data)
+          setPledgeDetail(response.data.data)
         } else if (response.data.pledgeNo) {
           // 객체가 직접 반환되는 경우
-          setSupportDetail(response.data)
+          setPledgeDetail(response.data)
         } else {
           setError("후원 정보를 불러올 수 없습니다.")
         }
@@ -63,7 +63,7 @@ export default function SupportDetailPage() {
     }
 
     if (id) {
-      fetchSupportDetail()
+      fetchPledgeDetail()
     }
   }, [id])
 
@@ -90,7 +90,7 @@ export default function SupportDetailPage() {
     )
   }
 
-  if (!supportDetail) {
+  if (!pledgeDetail) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -101,7 +101,15 @@ export default function SupportDetailPage() {
     )
   }
 
-  const totalAmount = supportDetail.totalAmount || 0
+  const totalAmount = pledgeDetail.totalAmount || 0
+  const additionalAmount = pledgeDetail.additionalAmount || 0
+  const rewards = pledgeDetail.rewards || []
+  const project = pledgeDetail.project || {}
+
+  // 리워드 총 금액 계산
+  const rewardsTotalAmount = rewards.reduce((sum, reward) => {
+    return sum + (reward.rewardAmount * reward.quantity)
+  }, 0)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -123,8 +131,8 @@ export default function SupportDetailPage() {
           <div className="flex gap-6">
             <div className="w-48 h-48 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
               <Image
-                src={supportDetail.projectThumbnail || "/placeholder.svg"}
-                alt={supportDetail.projectTitle}
+                src={project.thumbnailUrl || "/placeholder.svg"}
+                alt={project.title || "프로젝트 이미지"}
                 width={192}
                 height={192}
                 className="w-full h-full object-cover"
@@ -133,127 +141,197 @@ export default function SupportDetailPage() {
 
             <div className="flex-1">
               <div className="text-sm text-gray-500 mb-2">
-                {supportDetail.categoryName} | {supportDetail.creatorName}
+                {project.nickname} | {project.creatorName}
               </div>
-              <Link href={`/project/detail/${supportDetail.projectNo}`}>
+              <Link href={`/project/detail/${project.projectNo}`}>
                 <h1 className="text-2xl font-bold text-gray-800 mb-4 hover:text-red-500 transition-colors cursor-pointer">
-                  {supportDetail.projectTitle}
+                  {project.title}
                 </h1>
               </Link>
 
               <div className="flex items-center gap-4 mb-6">
-                <span className="text-xl font-bold">{supportDetail.currentAmount?.toLocaleString()}원</span>
-                <span className="text-red-500 font-bold">{supportDetail.fundingRate}%</span>
-                <span className="text-sm text-gray-600">• {supportDetail.projectStatus}</span>
+                <span className="text-xl font-bold">{project.currentAmount?.toLocaleString()}원</span>
+                <span className="text-red-500 font-bold">
+                  {project.goalAmount ? Math.round((project.currentAmount / project.goalAmount) * 100) : 0}%
+                </span>
+                <span className="text-sm text-gray-600">• {project.status}</span>
               </div>
 
-              <Button variant="outline" className="flex items-center gap-2 bg-transparent">
-                <MessageCircle className="w-4 h-4" />
-                창작자 문의
+              <Button 
+                className="bg-red-500 hover:bg-red-600 text-white"
+                onClick={() => window.open(`/project/detail/${project.projectNo}`, '_blank')}
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                프로젝트 문의하기
               </Button>
             </div>
           </div>
         </div>
 
-        {/* Support Information */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-6">후원 정보</h2>
-
-            <div className="space-y-4">
-              <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">프로젝트 상태</span>
-                <span className="text-red-500 font-medium">{supportDetail.projectStatus}</span>
-              </div>
-
-              <Separator />
-
-              <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">후원 상태</span>
-                <span className="text-gray-800">{supportDetail.pledgeStatus}</span>
-              </div>
-
-              <Separator />
-
-              <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">후원 번호</span>
-                <span className="text-gray-800">{supportDetail.pledgeNo}</span>
-              </div>
-
-              <Separator />
-
-              <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">후원 날짜</span>
-                <span className="text-gray-800">
-                  {supportDetail.createdAt ? new Date(supportDetail.createdAt).toLocaleDateString('ko-KR') : '-'}
-                </span>
-              </div>
-
-              <Separator />
-
-              <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">프로젝트 종료일</span>
-                <span className="text-gray-800">
-                  {supportDetail.deadline ? new Date(supportDetail.deadline).toLocaleDateString('ko-KR') : '-'}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Gift Information */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-6">선물 정보</h2>
-
-            <div className="space-y-4">
-              <div className="flex justify-between items-start py-2">
-                <span className="text-gray-600">선물 구성</span>
-                <div className="text-right">
-                  <div className="text-gray-800 font-medium mb-2">{supportDetail.rewardTitle}</div>
-                  <div className="text-sm text-gray-600">
-                    {supportDetail.rewardDescription}
+        {/* Pledge Details */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column */}
+          <div className="space-y-6">
+            {/* Pledge Information */}
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">후원 정보</h2>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">후원 번호</span>
+                    <span className="font-medium">{pledgeDetail.pledgeNo}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">후원일</span>
+                    <span className="font-medium">
+                      {pledgeDetail.createdAt ? new Date(pledgeDetail.createdAt).toLocaleDateString('ko-KR') : "-"}
+                    </span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between text-lg">
+                    <span className="text-gray-800 font-semibold">총 후원 금액</span>
+                    <span className="text-red-500 font-bold">{totalAmount.toLocaleString()}원</span>
                   </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-              <Separator />
+            {/* Rewards Information */}
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  <Package className="w-5 h-5" />
+                  선택한 리워드
+                </h2>
+                {rewards.length > 0 ? (
+                  <div className="space-y-4">
+                    {rewards.map((reward, index) => (
+                      <div key={reward.rewardNo} className="border rounded-lg p-4 bg-gray-50">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="font-semibold text-gray-800">{reward.rewardTitle}</h3>
+                          <span className="text-sm text-gray-500">수량: {reward.quantity}개</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">리워드 금액</span>
+                          <span className="font-medium">{(reward.rewardAmount * reward.quantity).toLocaleString()}원</span>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          (개당 {reward.rewardAmount.toLocaleString()}원)
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {additionalAmount > 0 && (
+                      <div className="border rounded-lg p-4 bg-blue-50">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600 flex items-center gap-2">
+                            <Plus className="w-4 h-4" />
+                            추가 후원금
+                          </span>
+                          <span className="font-medium text-blue-600">{additionalAmount.toLocaleString()}원</span>
+                        </div>
+                      </div>
+                    )}
 
-              <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">선물 금액</span>
-                <span className="text-gray-800 font-bold">
-                  {supportDetail.rewardAmount ? supportDetail.rewardAmount.toLocaleString() : '0'}원
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                    <Separator />
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">리워드 총액</span>
+                        <span className="font-medium">{rewardsTotalAmount.toLocaleString()}원</span>
+                      </div>
+                      {additionalAmount > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">추가 후원금</span>
+                          <span className="font-medium">{additionalAmount.toLocaleString()}원</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-lg font-bold border-t pt-2">
+                        <span className="text-gray-800">총 후원 금액</span>
+                        <span className="text-red-500">{totalAmount.toLocaleString()}원</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Package className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                    <p>선택된 리워드가 없습니다.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-        {/* Additional Support Information */}
-        <Card>
-          <CardContent className="p-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-6">추가 후원 정보</h2>
+            {/* Delivery Information */}
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">배송 정보</h2>
+                <div className="space-y-3">
+                  <div>
+                    <span className="text-gray-600 block mb-1">수령인</span>
+                    <span className="font-medium">{pledgeDetail.recipientName}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 block mb-1">연락처</span>
+                    <span className="font-medium">{pledgeDetail.deliveryPhone}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 block mb-1">배송 주소</span>
+                    <span className="font-medium">{pledgeDetail.deliveryAddress}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-            <div className="flex justify-between items-center py-2">
-              <span className="text-gray-600">추가 후원금</span>
-              <span className="text-gray-800 font-bold">
-                {supportDetail.additionalAmount ? supportDetail.additionalAmount.toLocaleString() : '0'}원
-              </span>
-            </div>
+          {/* Right Column */}
+          <div className="space-y-6">
+            {/* Project Description */}
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">프로젝트 소개</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  {project.description}
+                </p>
+              </CardContent>
+            </Card>
 
-            {(!supportDetail.additionalAmount || supportDetail.additionalAmount === 0) && (
-              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-500 text-center">추가 후원금이 없습니다.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            {/* Creator Information */}
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">창작자 정보</h2>
+                <div className="space-y-3">
+                  <div>
+                    <span className="text-gray-600 block mb-1">창작자</span>
+                    <span className="font-medium">{project.creatorName}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 block mb-1">소개</span>
+                    <span className="font-medium">{project.creatorInfo}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Total Amount Summary */}
-        <div className="mt-8 p-6 bg-white rounded-lg border-2 border-red-100">
-          <div className="flex justify-between items-center">
-            <span className="text-lg font-bold text-gray-800">총 후원 금액</span>
-            <span className="text-2xl font-bold text-red-500">{totalAmount.toLocaleString()}원</span>
+            {/* Project Timeline */}
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">프로젝트 일정</h2>
+                <div className="space-y-3">
+                  <div>
+                    <span className="text-gray-600 block mb-1">시작일</span>
+                    <span className="font-medium">
+                      {project.startLine ? new Date(project.startLine).toLocaleDateString('ko-KR') : "-"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 block mb-1">마감일</span>
+                    <span className="font-medium">
+                      {project.deadline ? new Date(project.deadline).toLocaleDateString('ko-KR') : "-"}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
