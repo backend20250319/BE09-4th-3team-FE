@@ -9,10 +9,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
-import { ChevronUp, ChevronDown, Heart } from "lucide-react"
+import { ChevronUp, ChevronDown, Heart, Package, Plus, Minus } from "lucide-react"
 import Image from "next/image"
 import PledgeHeader from "@/components/header/PledgeHeader"
 import { useRouter } from "next/navigation"
+
 
 export default function PledgePage() {
   const [additionalDonation, setAdditionalDonation] = useState("")
@@ -25,10 +26,12 @@ export default function PledgePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [personalInfoModalOpen, setPersonalInfoModalOpen] = useState(false)
   const [userInfo, setUserInfo] = useState(null)
+  const [selectedRewards, setSelectedRewards] = useState([]) // 선택된 선물들
 
   const { projectNo } = useParams();
   const searchParams = useSearchParams();
-  const rewardId = searchParams.get('rewardId');
+  const rewardId = searchParams.get('rewardId'); // @deprecated - 단일 선물 선택용, 호환성 유지
+  const cartId = searchParams.get('cartId'); // 장바구니용
   const [project, setProject] = useState(null);
   const router = useRouter();
 
@@ -64,27 +67,41 @@ export default function PledgePage() {
     }
   }, [projectNo]);
 
+  // SessionStorage에서 선택된 선물 정보 읽기 (cartId 기반)
+  useEffect(() => {
+    if (cartId) {
+      const storedRewards = sessionStorage.getItem(`selectedRewards_${cartId}`);
+      if (storedRewards) {
+        try {
+          const rewards = JSON.parse(storedRewards);
+          setSelectedRewards(rewards);
+          // sessionStorage.removeItem(`selectedRewards_${cartId}`); // 필요시 삭제
+        } catch (error) {
+          console.error('저장된 선물 정보 파싱 실패:', error);
+        }
+      }
+    }
+  }, [cartId]);
+
+  // @deprecated - URL 파라미터로 전달된 단일 선물이 있으면 초기 선택 (호환성 유지)
+  useEffect(() => {
+    if (project && rewardId && selectedRewards.length === 0) {
+      const reward = project.rewards?.find(r => r.id === parseInt(rewardId));
+      if (reward) {
+        setSelectedRewards([{ ...reward, quantity: 1 }]);
+      }
+    }
+  }, [project, rewardId, selectedRewards.length]);
+
   if (!project) return <div>로딩 중...</div>;
 
-  // rewardId에 따라 선택된 리워드 찾기
-  const selectedReward = rewardId 
-    ? project.rewards?.find(reward => reward.id === parseInt(rewardId))
-    : project.rewards?.[0]; // rewardId가 없으면 첫 번째 리워드 사용
+  // 선택된 선물들의 총 금액 계산
+  const selectedRewardsTotal = selectedRewards.reduce((sum, reward) => {
+    return sum + (reward.amount * reward.quantity);
+  }, 0);
 
-  // 선택된 리워드가 없으면 에러 처리
-  if (!selectedReward) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <h2 className="text-xl font-bold mb-2">리워드를 찾을 수 없습니다</h2>
-        <p className="text-gray-600">올바른 리워드를 선택해주세요.</p>
-      </div>
-    </div>;
-  }
-
-  // 선택된 리워드의 금액을 기본 금액으로 사용
-  const baseAmount = selectedReward.amount || 0;
-  const additionalAmount = Number.parseInt(additionalDonation) || 0
-  const totalAmount = baseAmount + additionalAmount
+  const additionalAmount = Number.parseInt(additionalDonation) || 0;
+  const totalAmount = selectedRewardsTotal + additionalAmount;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -121,34 +138,47 @@ export default function PledgePage() {
               </CardContent>
             </Card>
 
-            {/* Gift Selection */}
+            {/* Selected Rewards Display */}
             <div>
-              <h2 className="text-lg font-bold mb-4">선물 정보</h2>
-              <Card>
-                <CardContent>
-                  <div className="mb-4">
-                    <div className="font-medium mb-2">선물 구성</div>
-                    <div className="text-sm text-gray-600 mb-2">
-                      {selectedReward.title || '리워드 정보 없음'}
+              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <Package className="w-5 h-5" />
+                선택한 선물
+              </h2>
+              
+              {selectedRewards.length === 0 ? (
+                <Card>
+                  <CardContent>
+                    <div className="text-center py-8 text-gray-500">
+                      <Package className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                      <p>선택된 선물이 없습니다.</p>
                     </div>
-                    {selectedReward.description && (
-                      <ul className="text-sm text-gray-600 ml-4 space-y-1">
-                        {selectedReward.description.split('\n').map((item, index) => (
-                          <li key={index}>• {item}</li>
-                        ))}
-                      </ul>
-                    )}
-                    <div className="text-sm text-gray-500 mt-2">
-                      예상 전달일 {selectedReward.deliveryDate || '미정'}
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {selectedRewards.map((reward) => (
+                        <div key={reward.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-800">{reward.title}</h4>
+                            <p className="text-sm text-gray-600">
+                              {reward.amount.toLocaleString()}원 × {reward.quantity}개 = {(reward.amount * reward.quantity).toLocaleString()}원
+                            </p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                  <Separator className="my-4" />
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">선물 금액</span>
-                    <span className="font-bold">{baseAmount.toLocaleString()}원</span>
-                  </div>
-                </CardContent>
-              </Card>
+                    
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      <div className="flex justify-between text-sm font-medium">
+                        <span>선물 총액</span>
+                        <span>{selectedRewardsTotal.toLocaleString()}원</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* Additional Donation */}
@@ -261,6 +291,35 @@ export default function PledgePage() {
                   <div className="text-2xl font-bold">{totalAmount.toLocaleString()} 원</div>
                 </div>
 
+                {/* Selected Rewards Summary */}
+                {selectedRewards.length > 0 && (
+                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="text-sm font-medium mb-2">선택한 선물</div>
+                    <div className="space-y-1">
+                      {selectedRewards.map((reward) => (
+                        <div key={reward.id} className="flex justify-between text-sm">
+                          <span className="text-gray-600">{reward.title} × {reward.quantity}</span>
+                          <span>{(reward.amount * reward.quantity).toLocaleString()}원</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Separator className="my-2" />
+                    <div className="flex justify-between text-sm font-medium">
+                      <span>선물 총액</span>
+                      <span>{selectedRewardsTotal.toLocaleString()}원</span>
+                    </div>
+                    {additionalAmount > 0 && (
+                      <>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-blue-600">추가 후원금</span>
+                          <span className="text-blue-600">+{additionalAmount.toLocaleString()}원</span>
+                        </div>
+                        <Separator className="my-2" />
+                      </>
+                    )}
+                  </div>
+                )}
+
                 <div className="text-xs text-gray-500 mb-6">
                   프로젝트 성공 시, 결제는 <span className="font-medium">{project.deadline}</span> 에 진행됩니다. 프로젝트가
                   무산되거나 중단된 경우, 예약된 결제는 자동으로 취소됩니다.
@@ -340,8 +399,13 @@ export default function PledgePage() {
                 {/* Support Button */}
                 <Button
                   className="w-full bg-red-500 hover:bg-red-600 text-white py-3"
-                  disabled={!personalInfoConsent || !termsConsent || !recipientName || !deliveryPhone || !shippingAddress || isSubmitting}
+                  disabled={!personalInfoConsent || !termsConsent || !recipientName || !deliveryPhone || !shippingAddress || isSubmitting || selectedRewards.length === 0}
                   onClick={async () => {
+                    if (selectedRewards.length === 0) {
+                      alert('최소 1개 이상의 선물를 선택해주세요.');
+                      return;
+                    }
+
                     if (!recipientName || !deliveryPhone || !shippingAddress) {
                       alert('배송 정보를 모두 입력해주세요.');
                       return;
@@ -352,7 +416,10 @@ export default function PledgePage() {
                     try {
                       const pledgeData = {
                         projectNo: parseInt(projectNo),
-                        rewardNo: selectedReward.id,
+                        rewards: selectedRewards.map(reward => ({
+                          rewardNo: reward.id,
+                          quantity: reward.quantity
+                        })),
                         additionalAmount: additionalAmount,
                         deliveryAddress: shippingAddress,
                         deliveryPhone: deliveryPhone,
