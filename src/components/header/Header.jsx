@@ -132,6 +132,48 @@ export default function Header() {
     return () => window.removeEventListener("focus", handleFocus);
   }, [isLogin]);
 
+  // 알림 읽음 처리
+  const fetchUnreadCount = async () => {
+    const token = sessionStorage.getItem("accessToken");
+    if (!token) {
+      setUnreadCount(0);
+      return;
+    }
+    try {
+      const res = await fetch(
+        "http://localhost:8888/notifications/unread-count",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      setUnreadCount(data);
+    } catch (error) {
+      console.error("읽지 않은 알림 개수 가져오기 실패", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!isLogin) return;
+    fetchUnreadCount(); // 초기 호출
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, [isLogin]);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      if (isLogin) {
+        fetchUserInfo();
+        fetchUnreadCount();
+      }
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [isLogin]);
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 60);
@@ -340,9 +382,14 @@ export default function Header() {
                   <Heart />
                 </Link>
               </li>
-              <li className="p-4">
-                <Link href="/seokgeun/dropdownmenu/mynotification">
+              <li className="p-4 relative">
+                <Link href="/notification" className="relative">
                   <Bell />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] min-w-[16px] h-[16px] px-[4px] rounded-full flex items-center justify-center leading-none">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
                 </Link>
               </li>
               <li className="relative">
