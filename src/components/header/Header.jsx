@@ -436,7 +436,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/review"
+                          href="/review/myReview"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           내 후기

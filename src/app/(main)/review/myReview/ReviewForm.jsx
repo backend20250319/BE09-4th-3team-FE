@@ -12,6 +12,7 @@ const satisfactionMap = {
 };
 
 const ReviewForm = ({ project, onClose, onSubmit }) => {
+  console.log("Received project prop:", project);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [ratings, setRatings] = useState({
@@ -178,15 +179,15 @@ const ReviewForm = ({ project, onClose, onSubmit }) => {
           <div className={styles.content}>
             {/* Project Info */}
             <div className={styles.projectInfo}>
-              {/* <img
-                src="https://img.tumblbug.com/eyJidWNrZXQiOiJ0dW1ibGJ1Zy1pbWctYXNzZXRzIiwia2V5IjoiY292ZXIvMGY2MmM2MGYtZjljNS00YWQ4LThlMmYtYTZiOTViYjMxY2YyLzBhZTYxMDY2LWFmMjAtNGFhOC05ZmYzLTg4MWQ5OTg3OTJhNy5qcGVnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjo2MjAsImhlaWdodCI6NDY1LCJ3aXRob3V0RW5sYXJnZW1lbnQiOnRydWUsImZpdCI6bnVsbH0sInJvdW5kQ3JvcCI6ZmFsc2UsInJvdGF0ZSI6bnVsbH19"
-                alt="Project Cover"
+              <img
+                src={project.thumbnailUrl || "/images"}
+                alt={project.title || "Project Cover"}
                 className={styles.projectImage}
-              /> 추후 추가 */}
+              />
               <div>
-                {/* <div className={styles.projectCreator}>
+                <div className={styles.projectCreator}>
                   {project.creator_name}
-                </div> 추후 추가 */}
+                </div>
                 <div className={styles.projectTitle}>{project.title}</div>
               </div>
             </div>

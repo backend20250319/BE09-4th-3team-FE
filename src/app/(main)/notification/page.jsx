@@ -201,51 +201,57 @@ export default function NotificationPage() {
       <div
         className={`${styles.notificationList} ${
           isLoading ? styles.loading : ""
-        }`}
+        } ${!isLoading && notifications.length === 0 ? styles.noBorder : ""}`}
       >
-        {notifications.map((item) => (
-          <div key={item.notificationNo} className={styles.notificationItem}>
-            <div className={styles.notificationContent}>
-              <div className={styles.avatar}>
-                {item.projectThumbnailUrl ? (
-                  <img
-                    src={item.projectThumbnailUrl}
-                    alt={`${item.projectName} 썸네일`}
-                    className={styles.avatarImage}
-                  />
-                ) : (
-                  <img
-                    src="/images/tumblbug_logo.png"
-                    className={styles.avatarImage}
-                  />
-                )}
-              </div>
-              <div className={styles.content}>
-                <div className={styles.header}>
-                  <div className={styles.textContent}>
-                    {/* 창작자 이름 */}
-                    <div className={styles.creatorName}>{item.creatorName}</div>
-                    <h3 className={styles.notificationTitle}>
-                      {item.projectName}
-                    </h3>
-                    <p className={styles.notificationDescription}>
-                      {item.message}
-                    </p>
-                    <div className={styles.notificationTime}>
-                      {new Date(item.createdAt).toLocaleString()}
+        {!isLoading && notifications.length === 0 ? (
+          <p className={styles.emptyMessage}>도착한 알림이 없습니다.</p>
+        ) : (
+          notifications.map((item) => (
+            <div key={item.notificationNo} className={styles.notificationItem}>
+              <div className={styles.notificationContent}>
+                <div className={styles.avatar}>
+                  {item.projectThumbnailUrl ? (
+                    <img
+                      src={item.projectThumbnailUrl}
+                      alt={`${item.projectName} 썸네일`}
+                      className={styles.avatarImage}
+                    />
+                  ) : (
+                    <img
+                      src="/images/tumblbug_logo.png"
+                      className={styles.avatarImage}
+                    />
+                  )}
+                </div>
+                <div className={styles.content}>
+                  <div className={styles.header}>
+                    <div className={styles.textContent}>
+                      {/* 창작자 이름 */}
+                      <div className={styles.creatorName}>
+                        {item.creatorName}
+                      </div>
+                      <h3 className={styles.notificationTitle}>
+                        {item.projectName}
+                      </h3>
+                      <p className={styles.notificationDescription}>
+                        {item.message}
+                      </p>
+                      <div className={styles.notificationTime}>
+                        {new Date(item.createdAt).toLocaleString()}
+                      </div>
                     </div>
+                    <button
+                      className={styles.deleteButton}
+                      onClick={() => handleDelete(item.notificationNo)}
+                    >
+                      삭제
+                    </button>
                   </div>
-                  <button
-                    className={styles.deleteButton}
-                    onClick={() => handleDelete(item.notificationNo)}
-                  >
-                    삭제
-                  </button>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {totalPages > 0 && (

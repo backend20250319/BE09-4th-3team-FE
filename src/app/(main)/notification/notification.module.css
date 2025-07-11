@@ -95,6 +95,21 @@
   gap: 12px;
 }
 
+.emptyMessage {
+  text-align: center;
+  padding: 3rem 0;
+  color: #6b7280;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.notificationList.noBorder {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
 .creatorName {
   font-size: 0.9rem;
   color: #666;
