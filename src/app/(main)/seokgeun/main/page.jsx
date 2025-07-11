@@ -34,7 +34,7 @@ export default function MainPage() {
         // });
 
         // 사용자 정보 조회 API 호출
-        const response = await api.get("/api/register/user/me");
+        const response = await api.get("/api/user/me");
         setUser(response.data);
       } catch (err) {
         console.error("사용자 정보 조회 실패:", err);
@@ -62,7 +62,7 @@ export default function MainPage() {
   //  개선점: 로그아웃 핸들러 추가
   const handleLogout = async () => {
     try {
-      await api.post("/api/register/user/me/logout");
+      await api.post("/api/user/logout");
     } catch (error) {
       console.warn("로그아웃 요청 실패:", error);
     } finally {
