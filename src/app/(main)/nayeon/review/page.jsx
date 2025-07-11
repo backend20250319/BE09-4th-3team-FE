@@ -294,36 +294,35 @@ const Page = () => {
                       <div className={styles.projectContent}>
                         {/* 프로젝트 썸네일 */}
                         <img
-                          src={
-                            project.projectThumbnailUrl || "/placeholder.svg"
-                          }
-                          alt={project.projectTitle}
+                          src={project.thumbnailUrl || "/placeholder.svg"}
+                          alt={project.title}
                           className={styles.projectImage}
                         />
                         <div className={styles.projectInfo}>
                           <div className={styles.meta}>
                             {/* 후원 결제일 날짜 */}
                             <span>
-                              {project.pledgeCreatedAt
-                                ? `후원 결제일 ${new Date(
-                                    project.pledgeCreatedAt
-                                  ).toLocaleDateString()}`
+                              {project.pledgedAt
+                                ? `후원 결제일 ${project.pledgedAt.slice(
+                                    0,
+                                    10
+                                  )}`
                                 : "결제일 정보 없음"}
                             </span>
                           </div>
                           {/* 프로젝트 제목 */}
                           <h3 className={styles.projectTitle}>
-                            {project.projectTitle}
+                            {project.title}
                           </h3>
                           {/* 리워드 제목 */}
                           <p className={styles.projectSubtitle}>
-                            {project.rewardTitle || "리워드 정보 없음"}
+                            {project.rewardSummary || "리워드 정보 없음"}
                           </p>
                           <div className={styles.priceInfo}>
                             {/* 가격은 숫자라 포맷팅이 필요할 수 있음 */}
                             <span className={styles.price}>
-                              {project.rewardAmount != null
-                                ? `${project.rewardAmount.toLocaleString()}원`
+                              {project.totalAmount != null
+                                ? `${project.totalAmount.toLocaleString()}원`
                                 : "가격 정보 없음"}
                             </span>
                             <span className={styles.delivery}>
