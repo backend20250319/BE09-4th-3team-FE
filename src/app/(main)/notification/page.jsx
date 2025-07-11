@@ -25,13 +25,13 @@ const cleanupCache = () => {
 
 // JWT 토큰에서 userId 추출 함수
 function getUserIdFromAccessToken() {
-  const token = sessionStorage.getItem("accessToken"); // sessionStorage로 변경
+  const token = sessionStorage.getItem("accessToken");
   if (!token) return null;
 
   try {
     const base64Payload = token.split(".")[1];
     const payload = JSON.parse(atob(base64Payload));
-    return payload.sub || payload.userId || payload.id || null; // JWT 구조에 맞게 조정
+    return payload.sub || payload.userId || payload.id || null;
   } catch (e) {
     console.error("토큰 디코딩 실패:", e);
     return null;
@@ -207,11 +207,24 @@ export default function NotificationPage() {
           <div key={item.notificationNo} className={styles.notificationItem}>
             <div className={styles.notificationContent}>
               <div className={styles.avatar}>
-                <span className={styles.avatarText}>kakao</span>
+                {item.projectThumbnailUrl ? (
+                  <img
+                    src={item.projectThumbnailUrl}
+                    alt={`${item.projectName} 썸네일`}
+                    className={styles.avatarImage}
+                  />
+                ) : (
+                  <img
+                    src="/images/tumblbug_logo.png"
+                    className={styles.avatarImage}
+                  />
+                )}
               </div>
               <div className={styles.content}>
                 <div className={styles.header}>
                   <div className={styles.textContent}>
+                    {/* 창작자 이름 */}
+                    <div className={styles.creatorName}>{item.creatorName}</div>
                     <h3 className={styles.notificationTitle}>
                       {item.projectName}
                     </h3>
