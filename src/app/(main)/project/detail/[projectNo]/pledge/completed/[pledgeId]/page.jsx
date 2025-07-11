@@ -8,6 +8,7 @@ import Image from "next/image"
 import PledgeHeader from "@/components/header/PledgeHeader"
 import axios from "axios"
 import { useParams } from "next/navigation"
+import Link from "next/link"
 
 export default function PledgeSuccessPage() {
   const { projectNo, pledgeId } = useParams();
@@ -98,7 +99,7 @@ export default function PledgeSuccessPage() {
             <span className="text-gray-800">공식 후원자가 되셨습니다!</span>
           </h1>
           <p className="text-gray-600 mb-8">
-            * 후원 내역 변경은 <span className="text-blue-500 underline cursor-pointer">후원 상세</span>에서 하실 수
+            * 후원 내역 변경은 <Link href={`/pledges/${pledgeId}`}><span className="text-blue-500 underline cursor-pointer">후원 상세</span></Link>에서 하실 수
             있습니다.
           </p>
 

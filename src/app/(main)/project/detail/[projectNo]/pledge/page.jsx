@@ -93,7 +93,17 @@ export default function PledgePage() {
     }
   }, [project, rewardId, selectedRewards.length]);
 
-  if (!project) return <div>로딩 중...</div>;
+  // 로딩 스피너 컴포넌트 추가
+  function LoadingSpinner() {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[300px]">
+        <div className="w-12 h-12 border-4 border-red-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <div className="text-gray-600 font-medium text-lg">프로젝트 정보를 불러오는 중...</div>
+      </div>
+    );
+  }
+
+  if (!project) return <LoadingSpinner />;
 
   // 선택된 선물들의 총 금액 계산
   const selectedRewardsTotal = selectedRewards.reduce((sum, reward) => {
