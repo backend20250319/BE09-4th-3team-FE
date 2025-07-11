@@ -79,7 +79,7 @@
 /* 회원가입 링크 스타일 */
 .signup {
   text-align: center; /* 텍스트 중앙 정렬 */
-  font-size: 13px; /* 작은 글자 크기 */
+  font-size: 16px; /* 작은 글자 크기 */
   margin-top: 1rem; /* 상단 여백 */
   color: #666; /* 회색 텍스트 */
 }
@@ -183,45 +183,91 @@
   cursor: pointer;
 }
 
-/* 기존 모달 스타일은 주석 처리
-.modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal {
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
+.socialLoginLinks {
   text-align: center;
-  max-width: 400px;
-  width: 90%;
+  margin-top: 12px;
 }
-
-.modalContent p {
-  white-space: pre-line;
-  margin-bottom: 20px;
-  line-height: 1.5;
+.socialLoginLink {
+  text-decoration: underline;
+  font-weight: 500;
+  font-size: 15px;
+  margin-right: 16px;
+  transition: color 0.2s;
 }
-
-.modalButton {
-  background: #007bff;
-  color: white;
+.socialLoginLink:last-child {
+  margin-right: 0;
+}
+.socialLoginLinksRow {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  margin-top: 12px;
+  width: 100%;
+}
+.socialLoginBtn {
+  flex: 1 1 0;
+  text-align: center;
+  font-weight: 500;
+  font-size: 15px;
+  padding: 12px 0;
+  text-decoration: underline;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  background: none;
   cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.socialLoginGoogle {
+  color: #4285f4;
+  border-right: 1px solid #eee;
+}
+.socialLoginGoogle:hover {
+  background: #e8f0fe;
+  color: #174ea6;
+}
+.socialLoginKakao {
+  color: #fee500;
+}
+.socialLoginKakao:hover {
+  background: #fffbe7;
+  color: #c7b200;
 }
 
-.modalButton:hover {
-  background: #0056b3;
+.socialLoginBtnsCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  width: 100%;
 }
-*/
+.socialLoginBtnsRow {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  width: 100%;
+}
+.socialLoginBtnBlock {
+  flex: 1 1 0;
+  padding: 16px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  margin: 0;
+  display: block;
+}
+.socialLoginKakaoBlock {
+  background: #fee500;
+  color: #191600;
+}
+.socialLoginKakaoBlock:hover {
+  background: #ffe066;
+}
+.socialLoginGoogleBlock {
+  background: #8ecaff;
+  color: #fff;
+}
+.socialLoginGoogleBlock:hover {
+  background: #5ba6e6;
+}

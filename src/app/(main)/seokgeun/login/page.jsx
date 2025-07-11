@@ -6,6 +6,8 @@ import React, { useState, useEffect } from "react"; // 개선점: useEffect 추�
 import styles from "./login.module.css";
 import api from "../api/axios"; // API 인스턴스 사용
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export default function LoginPage() {
   // 폼 상태 관리 - 사용자 입력값 저장
   const [form, setForm] = useState({
@@ -125,6 +127,14 @@ export default function LoginPage() {
     }
   };
 
+  // 소셜 로그인 핸들러
+  const handleKakaoLogin = () => {
+    window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao`;
+  };
+  const handleGoogleLogin = () => {
+    window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
+  };
+
   return (
     <div className={styles.container}>
       {/* 좌측 로그인 박스 */}
@@ -177,12 +187,35 @@ export default function LoginPage() {
             </button>
           </form>
 
+          {/* 소셜 로그인 버튼 */}
+          <div className={styles.socialLoginBtnsRow}>
+            <button
+              type="button"
+              className={`${styles.socialLoginBtnBlock} ${styles.socialLoginKakaoBlock}`}
+              onClick={handleKakaoLogin}
+            >
+              카카오로 로그인
+            </button>
+            <button
+              type="button"
+              className={`${styles.socialLoginBtnBlock} ${styles.socialLoginGoogleBlock}`}
+              onClick={handleGoogleLogin}
+            >
+              구글로 로그인
+            </button>
+          </div>
+
           {/* 회원가입 링크 */}
           <div className={styles.signup}>
             아직 펀디 계정이 없으신가요?{" "}
             <a
               href="/seokgeun/register"
-              style={{ textDecoration: "underline", color: "#007bff" }}
+              style={{
+                textDecoration: "underline",
+                color: "#007bff",
+                fontWeight: "bold",
+                fontSize: "15px"
+              }}
             >
               회원가입
             </a>

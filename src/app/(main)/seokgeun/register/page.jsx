@@ -98,6 +98,9 @@ export default function Page() {
   const timerRef = useRef(null);
 
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMsg, setModalMsg] = useState("");
+  const [isSignupSuccess, setIsSignupSuccess] = useState(false);
   const router = useRouter();
 
   // 주소 API 로딩
@@ -284,6 +287,10 @@ export default function Page() {
           return prev - 1;
         });
       }, 1000);
+
+      // 성공 메시지 모달 표시
+      setModalMsg("인증메일을 발송하였습니다. 이메일 확인해주세요.");
+      setShowModal(true);
     } catch (e) {
       setEmailVerificationError(e.message);
     } finally {
@@ -326,37 +333,44 @@ export default function Page() {
     setLoading(true);
 
     if (!form.termsService || !form.termsPrivacy) {
-      alert("필수 약관에 동의해 주세요.");
+      setModalMsg("필수 약관에 동의해 주세요.");
+      setShowModal(true);
       setLoading(false);
       return;
     }
     if (!validateForm()) {
-      alert("입력값을 다시 확인해주세요.");
+      setModalMsg("입력값을 다시 확인해주세요.");
+      setShowModal(true);
       setLoading(false);
       return;
     }
     if (!userIdValid) {
-      alert("아이디 중복 확인을 완료해주세요.");
+      setModalMsg("아이디 중복 확인을 완료해주세요.");
+      setShowModal(true);
       setLoading(false);
       return;
     }
     if (!nicknameValid) {
-      alert("닉네임 중복 확인을 완료해주세요.");
+      setModalMsg("닉네임 중복 확인을 완료해주세요.");
+      setShowModal(true);
       setLoading(false);
       return;
     }
     if (!emailValid) {
-      alert("이메일 중복 확인을 완료해주세요.");
+      setModalMsg("이메일 중복 확인을 완료해주세요.");
+      setShowModal(true);
       setLoading(false);
       return;
     }
     if (!phoneValid) {
-      alert("전화번호 중복 확인을 완료해주세요.");
+      setModalMsg("전화번호 중복 확인을 완료해주세요.");
+      setShowModal(true);
       setLoading(false);
       return;
     }
     if (!emailVerified) {
-      alert("이메일 인증을 완료해주세요.");
+      setModalMsg("이메일 인증을 완료해주세요.");
+      setShowModal(true);
       setLoading(false);
       return;
     }
@@ -383,23 +397,31 @@ export default function Page() {
         }
       }
       if (response.ok) {
-        alert("회원가입 성공! 로그인 화면으로 이동합니다.");
-        window.location.href = "/seokgeun/login";
+        setModalMsg(
+          "축하합니다. 회원가입이 되었습니다. 확인 버튼을 누르면 로그인 페이지로 이동합니다."
+        );
+        setShowModal(true);
+        setIsSignupSuccess(true);
       } else if (response.status === 409) {
-        alert(data.message || "이미 존재하는 정보가 있습니다.");
+        setModalMsg(data.message || "이미 존재하는 정보가 있습니다.");
+        setShowModal(true);
       } else if (response.status === 401 || response.status === 419) {
-        alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+        setModalMsg("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+        setShowModal(true);
         window.location.href = "/seokgeun/login";
       } else {
-        alert(`회원가입 실패: ${data.message || response.status}`);
+        setModalMsg(`회원가입 실패: ${data.message || response.status}`);
+        setShowModal(true);
       }
     } catch (error) {
       if (error.name === "TypeError" && error.message.includes("fetch")) {
-        alert(
+        setModalMsg(
           "서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해주세요."
         );
+        setShowModal(true);
       } else {
-        alert("서버 통신 중 오류가 발생했습니다: " + error.message);
+        setModalMsg("서버 통신 중 오류가 발생했습니다: " + error.message);
+        setShowModal(true);
       }
     } finally {
       setLoading(false);
@@ -409,55 +431,72 @@ export default function Page() {
   // 중복 확인 이벤트
   const handleUserIdCheck = async () => {
     if (!form.userId.trim()) {
-      alert("아이디를 입력해주세요.");
+      setModalMsg("아이디를 입력해주세요.");
+      setShowModal(true);
       return;
     }
     const validationError = validateField("userId", form.userId);
     if (validationError) {
-      alert(validationError);
+      setModalMsg(validationError);
+      setShowModal(true);
       return;
     }
     const isDup = await checkUserId(form.userId);
-    alert(isDup ? "이미 존재하는 아이디입니다." : "사용 가능한 아이디입니다.");
+    setModalMsg(
+      isDup ? "이미 존재하는 아이디입니다." : "사용 가능한 아이디입니다."
+    );
+    setShowModal(true);
     setUserIdValid(!isDup);
   };
   const handleNicknameCheck = async () => {
     if (!form.nickname.trim()) {
-      alert("닉네임을 입력해주세요.");
+      setModalMsg("닉네임을 입력해주세요.");
+      setShowModal(true);
       return;
     }
     const isDup = await checkNickname(form.nickname);
-    alert(isDup ? "이미 존재하는 닉네임입니다." : "사용 가능한 닉네임입니다.");
+    setModalMsg(
+      isDup ? "이미 존재하는 닉네임입니다." : "사용 가능한 닉네임입니다."
+    );
+    setShowModal(true);
     setNicknameValid(!isDup);
   };
   const handleEmailCheck = async () => {
     if (!form.email.trim()) {
-      alert("이메일을 입력해주세요.");
+      setModalMsg("이메일을 입력해주세요.");
+      setShowModal(true);
       return;
     }
     const validationError = validateField("email", form.email);
     if (validationError) {
-      alert(validationError);
+      setModalMsg(validationError);
+      setShowModal(true);
       return;
     }
     const isDup = await checkEmail(form.email);
-    alert(isDup ? "이미 존재하는 이메일입니다." : "사용 가능한 이메일입니다.");
+    setModalMsg(
+      isDup ? "이미 존재하는 이메일입니다." : "사용 가능한 이메일입니다."
+    );
+    setShowModal(true);
     setEmailValid(!isDup);
   };
   const handlePhoneCheck = async () => {
     if (!form.phone.trim()) {
-      alert("전화번호를 입력해주세요.");
+      setModalMsg("전화번호를 입력해주세요.");
+      setShowModal(true);
       return;
     }
     const validationError = validateField("phone", form.phone);
     if (validationError) {
-      alert(validationError);
+      setModalMsg(validationError);
+      setShowModal(true);
       return;
     }
     const isDup = await checkPhone(form.phone);
-    alert(
+    setModalMsg(
       isDup ? "이미 존재하는 전화번호입니다." : "사용 가능한 전화번호입니다."
     );
+    setShowModal(true);
     setPhoneValid(!isDup);
   };
 
@@ -774,6 +813,26 @@ export default function Page() {
           </div>
         </form>
       </div>
+      {showModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalContent}>
+              <p style={{ whiteSpace: "pre-line" }}>{modalMsg}</p>
+              <button
+                className={styles.modalButton}
+                onClick={() => {
+                  setShowModal(false);
+                  if (isSignupSuccess) {
+                    window.location.href = "/seokgeun/login";
+                  }
+                }}
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
