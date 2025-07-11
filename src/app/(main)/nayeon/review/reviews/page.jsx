@@ -1,4 +1,4 @@
-import ReviewComponent from "../review-component";
+import ReviewComponent from "./../review-component";
 
 export default function ReviewsPage() {
   return (

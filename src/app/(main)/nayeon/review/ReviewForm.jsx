@@ -1,9 +1,18 @@
 "use client";
+
+import axios from "axios";
 import { useState } from "react";
 import { X, Upload } from "lucide-react";
 import styles from "./reviewForm.module.css";
 
-const ReviewForm = ({ onClose, onSubmit }) => {
+const satisfactionMap = {
+  bad: 1,
+  neutral: 2,
+  good: 3,
+};
+
+const ReviewForm = ({ project, onClose, onSubmit }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [ratings, setRatings] = useState({
     quality: null,
@@ -13,57 +22,60 @@ const ReviewForm = ({ onClose, onSubmit }) => {
   const [reviewText, setReviewText] = useState("");
   const [images, setImages] = useState([]);
 
-  // X 버튼 클릭 시 확인 모달 띄우기
-  const handleCloseClick = () => {
-    setShowExitModal(true);
-  };
+  // 닫기 버튼 클릭 시 모달 표시
+  const handleCloseClick = () => setShowExitModal(true);
 
-  // 확인 모달에서 '나가기' 클릭
+  // 모달에서 '나가기' 클릭 시
   const handleExit = () => {
     setShowExitModal(false);
     onClose();
   };
 
-  // 확인 모달에서 '취소' 클릭
-  const handleCancel = () => {
-    setShowExitModal(false);
-  };
+  // 모달에서 '취소' 클릭 시
+  const handleCancel = () => setShowExitModal(false);
 
+  // 평점 변경
   const handleRatingChange = (category, value) => {
-    setRatings((prev) => ({
-      ...prev,
-      [category]: value,
-    }));
+    setRatings((prev) => ({ ...prev, [category]: value }));
   };
 
-  // 이미지 선택 시 처리 함수
+  // 이미지 선택 시
   const handleImageChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    const totalImages = images.concat(selectedFiles);
-    if (totalImages.length > 10) {
+
+    if (images.length + selectedFiles.length > 10) {
       alert("최대 10개까지 업로드 가능합니다.");
       return;
     }
-    setImages(totalImages);
+
+    setImages((prev) => [...prev, ...selectedFiles]);
   };
 
-  // 이미지 삭제 함수
+  // 이미지 삭제
   const handleImageRemove = (index) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // 후기 제출 처리
-  const handleSubmit = () => {
-    // 새로운 후기 데이터 생성 (실제로는 서버에서 받아올 데이터)
-    const newReview = {
-      reviewNo: Date.now(), // 임시 ID
-      projectTitle: "[구인] 네이버웹툰 <마루는 강쥐> 나랑 살 언니 찾습니다",
-      content: reviewText,
-      rating: 5, // 임시 평점
-      createdDate: new Date().toISOString(),
-    };
+  // 유효성 검사
+  const isFormValid = () =>
+    ratings.quality &&
+    ratings.plan &&
+    ratings.communication &&
+    reviewText.length >= 20;
 
-    onSubmit(newReview);
+  // 제출 조건
+  const handleSubmit = () => {
+    if (!isFormValid()) {
+      alert("모든 평점과 후기를 올바르게 작성해주세요.");
+      return;
+    }
+    onSubmit({
+      projectNo: project.projectNo,
+      rewardStatus: satisfactionMap[ratings.quality],
+      planStatus: satisfactionMap[ratings.plan],
+      commStatus: satisfactionMap[ratings.communication],
+      content: reviewText,
+    });
   };
 
   const SmileyButton = ({ type, isSelected, onClick, label }) => {
@@ -152,15 +164,6 @@ const ReviewForm = ({ onClose, onSubmit }) => {
     );
   };
 
-  const isFormValid = () => {
-    return (
-      ratings.quality !== null &&
-      ratings.plan !== null &&
-      ratings.communication !== null &&
-      reviewText.length >= 20
-    );
-  };
-
   return (
     <>
       <div className={styles.overlay}>
@@ -175,16 +178,16 @@ const ReviewForm = ({ onClose, onSubmit }) => {
           <div className={styles.content}>
             {/* Project Info */}
             <div className={styles.projectInfo}>
-              <img
+              {/* <img
                 src="https://img.tumblbug.com/eyJidWNrZXQiOiJ0dW1ibGJ1Zy1pbWctYXNzZXRzIiwia2V5IjoiY292ZXIvMGY2MmM2MGYtZjljNS00YWQ4LThlMmYtYTZiOTViYjMxY2YyLzBhZTYxMDY2LWFmMjAtNGFhOC05ZmYzLTg4MWQ5OTg3OTJhNy5qcGVnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjo2MjAsImhlaWdodCI6NDY1LCJ3aXRob3V0RW5sYXJnZW1lbnQiOnRydWUsImZpdCI6bnVsbH0sInJvdW5kQ3JvcCI6ZmFsc2UsInJvdGF0ZSI6bnVsbH19"
                 alt="Project Cover"
                 className={styles.projectImage}
-              />
+              /> 추후 추가 */}
               <div>
-                <div className={styles.projectCreator}>네이버웹툰</div>
-                <div className={styles.projectTitle}>
-                  [구인] 네이버웹툰 &lt;마루는 강쥐&gt; 나랑 살 언니 찾습니다
-                </div>
+                {/* <div className={styles.projectCreator}>
+                  {project.creator_name}
+                </div> 추후 추가 */}
+                <div className={styles.projectTitle}>{project.title}</div>
               </div>
             </div>
             {/* Rating Questions */}
@@ -387,12 +390,13 @@ const ReviewForm = ({ onClose, onSubmit }) => {
           {/* Footer Button */}
           <div className={styles.footer}>
             <button
+              type="button"
               className={`${styles.submitButton} ${
                 isFormValid()
                   ? styles.submitButtonEnabled
                   : styles.submitButtonDisabled
               }`}
-              disabled={!isFormValid()}
+              disabled={!isFormValid() || isSubmitting}
               onClick={handleSubmit}
             >
               후기 작성 완료
