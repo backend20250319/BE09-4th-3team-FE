@@ -13,6 +13,7 @@ import { ChevronUp, ChevronDown, Heart, Package, Plus, Minus } from "lucide-reac
 import Image from "next/image"
 import PledgeHeader from "@/components/header/PledgeHeader"
 import { useRouter } from "next/navigation"
+import { requireAccessTokenOrRedirect } from "@/lib/utils"
 
 
 export default function PledgePage() {
@@ -38,13 +39,10 @@ export default function PledgePage() {
   // 사용자 정보 가져오기
   useEffect(() => {
     const fetchUserInfo = async () => {
-      try {
-        const token = sessionStorage.getItem('accessToken');
-        if (!token) {
-          alert('로그인이 필요합니다.');
-          return;
-        }
+      const token = requireAccessTokenOrRedirect()
+      if (!token) return
 
+      try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/register/user/me`, {
           headers: {
             'Authorization': `Bearer ${token}`
