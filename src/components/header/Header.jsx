@@ -14,9 +14,9 @@ const getProfileImgUrl = (img) => {
   if (img.startsWith("data:")) return img;
   // 절대경로(http/https)
   if (img.startsWith("http")) return img;
-  // 상대경로(/profile_images/xxx.png) -> 도메인 붙여서 (한글, 공백 등 인코딩)
-  if (img.startsWith("/")) return "http://localhost:8888" + encodeURI(img);
-  // 그 외엔 기본 이미지
+  // 상대경로(/profile_images/xxx.png) -> 백엔드 API 서버에서 가져오기
+  if (img.startsWith("/profile_images/")) return "http://localhost:8888" + encodeURI(img);
+  // 그 외엔 기본 이미지 (정적 파일은 Next.js public 폴더에서)
   return "/images/default_login_icon.png";
 };
 

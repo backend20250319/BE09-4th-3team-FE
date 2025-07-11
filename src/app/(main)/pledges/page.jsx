@@ -126,15 +126,6 @@ export default function MyProjectsPage() {
                         <span className="font-bold text-gray-800">
                           {pledge.totalAmount?.toLocaleString()}원
                         </span>
-                        <span className={`text-xs px-2 py-1 rounded ${
-                          pledge.pledgeStatus === 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                          pledge.pledgeStatus === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {pledge.pledgeStatus === 'COMPLETED' ? '완료' :
-                           pledge.pledgeStatus === 'PENDING' ? '대기중' :
-                           pledge.pledgeStatus}
-                        </span>
                       </div>
                     </div>
                   </div>
