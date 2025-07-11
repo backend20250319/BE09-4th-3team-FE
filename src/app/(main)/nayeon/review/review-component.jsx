@@ -84,7 +84,8 @@ export default function ReviewComponent({ projectNo }) {
 
   if (loading) return <div>리뷰를 불러오는 중...</div>;
   if (error) return <div>{error}</div>;
-  if (showAllReviews) return <ReviewAllPage onBack={handleBackToSummary} />;
+  if (showAllReviews)
+    return <ReviewAllPage projectNo={projectNo} onBack={handleBackToSummary} />;
 
   return (
     <div className={styles.container}>

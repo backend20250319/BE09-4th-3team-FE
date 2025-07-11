@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import styles from "./ReviewAllPage.module.css";
 
-export default function ReviewAllPage({ onBack }) {
+export default function ReviewAllPage({ onBack, projectNo }) {
   const [allReviews, setAllReviews] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState("latest");
@@ -24,10 +24,14 @@ export default function ReviewAllPage({ onBack }) {
 
   const reviewsPerPage = 10;
 
-  // 하드코딩 프로젝트 번호 (나중에 props 등으로 받아올 수 있음)
-  const projectNo = 2;
+  // 인증 헤더 함수 추가
+  const getAuthHeaders = () => {
+    const token = sessionStorage.getItem("accessToken");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
 
   useEffect(() => {
+    if (!projectNo) return; // projectNo 없으면 호출 중단
     const fetchReviews = async () => {
       setLoading(true);
       setError(null);
@@ -36,7 +40,8 @@ export default function ReviewAllPage({ onBack }) {
         const response = await axios.get(
           `http://localhost:8888/reviews/project/${projectNo}?page=${
             currentPage - 1
-          }&size=${reviewsPerPage}&sort=${sortBy}`
+          }&size=${reviewsPerPage}&sort=${sortBy}`,
+          { headers: getAuthHeaders() } // 헤더에 토큰 포함
         );
 
         setAllReviews(response.data.content);
@@ -162,12 +167,11 @@ export default function ReviewAllPage({ onBack }) {
               <div className={styles.reviewHeader}>
                 <div className={styles.authorInfo}>
                   {/* 아바타 이미지 영역 - 필요 없으면 주석 처리 */}
-                  {/*
+                  {/* 
                   <div className={styles.avatar}>
                     <img
                       src={
-                        review.user?.avatar ||
-                        "/placeholder.svg?height=40&width=40"
+                        review.user?.avatar || "/placeholder.svg?height=40&width=40"
                       }
                       alt="프로필"
                     />
