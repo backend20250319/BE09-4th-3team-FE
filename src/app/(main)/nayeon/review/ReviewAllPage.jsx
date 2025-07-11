@@ -2,14 +2,7 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  MoreHorizontal,
-  ThumbsUp,
-  ThumbsDown,
-  MessageCircle,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 import styles from "./ReviewAllPage.module.css";
 
 export default function ReviewAllPage({ onBack, projectNo }) {
@@ -24,26 +17,47 @@ export default function ReviewAllPage({ onBack, projectNo }) {
 
   const reviewsPerPage = 10;
 
-  // 인증 헤더 함수 추가
+  // ✅ 상태 텍스트 매핑
+  const statusTextMap = {
+    rewardStatus: {
+      5: "프로젝트 만족해요",
+      3: "프로젝트 보통이에요",
+      1: "프로젝트 아쉬워요",
+    },
+    planStatus: {
+      5: "계획 준수 잘 지켰어요",
+      3: "계획 준수 무난했어요",
+      1: "계획 준수 아쉽게 지켰어요",
+    },
+    commStatus: {
+      5: "소통이 친절했어요",
+      3: "소통이 보통이에요",
+      1: "소통이 아쉬웠어요",
+    },
+  };
+
+  const getStatusText = (type, value) => {
+    return statusTextMap[type][value] || "정보 없음";
+  };
+
   const getAuthHeaders = () => {
     const token = sessionStorage.getItem("accessToken");
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
   useEffect(() => {
-    if (!projectNo) return; // projectNo 없으면 호출 중단
+    if (!projectNo) return;
+
     const fetchReviews = async () => {
       setLoading(true);
       setError(null);
-
       try {
         const response = await axios.get(
           `http://localhost:8888/reviews/project/${projectNo}?page=${
             currentPage - 1
           }&size=${reviewsPerPage}&sort=${sortBy}`,
-          { headers: getAuthHeaders() } // 헤더에 토큰 포함
+          { headers: getAuthHeaders() }
         );
-
         setAllReviews(response.data.content);
         setTotalPages(response.data.totalPages);
         setTotalElements(response.data.totalElements);
@@ -146,7 +160,6 @@ export default function ReviewAllPage({ onBack, projectNo }) {
         </div>
       </div>
 
-      {/* 페이지 정보 */}
       <div className={styles.pageInfo}>
         <span>
           {currentPage} / {totalPages} 페이지
@@ -166,17 +179,6 @@ export default function ReviewAllPage({ onBack, projectNo }) {
             <div key={review.reviewNo} className={styles.reviewCard}>
               <div className={styles.reviewHeader}>
                 <div className={styles.authorInfo}>
-                  {/* 아바타 이미지 영역 - 필요 없으면 주석 처리 */}
-                  {/* 
-                  <div className={styles.avatar}>
-                    <img
-                      src={
-                        review.user?.avatar || "/placeholder.svg?height=40&width=40"
-                      }
-                      alt="프로필"
-                    />
-                  </div>
-                  */}
                   <div className={styles.authorDetails}>
                     <div className={styles.authorName}>
                       <span>{review.userNickname || "익명"}</span>
@@ -205,15 +207,18 @@ export default function ReviewAllPage({ onBack, projectNo }) {
               </div>
 
               <div className={styles.reviewContent}>
-                {review.tags && review.tags.length > 0 && (
-                  <div className={styles.tagContainer}>
-                    {review.tags.map((tag, index) => (
-                      <span key={index} className={styles.tag}>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                {/* ✅ 상태 텍스트 태그 추가 */}
+                <div className={styles.statusTags}>
+                  <span className={styles.statusTag}>
+                    {getStatusText("rewardStatus", review.rewardStatus)}
+                  </span>
+                  <span className={styles.statusTag}>
+                    {getStatusText("planStatus", review.planStatus)}
+                  </span>
+                  <span className={styles.statusTag}>
+                    {getStatusText("commStatus", review.commStatus)}
+                  </span>
+                </div>
 
                 <p className={styles.reviewText}>{review.content}</p>
 
@@ -226,10 +231,6 @@ export default function ReviewAllPage({ onBack, projectNo }) {
                     />
                   </div>
                 )}
-              </div>
-
-              <div className={styles.reviewActions}>
-                <div className={styles.helpfulButtons}></div>
               </div>
             </div>
           ))
