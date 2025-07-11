@@ -229,22 +229,7 @@ export default function ReviewAllPage({ onBack, projectNo }) {
               </div>
 
               <div className={styles.reviewActions}>
-                <div className={styles.helpfulButtons}>
-                  <button className={styles.helpfulButton}>
-                    <ThumbsUp size={16} />
-                    <span>
-                      도움됨 {review.rewardStatus /* 적절한 필드로 교체 필요 */}
-                    </span>
-                  </button>
-                  <button className={styles.helpfulButton}>
-                    <ThumbsDown size={16} />
-                    <span>0</span> {/* unhelpful 데이터 없으면 0 으로 표시 */}
-                  </button>
-                </div>
-                <button className={styles.replyButton}>
-                  <MessageCircle size={16} />
-                  <span>답글</span>
-                </button>
+                <div className={styles.helpfulButtons}></div>
               </div>
             </div>
           ))

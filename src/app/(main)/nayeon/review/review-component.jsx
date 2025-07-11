@@ -174,23 +174,6 @@ export default function ReviewComponent({ projectNo }) {
                 </div>
               )}
             </div>
-
-            <div className={styles.reviewActions}>
-              <div className={styles.helpfulButtons}>
-                <button className={styles.helpfulButton}>
-                  <ThumbsUp size={16} />
-                  <span>도움됨 {review.rewardStatus}</span>
-                </button>
-                <button className={styles.helpfulButton}>
-                  <ThumbsDown size={16} />
-                  <span>{review.unhelpful || 0}</span>
-                </button>
-              </div>
-              <button className={styles.replyButton}>
-                <MessageCircle size={16} />
-                <span>답글</span>
-              </button>
-            </div>
           </div>
         ))}
       </div>
