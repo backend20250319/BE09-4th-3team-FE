@@ -35,7 +35,7 @@
 .mysettings-horizontal-tab.active {
   color: #191919;
   font-weight: 700;
-  border-bottom: 3px solid #191919;
+  border-bottom: 3px solid #dd6706;
 }
 .mysettings-profile-table-row-wrapper {
   display: flex;
@@ -53,8 +53,8 @@
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  padding: 32px 0 20px 0;
-  min-height: 40px;
+  padding: 0 0 0 0;
+  min-height: 20px;
   border-bottom: 1px solid #ececec;
   position: relative;
 }
@@ -81,7 +81,6 @@
   font-size: 15px;
   font-weight: 700;
   color: #222;
-  margin-bottom: 0px;
   margin-top: 10px;
 }
 .mysettings-profile-value {
@@ -99,9 +98,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 24px;
-  margin-right: 24px;
+  margin-left: 0;
+  margin-right: 0;
   cursor: pointer;
+  align-self: flex-start;
 }
 .mysettings-profile-img {
   width: 56px;
@@ -158,7 +158,7 @@
 .mysettings-edit-btn,
 .mysettings-cancel-btn {
   margin-left: 0;
-  margin-bottom: px;
+  margin-bottom: 0;
   align-self: center;
 }
 .mysettings-edit-btn {
@@ -194,7 +194,7 @@
   padding-bottom: 0;
 }
 .mysettings-save-btn {
-  background: #191919;
+  background: #dd6706;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -242,14 +242,30 @@
   margin-top: 8px;
   padding-left: 0;
 }
-.mysettings-profile-img-wrap {
-  margin-left: 0 !important;
-  align-self: flex-start;
-  display: block;
+
+.mysettings-profile-img-edit-wrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f3f3f3;
+  border: 1.5px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border 0.2s;
 }
-.mysettings-profile-img {
-  display: block;
-  margin: 0;
+
+.mysettings-profile-img-edit-wrap:hover {
+  border: 1.5px solid #d32f2f;
+}
+
+.mysettings-profile-img-edit {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .mysettings-profile-img-edit-row {
@@ -314,4 +330,38 @@
     min-width: 0;
     max-width: 100%;
   }
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  padding: 32px 24px;
+  min-width: 280px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
+}
+.modalContent {
+  text-align: center;
+}
+.modalContent button {
+  margin-top: 24px;
+  padding: 8px 32px;
+  border-radius: 8px;
+  border: none;
+  background: #d32f2f;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
 }

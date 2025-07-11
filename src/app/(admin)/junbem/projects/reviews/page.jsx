@@ -10,46 +10,30 @@ export default function ProjectReviewPage() {
     const [selectedProject, setSelectedProject] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
-    // ✅ 프로젝트 상태 변경 함수
-    const handleStatusChange = async (projectId, status) => {
-        const statusCode = status === "approved" ? "APPROVED" : "REJECTED";
+    const [currentPage, setCurrentPage] = useState(1); // 페이지 번호 (1부터 시작)
+    const [totalPages, setTotalPages] = useState(1);   // 총 페이지 수 (API 응답 기반)
 
-        try {
-            const token = localStorage.getItem("accessToken"); // ✅ 선언 추가
-
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/projects?status=WAITING_APPROVAL`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!res.ok) throw new Error("상태 변경 실패");
-
-            // 🔄 성공 시 목록에서 제거
-            setProjects((prev) => prev.filter((p) => p.id !== projectId));
-        } catch (error) {
-            console.error("상태 변경 오류:", error);
-            alert("프로젝트 상태 변경에 실패했습니다.");
-        }
-    };
 
     // 🔽 API에서 승인 대기(WAITING_APPROVAL) 상태 프로젝트 불러오기
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                const token = sessionStorage.getItem("accessToken"); // ✅ 선언 추가
+                const token = sessionStorage.getItem("accessToken");
 
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/projects?status=WAITING_APPROVAL`, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/projects?page=${currentPage - 1}&productStatus=WAITING_APPROVAL`,
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
 
                 if (!res.ok) throw new Error("서버 응답 오류");
 
                 const data = await res.json();
+                setTotalPages(data.totalPages); // ✅ 총 페이지 수 저장
 
                 const waitingProjects = data.content
                     .filter((item) => item.productStatus === "WAITING_APPROVAL")
@@ -63,7 +47,7 @@ export default function ProjectReviewPage() {
                             currency: "KRW",
                         }),
                         date: new Date(item.createdAt).toLocaleDateString("ko-KR"),
-                        description: item.description.replace(/<[^>]+>/g, ""), // HTML 제거
+                        description: item.description.replace(/<[^>]+>/g, ""),
                     }));
 
                 setProjects(waitingProjects);
@@ -73,8 +57,37 @@ export default function ProjectReviewPage() {
         };
 
         fetchProjects();
-    }, []);
+    }, [currentPage]); // ✅ 페이지 변경 시 새로 요청
 
+
+    // ✅ 프로젝트 상태 변경 함수
+    const handleStatusChange = async (projectId, status) => {
+        const statusCode = status === "approved" ? "APPROVED" : "REJECTED";
+
+        try {
+            const token = sessionStorage.getItem("accessToken");
+
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/projects/status`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    projectId: projectId,
+                    productStatus: statusCode,
+                }),
+            });
+
+            if (!res.ok) throw new Error("상태 변경 실패");
+
+            // 🔄 성공 시 목록에서 제거
+            setProjects((prev) => prev.filter((p) => p.id !== projectId));
+        } catch (error) {
+            console.error("상태 변경 오류:", error);
+            alert("프로젝트 상태 변경에 실패했습니다.");
+        }
+    };
 
     const openModal = (project) => {
         setSelectedProject(project);
@@ -164,6 +177,27 @@ export default function ProjectReviewPage() {
                     </table>
                 </div>
             </div>
+
+            <div className="flex justify-center mt-6 gap-2">
+                <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    className="px-3 py-1 border rounded disabled:opacity-50  cursor-pointer"
+                >
+                    이전
+                </button>
+                <span className="text-sm py-1">
+                    {currentPage} / {totalPages}
+                </span>
+                <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    className="px-3 py-1 border rounded disabled:opacity-50  cursor-pointer"
+                >
+                    다음
+                </button>
+            </div>
+
 
             {/* 🔹 모달 */}
             {showModal && selectedProject && (

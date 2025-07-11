@@ -19,13 +19,20 @@ export default function ReviewComponent({ projectNo }) {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [showAllReviews, setShowAllReviews] = useState(false);
 
-  const fixedProjectNo = 2;
+  // 토큰이 있을 경우 요청 헤더에 넣기 위한 함수
+  const getAuthHeaders = () => {
+    const token = sessionStorage.getItem("accessToken");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
 
   useEffect(() => {
+    if (!projectNo) return; // 프로젝트 번호 없으면 요청 안 함
+    setLoading(true);
     const fetchReviews = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8888/reviews/project/${fixedProjectNo}?page=0&size=5&sort=${sortBy}`
+          `http://localhost:8888/reviews/project/${projectNo}?page=0&size=5&sort=${sortBy}`,
+          { headers: getAuthHeaders() }
         );
         setReviews(response.data.content);
         setLoading(false);
@@ -37,7 +44,7 @@ export default function ReviewComponent({ projectNo }) {
     };
 
     fetchReviews();
-  }, [sortBy]);
+  }, [projectNo, sortBy]);
 
   const toggleDropdown = (reviewId) => {
     setActiveDropdown(activeDropdown === reviewId ? null : reviewId);
@@ -106,7 +113,7 @@ export default function ReviewComponent({ projectNo }) {
             <div className={styles.reviewHeader}>
               <div className={styles.authorInfo}>
                 {/* 아바타 이미지 영역 - 필요 없으면 주석 처리 */}
-                {/*
+                {/* 
                 <div className={styles.avatar}>
                   <img
                     src={review.author?.avatar || "/placeholder.svg"}

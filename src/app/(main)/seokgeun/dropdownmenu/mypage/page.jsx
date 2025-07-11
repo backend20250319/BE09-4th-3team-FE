@@ -115,7 +115,12 @@ export default function MyPage() {
       <div className="sponsored-divider"></div>
       <div className="mypage-profile-row">
         <div className="mypage-profile-img">
-          {/* <Image src={profileImg} width={80} height={80} alt="프로필" /> */}
+          <Image
+            src="/images/default_login_icon.png"
+            width={120}
+            height={120}
+            alt="프로필"
+          />
         </div>
         <div className="mypage-profile-info">
           <div className="mypage-nickname">{user?.nickname || "-"}</div>

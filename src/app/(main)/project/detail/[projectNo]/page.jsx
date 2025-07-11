@@ -19,6 +19,13 @@ export default function Page() {
   const { projectNo } = useParams();
   const [project, setProject] = useState(null);
 
+  const onClickGoPledge = () => {
+    window.scrollTo({
+      top: 1090,
+      behavior: "smooth", // 부드러운 스크롤
+    });
+  };
+
   // 결제 진행 날짜 +1일
   const getNextDay = (dateString) => {
     const date = new Date(dateString);
@@ -113,7 +120,10 @@ export default function Page() {
               <div>
                 <Share2 />
               </div>
-              <button className="w-full h-[48px] cursor-pointer py-[14px] px-5 rounded-[8px] gap-1 flex items-center justify-center border-0 text-base bg-[#1c1c1c] text-white">
+              <button
+                onClick={onClickGoPledge}
+                className="w-full h-[48px] cursor-pointer py-[14px] px-5 rounded-[8px] gap-1 flex items-center justify-center border-0 text-base bg-[#1c1c1c] text-white"
+              >
                 후원하기
               </button>
             </div>
