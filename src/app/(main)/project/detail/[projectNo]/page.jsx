@@ -26,34 +26,30 @@ export default function Page() {
   // 선물 수량 변경
   const updateRewardQuantity = (rewardId, newQuantity) => {
     if (newQuantity < 1) return;
-    
-    setSelectedRewards(prev => 
-      prev.map(reward => 
-        reward.id === rewardId 
-          ? { ...reward, quantity: newQuantity }
-          : reward
-      )
+
+    setSelectedRewards((prev) =>
+      prev.map((reward) => (reward.id === rewardId ? { ...reward, quantity: newQuantity } : reward))
     );
   };
 
   // 선물 제거
   const removeReward = (rewardId) => {
-    setSelectedRewards(prev => prev.filter(reward => reward.id !== rewardId));
+    setSelectedRewards((prev) => prev.filter((reward) => reward.id !== rewardId));
   };
 
   // 선물 추가
   const addReward = (reward) => {
-    const existingReward = selectedRewards.find(r => r.id === reward.id);
+    const existingReward = selectedRewards.find((r) => r.id === reward.id);
     if (existingReward) {
       updateRewardQuantity(reward.id, existingReward.quantity + 1);
     } else {
-      setSelectedRewards(prev => [...prev, { ...reward, quantity: 1 }]);
+      setSelectedRewards((prev) => [...prev, { ...reward, quantity: 1 }]);
     }
   };
 
   // 선택된 선물들의 총 금액 계산
   const selectedRewardsTotal = selectedRewards.reduce((sum, reward) => {
-    return sum + (reward.amount * reward.quantity);
+    return sum + reward.amount * reward.quantity;
   }, 0);
 
   const onClickGoPledge = () => {
@@ -65,7 +61,7 @@ export default function Page() {
 
   const handlePledge = () => {
     if (selectedRewards.length === 0) {
-      alert('최소 1개 이상의 선물을 선택해주세요.');
+      alert("최소 1개 이상의 선물을 선택해주세요.");
       return;
     }
     const cartId = uuidv4();
@@ -96,7 +92,7 @@ export default function Page() {
   }, [projectNo]);
 
   return project ? (
-    <main className="bg-white h-[2000px]">
+    <main className="bg-white">
       <div className="pt-8 w-[1040px] max-w-[1160px] flex flex-col mx-auto">
         <div className="flex text-[#545454] text-xs leading-[120%] items-center mb-3">
           {project.categoryName}
@@ -211,8 +207,8 @@ export default function Page() {
             </TabsList>
             <TabsContent value="section01" className="flex gap-[38px]">
               <ProjectPlan project={project} />
-              <ProjectInfo 
-                project={project} 
+              <ProjectInfo
+                project={project}
                 selectedRewards={selectedRewards}
                 onAddReward={addReward}
                 onUpdateQuantity={updateRewardQuantity}
@@ -229,8 +225,8 @@ export default function Page() {
             </TabsContent>
             <TabsContent value="section04" className="flex gap-[38px]">
               <ProjectReview project={project} />
-              <ProjectInfo 
-                project={project} 
+              <ProjectInfo
+                project={project}
                 selectedRewards={selectedRewards}
                 onAddReward={addReward}
                 onUpdateQuantity={updateRewardQuantity}
