@@ -6,7 +6,7 @@ import Image from "next/image";
 
 export default function Footer() {
   return (
-    <footer className="relative w-full border-t border-[#efefef]">
+    <footer className="relative w-full border-t border-[#efefef] z-50">
       <div className="relative overflow-hidden flex w-full items-center justify-center flex-col bg-white">
         {/* 첫번째 푸터 */}
         <section className="w-[1160px] flex flex-row justify-between max-h-[220px] min-h-[178px] ">
