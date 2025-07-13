@@ -52,7 +52,7 @@ export default function Page() {
   };
 
   return (
-    <div className="w-[1160px] mx-auto">
+    <div className="w-[1160px] mx-auto my-10">
       <div className="text-base leading-[27px] mx-auto pt-4 pr-5 pb-3">
         <span className="text-[#ff5757]">{approvedCount}</span>개의 프로젝트가 있습니다.
       </div>
