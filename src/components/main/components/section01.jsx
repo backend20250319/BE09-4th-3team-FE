@@ -1,5 +1,4 @@
 "use client";
-import axios from "axios";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -12,15 +11,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { getDday } from "@/components/utils/dday";
 
-export default function Section01() {
-  const [projects, setProjects] = useState([]);
-  const [pagination, setPagination] = useState({
-    page: 0,
-    size: 12,
-    totalPages: 0,
-    totalElements: 0,
-  });
-
+export default function Section01({ projects }) {
   const [currentIndex, setCurrentIndex] = useState(1);
   const swiperRef = useRef(null);
 
@@ -33,24 +24,6 @@ export default function Section01() {
         setCurrentIndex(swiperRef.current.realIndex + 1);
       });
     }
-  }, []);
-
-  const fetchProjects = async (page = 0, size = 12) => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/project/list`, {
-        params: { page, size },
-      });
-      if (response.data.success) {
-        setProjects(response.data.data);
-        setPagination(response.data.pagination);
-      }
-    } catch (error) {
-      console.error("프로젝트 목록 조회 실패:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchProjects();
   }, []);
 
   const formatCustomDate = (date = new Date()) => {
@@ -142,8 +115,13 @@ export default function Section01() {
 
                     <div className="pt-4 flex flex-col">
                       <p className="text-xs leading-[120%] text-[#545454]">{project.creatorName}</p>
-                      <h2 className="text-base pb-1 text-[#1c1c1c] mb-[6px] ">{project.title}</h2>
+                      <h2 className="text-base pb-1 text-[#1c1c1c] ">{project.title}</h2>
                     </div>
+                    {project.creatorName == "hoya" && (
+                      <div>
+                        <Image src={"/main/goodCreator.png"} alt="좋은 창작자" width={60} height={17} />
+                      </div>
+                    )}
                     <div className="pb-1 text-sm">
                       <div className="flex justify-between">
                         <div className="flex gap-1">
@@ -178,7 +156,7 @@ export default function Section01() {
                       alt={project.title}
                       width={116}
                       height={116}
-                      className="object-cover w-[116px] h-[116px] flex-shrink-0 rounded-[8px]"
+                      className="object-cover w-[116px] h-[116px] flex-shrink-0 rounded-[8px] hover:scale-110 duration-300 ease-in-out transition-all"
                     />
                   ) : (
                     <div className="w-[116px] h-[116px] bg-gray-200 flex items-center justify-center text-sm text-gray-500 rounded-[8px] flex-shrink-0">
@@ -202,8 +180,13 @@ export default function Section01() {
                     <div className="bg-[#f0f0f0] w-12 text-[#545454] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center px-1 rounded-[2px]">
                       {getDday(project.startLine, project.deadLine)}일 남음
                     </div>
-                    <div className="pb-1 text-sm">
+                    <div className="pb-1 text-sm flex flex-col">
                       <p className="text-sm text-[#eb4b38] font-bold">{project.percent}% 달성</p>
+                      {project.creatorName == "hoya" && (
+                        <div>
+                          <Image src={"/main/goodCreator.png"} alt="좋은 창작자" width={60} height={17} />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
