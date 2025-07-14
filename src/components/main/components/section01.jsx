@@ -112,16 +112,10 @@ export default function Section01({ projects }) {
                         이미지 없음
                       </div>
                     )}
-
                     <div className="pt-4 flex flex-col">
                       <p className="text-xs leading-[120%] text-[#545454]">{project.creatorName}</p>
-                      <h2 className="text-base pb-1 text-[#1c1c1c] ">{project.title}</h2>
+                      <h2 className="text-sm pb-1 text-[#1c1c1c] ">{project.title}</h2>
                     </div>
-                    {project.creatorName == "hoya" && (
-                      <div>
-                        <Image src={"/main/goodCreator.png"} alt="좋은 창작자" width={60} height={17} />
-                      </div>
-                    )}
                     <div className="pb-1 text-sm">
                       <div className="flex justify-between">
                         <div className="flex gap-1">
@@ -129,17 +123,41 @@ export default function Section01({ projects }) {
                         </div>
                       </div>
                     </div>
+                    <div className="flex gap-1">
+                      {new Date(project.startLine) > new Date() ? (
+                        // 시작일이 미래 → 공개예정
+                        <div className="bg-[#EDE9FE] w-12 text-[#7C3AED] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                          공개예정
+                        </div>
+                      ) : (
+                        // 시작일이 오늘이거나 지남 → 진행중 + 남은 일수
+                        <div className="flex gap-1">
+                          <div className="bg-[#e0f7e9] w-12 text-[#34a853] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                            진행중
+                          </div>
+                          <div className="bg-[#F3F4F6] w-12 text-[#374151] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                            {getDday(project.startLine, project.deadLine)}일 남음
+                          </div>
+                        </div>
+                      )}
+                      {project.creatorName == "hoya" && (
+                        <div>
+                          <Image src={"/main/goodCreator.png"} alt="좋은 창작자" width={60} height={17} />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </Link>
               ))}
             </div>
           </div>
         </div>
+        {/* 측면 인기 프로젝트 */}
         <div className="max-w-[314px] w-[calc(100%-844px)]">
           <div className="mb-[22px]">
             <div className="flex justify-between items-center">
               <h2 className="text-xl text-[#0d0d0d]">인기 프로젝트</h2>
-              <Link href="/project/list" className="text-base font-normal leading-[120%] text-[#545454]">
+              <Link href="/project/list" className="text-sm font-normal leading-[120%] text-[#545454]">
                 전체보기
               </Link>
             </div>
@@ -172,16 +190,32 @@ export default function Section01({ projects }) {
                   </span>
 
                   {/* 텍스트 설명 */}
-                  <div className="ml-4 flex flex-col justify-between flex-1 gap-2">
+                  <div className="ml-4 flex flex-col justify-start gap-1 flex-1">
                     <div>
                       <p className="text-xs leading-[120%] text-[#545454]">{project.creatorName}</p>
                       <h2 className="text-base text-[#1c1c1c]">{project.title}</h2>
                     </div>
-                    <div className="bg-[#f0f0f0] w-12 text-[#545454] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center px-1 rounded-[2px]">
-                      {getDday(project.startLine, project.deadLine)}일 남음
-                    </div>
-                    <div className="pb-1 text-sm flex flex-col">
+
+                    <div className="pb-1 text-sm flex flex-col gap-1">
                       <p className="text-sm text-[#eb4b38] font-bold">{project.percent}% 달성</p>
+                    </div>
+                    <div className="flex gap-1">
+                      {new Date(project.startLine) > new Date() ? (
+                        // 시작일이 미래 → 공개예정
+                        <div className="bg-[#EDE9FE] w-12 text-[#7C3AED] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                          공개예정
+                        </div>
+                      ) : (
+                        // 시작일이 오늘이거나 지남 → 진행중 + 남은 일수
+                        <div className="flex gap-1">
+                          <div className="bg-[#e0f7e9] w-12 text-[#34a853] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                            진행중
+                          </div>
+                          <div className="bg-[#F3F4F6] w-12 text-[#374151] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                            {getDday(project.startLine, project.deadLine)}일 남음
+                          </div>
+                        </div>
+                      )}
                       {project.creatorName == "hoya" && (
                         <div>
                           <Image src={"/main/goodCreator.png"} alt="좋은 창작자" width={60} height={17} />
