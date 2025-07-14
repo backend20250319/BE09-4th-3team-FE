@@ -214,7 +214,7 @@ export default function LoginPage() {
                 textDecoration: "underline",
                 color: "#007bff",
                 fontWeight: "bold",
-                fontSize: "15px"
+                fontSize: "15px",
               }}
             >
               회원가입
