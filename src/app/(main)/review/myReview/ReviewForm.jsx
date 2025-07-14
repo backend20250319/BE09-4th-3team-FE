@@ -185,7 +185,7 @@ const ReviewForm = ({ project, onClose, onSubmit }) => {
               />
               <div>
                 <div className={styles.projectCreator}>
-                  {project.creator_name}
+                  {project.creatorName}
                 </div>
                 <div className={styles.projectTitle}>{project.title}</div>
               </div>

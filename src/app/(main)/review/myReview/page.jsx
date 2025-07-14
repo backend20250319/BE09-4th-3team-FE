@@ -141,7 +141,7 @@ const Page = () => {
         );
       } else {
         const response = await axios.post(
-          `http://localhost:8888/reviews`,
+          `http://localhost:8888/reviews/create`,
           reviewData,
           { headers: getAuthHeaders() }
         );
