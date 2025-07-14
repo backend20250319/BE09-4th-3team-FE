@@ -380,13 +380,16 @@ export default function Header() {
                   <Heart />
                 </Link>
               </li>
+
               {/* ADMIN으로 가는 icon 추가 */}
               {roleType === "ADMIN" && (
+
                   <li className="p-4">
-                    <Link href="/admin">
+                    <Link href="/admain">
                       <User />
                     </Link>
                   </li>
+
               )}
               <li className="p-4">
                 <Link href="/users/dropdownmenu/mynotification">

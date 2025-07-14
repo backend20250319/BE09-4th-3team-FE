@@ -1,4 +1,4 @@
-@import "../../node_modules/tailwindcss/dist/lib.d.mts";
+@import "tailwindcss";
 
 /* 전체 헤더 영역 */
 .dashboard-header {

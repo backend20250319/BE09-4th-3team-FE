@@ -1,4 +1,4 @@
-@import "../../../node_modules/tailwindcss/dist/lib.d.mts";
+@import "tailwindcss";
 
 /* 컨테이너 및 메인 영역 */
 .dashboard-container {

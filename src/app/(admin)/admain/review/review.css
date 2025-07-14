@@ -1,4 +1,4 @@
-@import "../../../../node_modules/tailwindcss/dist/lib.d.mts";
+@import "tailwindcss";
 
 .review-page {
     @apply p-8 bg-gray-50 min-h-screen font-sans;
