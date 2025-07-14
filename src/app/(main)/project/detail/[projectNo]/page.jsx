@@ -3,12 +3,11 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { ChevronRight, Download, Heart, Share2, Plus, Minus } from "lucide-react";
+import { ChevronRight, Download, Heart, Share2 } from "lucide-react";
 import Image from "next/image";
 import { getDday } from "@/components/utils/dday";
 import { numberWithCommas } from "@/components/utils/number";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import ProjectPlan from "../components/projectPlan";
 import ProjectReview from "../components/projectReview";
 import ProjectUpdate from "../components/projectUpdate";
@@ -174,7 +173,7 @@ export default function Page() {
         </div>
       </div>
       <div
-        className="h-[56px] px-[1rem] w-full flex items-stretch border-t relative border-[#e4e4e4]"
+        className="px-[1rem] w-full flex items-stretch border-t relative border-[#e4e4e4]"
         style={{ boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.08)" }}
       >
         <div className="flex justify-start items-stretch w-[1040px] mx-auto">
