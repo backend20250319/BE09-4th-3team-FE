@@ -1,7 +1,6 @@
 "use client";
-import Section01 from "@/components/main/section01";
-import Link from "next/link";
-import React, { useEffect } from "react";
+import Section01 from "@/components/main/components/section01";
+import { useEffect } from "react";
 
 export default function Main() {
   // OAuth 로그인 후 토큰 처리

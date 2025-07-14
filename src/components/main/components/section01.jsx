@@ -1,16 +1,16 @@
 "use client";
 import axios from "axios";
 import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
-import { CategoryBtn } from "./components/categoryBtn";
+import { CategoryBtn } from "./categoryBtn";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { getDday } from "../utils/dday";
+import { getDday } from "@/components/utils/dday";
 
 export default function Section01() {
   const [projects, setProjects] = useState([]);
@@ -194,10 +194,13 @@ export default function Section01() {
                   </span>
 
                   {/* 텍스트 설명 */}
-                  <div className="ml-4 flex flex-col justify-between flex-1">
+                  <div className="ml-4 flex flex-col justify-between flex-1 gap-2">
                     <div>
                       <p className="text-xs leading-[120%] text-[#545454]">{project.creatorName}</p>
-                      <h2 className="text-base pb-1 text-[#1c1c1c] mb-[6px] ">{project.title}</h2>
+                      <h2 className="text-base text-[#1c1c1c]">{project.title}</h2>
+                    </div>
+                    <div className="bg-[#f0f0f0] w-12 text-[#545454] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center px-1 rounded-[2px]">
+                      {getDday(project.startLine, project.deadLine)}일 남음
                     </div>
                     <div className="pb-1 text-sm">
                       <p className="text-sm text-[#eb4b38] font-bold">{project.percent}% 달성</p>
