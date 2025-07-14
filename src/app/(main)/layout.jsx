@@ -1,5 +1,6 @@
 import Header from "@/components/header/Header";
 import "./globals.css";
+import Footer from "@/components/footer/footer";
 
 export const metadata = {
   title: "텀블벅",
@@ -15,6 +16,7 @@ export default function RootLayout({ children }) {
       <body>
         <Header />
         {children}
+        <Footer />
       </body>
     </html>
   );

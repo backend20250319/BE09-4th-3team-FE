@@ -9,6 +9,7 @@ import Image from "next/image"
 import axios from "axios"
 import { useParams } from "next/navigation"
 import Link from "next/link"
+import { requireAccessTokenOrRedirect } from "@/lib/utils"
 
 export default function PledgeDetailPage() {
   const { id } = useParams()
@@ -18,17 +19,13 @@ export default function PledgeDetailPage() {
 
   useEffect(() => {
     const fetchPledgeDetail = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        
-        const token = sessionStorage.getItem("accessToken")
-        if (!token) {
-          setError("로그인이 필요합니다.")
-          setLoading(false)
-          return
-        }
+      setLoading(true)
+      setError(null)
 
+      const token = requireAccessTokenOrRedirect()
+      if (!token) return
+
+      try {
         // 후원 상세 정보 가져오기
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/pledge/${id}`, {
           headers: {

@@ -13,6 +13,7 @@ import { ChevronUp, ChevronDown, Heart, Package, Plus, Minus } from "lucide-reac
 import Image from "next/image"
 import PledgeHeader from "@/components/header/PledgeHeader"
 import { useRouter } from "next/navigation"
+import { requireAccessTokenOrRedirect } from "@/lib/utils"
 
 
 export default function PledgePage() {
@@ -38,13 +39,10 @@ export default function PledgePage() {
   // 사용자 정보 가져오기
   useEffect(() => {
     const fetchUserInfo = async () => {
-      try {
-        const token = sessionStorage.getItem('accessToken');
-        if (!token) {
-          alert('로그인이 필요합니다.');
-          return;
-        }
+      const token = requireAccessTokenOrRedirect()
+      if (!token) return
 
+      try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/register/user/me`, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -93,7 +91,17 @@ export default function PledgePage() {
     }
   }, [project, rewardId, selectedRewards.length]);
 
-  if (!project) return <div>로딩 중...</div>;
+  // 로딩 스피너 컴포넌트 추가
+  function LoadingSpinner() {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[300px]">
+        <div className="w-12 h-12 border-4 border-red-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <div className="text-gray-600 font-medium text-lg">프로젝트 정보를 불러오는 중...</div>
+      </div>
+    );
+  }
+
+  if (!project) return <LoadingSpinner />;
 
   // 선택된 선물들의 총 금액 계산
   const selectedRewardsTotal = selectedRewards.reduce((sum, reward) => {
@@ -351,15 +359,15 @@ export default function PledgePage() {
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <Checkbox 
-                      id="terms" 
-                      checked={termsConsent} 
+                    <Checkbox
+                      id="terms"
+                      checked={termsConsent}
                       onCheckedChange={(checked) => {
                         setTermsConsent(checked);
                         if (checked) {
                           setTermsExpanded(false);
                         }
-                      }} 
+                      }}
                     />
                     <div className="flex-1">
                       <div className="flex items-center justify-between">

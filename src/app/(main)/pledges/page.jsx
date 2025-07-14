@@ -6,6 +6,7 @@ import { Package } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import axios from "axios"
+import { requireAccessTokenOrRedirect } from "@/lib/utils"
 
 export default function MyPledgesPage() {
   const [pledges, setPledges] = useState([])
@@ -16,14 +17,11 @@ export default function MyPledgesPage() {
     async function fetchPledges() {
       setLoading(true)
       setError(null)
-      try {
-        const token = sessionStorage.getItem("accessToken")
-        if (!token) {
-          setError("로그인이 필요합니다.")
-          setLoading(false)
-          return
-        }
 
+      const token = requireAccessTokenOrRedirect()
+      if (!token) return
+
+      try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/pledge/my`, {
           headers: {
             'Authorization': `Bearer ${token}`

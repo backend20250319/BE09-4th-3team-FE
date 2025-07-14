@@ -6,19 +6,10 @@ import Link from "next/link";
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
-// 프로필 이미지 경로 안전하게 처리하는 함수
-// const getProfileImgUrl = (img) => {
-//   if (!img || img === "null" || typeof img !== "string")
-//     return "/images/default_login_icon.png";
-//   // base64는 미리보기 용
-//   if (img.startsWith("data:")) return img;
-//   // 절대경로(http/https)
-//   if (img.startsWith("http")) return img;
-//   // 상대경로(/profile_images/xxx.png) -> 도메인 붙여서 (한글, 공백 등 인코딩)
-//   if (img.startsWith("/")) return "http://localhost:8888" + encodeURI(img);
-//   // 그 외엔 기본 이미지
-//   return "/images/default_login_icon.png";
-// };
+// 석근: API BASE URL 추가
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8888";
+console.log("석근: 헤더 API_BASE_URL:", API_BASE_URL); // 이 줄 추가!
 
 export default function Header() {
   const pathname = usePathname();
@@ -36,9 +27,6 @@ export default function Header() {
   const [nickname, setNickname] = useState("");
   const [isLogin, setIsLogin] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  // const [profileImg, setProfileImg] = useState(
-  //   "/images/default_login_icon.png"
-  // );
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -48,19 +36,6 @@ export default function Header() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  // sessionStorage에서 이미지, 닉네임 동기화 (storage 이벤트 포함)
-  // useEffect(() => {
-  //   const updateProfileImg = () => {
-  //     const savedImg = sessionStorage.getItem("profileImg");
-  //     setProfileImg(
-  //       getProfileImgUrl(savedImg) || "/images/default_login_icon.png"
-  //     );
-  //   };
-  //   updateProfileImg();
-  //   window.addEventListener("storage", updateProfileImg);
-  //   return () => window.removeEventListener("storage", updateProfileImg);
-  // }, []);
 
   useEffect(() => {
     const updateNickname = () => {
@@ -72,7 +47,21 @@ export default function Header() {
     return () => window.removeEventListener("storage", updateNickname);
   }, []);
 
-  // 사용자 정보 fetch
+  // 석근: storage 이벤트 감지 시 사용자 정보 다시 fetch (OAuth 로그인 후 동기화)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const accessToken = sessionStorage.getItem("accessToken");
+      if (accessToken && !isLogin) {
+        console.log("석근: storage 이벤트 감지, 사용자 정보 다시 fetch");
+        fetchUserInfo();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [isLogin]);
+
+  // 사용자 정보 fetch - 실제 백엔드 API 사용
   const fetchUserInfo = async () => {
     const accessToken = sessionStorage.getItem("accessToken");
     if (!accessToken) {
@@ -81,21 +70,40 @@ export default function Header() {
       return;
     }
     try {
-      const response = await fetch("/api/register/user/me", {
-        headers: { Authorization: `Bearer ${accessToken}` },
+      const response = await fetch(`${API_BASE_URL}/api/user/me`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
       });
-      if (!response.ok) throw new Error("not logged in");
-      const data = await response.json();
-
-      // 닉네임 처리
-      const savedNickname = sessionStorage.getItem("nickname");
-      if (data.nickname && data.nickname !== savedNickname) {
-        setNickname(data.nickname);
-        sessionStorage.setItem("nickname", data.nickname);
-      } else if (data.nickname && !savedNickname) {
-        setNickname(data.nickname);
-        sessionStorage.setItem("nickname", data.nickname);
+      if (!response.ok) {
+        if (response.status === 401) {
+          // 인증 실패(로그인 만료 등)는 에러로 남기지 않고 조용히 처리
+          setIsLogin(false);
+          setNickname("");
+          return;
+        } else {
+          // 기타 에러는 콘솔에만 표시
+          console.error(
+            "[Header] 사용자 정보 로드 실패 - HTTP 상태:",
+            response.status
+          );
+          setIsLogin(false);
+          setNickname("");
+          return;
+        }
       }
+      const data = await response.json();
+      // 닉네임이 있으면 세션과 상태에 저장
+      if (data.nickname) {
+        setNickname(data.nickname);
+        sessionStorage.setItem("nickname", data.nickname);
+        setIsLogin(true);
+      } else {
+        setNickname("");
+        setIsLogin(false);
+      }
+
       // 프로필 이미지 처리 (항상 가공 후 저장)
       // if (data.profileImg) {
       //   const url = getProfileImgUrl(data.profileImg);
@@ -107,10 +115,10 @@ export default function Header() {
 
       setIsLogin(true);
     } catch (error) {
+      // 네트워크 등 예외 상황만 에러로 표시
+      console.error("[Header] 사용자 정보 로드 실패:", error);
       setIsLogin(false);
       setNickname("");
-      setProfileImg("/images/default_login_icon.png");
-      // sessionStorage.setItem("profileImg", "/images/default_login_icon.png");
     }
   };
 
@@ -145,21 +153,26 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // 석근: 로그아웃 - 실제 백엔드 API 사용
   const handleLogout = async () => {
     const accessToken = sessionStorage.getItem("accessToken");
     try {
-      await fetch("/api/register/user/me/logout", {
+      // 석근: 실제 백엔드 로그아웃 API 호출
+      await fetch(`${API_BASE_URL}/api/user/logout`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
       });
-    } catch (e) {}
+    } catch (e) {
+      console.error("석근: 로그아웃 API 호출 실패:", e);
+    }
     sessionStorage.removeItem("accessToken");
     sessionStorage.removeItem("refreshToken");
     sessionStorage.removeItem("nickname");
-    // sessionStorage.removeItem("profileImg");
     setIsLogin(false);
     setNickname("");
-    // setProfileImg("/images/default_login_icon.png");
     router.push("/seokgeun/main");
   };
 
@@ -311,29 +324,18 @@ export default function Header() {
   ];
 
   return (
-    <div
-      className={`mx-auto h-[116px] ${
-        isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"
-      }`}
-    >
+    <div className={`mx-auto h-[116px] ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"}`}>
       {/* 1번째 헤더 */}
       <div className="max-w-[1160px] w-full mx-auto flex justify-between items-center h-[60px] mt-[10px]">
         <div className="w-[132px] h-[60px] flex items-center">
           <Link href={"/"}>
-            <Image
-              src="/images/tumblbug_logo.png"
-              alt="텀블벅 로고"
-              width={132}
-              height={36}
-            />
+            <Image src="/images/tumblbug_logo.png" alt="텀블벅 로고" width={132} height={36} />
           </Link>
         </div>
         <ul className="flex items-center">
           <li className="p-4">
             <Link href={"/project/intro"}>
-              <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">
-                프로젝트 올리기
-              </span>
+              <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">프로젝트 올리기</span>
             </Link>
           </li>
           {isLogin ? (
@@ -373,9 +375,7 @@ export default function Header() {
                       }}
                     />
                   </Link>
-                  <div className="font-bold text-[12px] ml-[10px]">
-                    {nickname}
-                  </div>
+                  <div className="font-bold text-[12px] ml-[10px]">{nickname}</div>
                 </button>
                 {dropdownOpen && (
                   <div
@@ -392,10 +392,7 @@ export default function Header() {
                         </Link>
                       </li>
                       <li>
-                        <Link
-                          href="/pledges"
-                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        >
+                        <Link href="/pledges" className="block px-4 py-2 hover:bg-gray-100 cursor-pointer">
                           후원한 프로젝트
                         </Link>
                       </li>
@@ -455,10 +452,7 @@ export default function Header() {
                           설정
                         </Link>
                       </li>
-                      <li
-                        className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        onClick={handleLogout}
-                      >
+                      <li className="block px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={handleLogout}>
                         로그아웃
                       </li>
                     </ul>
@@ -473,9 +467,7 @@ export default function Header() {
                 href={"/seokgeun"}
               >
                 <User className="bg-[#ddd] rounded-3xl" color="#fff" />
-                <div className="font-bold text-[12px] ml-[10px]">
-                  로그인/회원가입
-                </div>
+                <div className="font-bold text-[12px] ml-[10px]">로그인/회원가입</div>
               </Link>
             </li>
           )}
@@ -485,11 +477,7 @@ export default function Header() {
       {/* 2번째 헤더 */}
       <div
         className={`w-full bg-white ${
-          isScrolled
-            ? `fixed top-0 left-0 z-50 ${
-                isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"
-              }`
-            : ""
+          isScrolled ? `fixed top-0 left-0 z-50 ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"}` : ""
         }`}
         style={{ overflow: "visible" }}
       >
@@ -501,9 +489,7 @@ export default function Header() {
               onMouseLeave={() => setIsCategoryOpen(false)}
             >
               <Menu className="mr-[8px] group-hover:text-[#FF5757] transition-all duration-300" />
-              <span className="pt-[1px] px-[6px] group-hover:text-[#FF5757] transition-all duration-300">
-                카테고리
-              </span>
+              <span className="pt-[1px] px-[6px] group-hover:text-[#FF5757] transition-all duration-300">카테고리</span>
               {/* 카테고리 메뉴 전체 */}
               {isCategoryOpen && (
                 <div
@@ -513,10 +499,7 @@ export default function Header() {
                 >
                   <div className="w-[1160px] mx-auto relative flex justify-between mt-[16px] px-[10px] after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:shadow-[0_6px_7px_rgba(0,0,0,0.08)] after:pointer-events-none">
                     {categoryData.map((column, colIndex) => (
-                      <div
-                        key={colIndex}
-                        className="flex-grow flex-shrink-0 basis-[20%]"
-                      >
+                      <div key={colIndex} className="flex-grow flex-shrink-0 basis-[20%]">
                         {column.map((item, itemIndex) => (
                           <div
                             key={itemIndex}
@@ -552,26 +535,17 @@ export default function Header() {
               )}
             </li>
             <li>
-              <Link
-                href={"#"}
-                className="hover:text-[#FF5757] transition-all duration-300"
-              >
+              <Link href={"/"} className="hover:text-[#FF5757] transition-all duration-300">
                 <span className="pt-[1px] px-[6px]">홈</span>
               </Link>
             </li>
             <li>
-              <Link
-                href={"#"}
-                className="hover:text-[#FF5757] transition-all duration-300"
-              >
+              <Link href={"/project/list"} className="hover:text-[#FF5757] transition-all duration-300">
                 <span className="pt-[1px] px-[6px]">인기</span>
               </Link>
             </li>
             <li>
-              <Link
-                href={"#"}
-                className="hover:text-[#FF5757] transition-all duration-300"
-              >
+              <Link href={"/project/list"} className="hover:text-[#FF5757] transition-all duration-300">
                 <span className="pt-[1px] px-[6px]">신규</span>
               </Link>
             </li>

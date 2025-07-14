@@ -1,20 +1,19 @@
 "use client";
-import { Dialog } from "@/components/ui/dialog";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
 
-export default function ProjectInfo({ 
-  project, 
-  selectedRewards = [], 
-  onAddReward, 
-  onUpdateQuantity, 
-  onRemoveReward, 
+export default function ProjectInfo({
+  project,
+  selectedRewards = [],
+  onAddReward,
+  onUpdateQuantity,
+  onRemoveReward,
   onPledge,
-  selectedRewardsTotal = 0
+  selectedRewardsTotal = 0,
 }) {
   const router = useRouter();
   const token = sessionStorage.getItem("accessToken");
@@ -35,12 +34,12 @@ export default function ProjectInfo({
       router.push("/seokgeun");
       return;
     }
-    
+
     if (selectedRewards.length === 0) {
-      alert('최소 1개 이상의 선물을 선택해주세요.');
+      alert("최소 1개 이상의 선물을 선택해주세요.");
       return;
     }
-    
+
     onPledge?.();
   };
 
@@ -71,11 +70,13 @@ export default function ProjectInfo({
         {/* 선물 선택 */}
         <div
           className={`pt-6 transition-all duration-300 ease-in-out ${
-            isScrolled ? "fixed top-[50px] right-[13%] w-[352px] z-10" : ""
+            isScrolled
+              ? "fixed top-[50px] h-[calc(100%-52px)] scrollbar-hide overflow-auto right-[13%] w-[352px] z-10"
+              : ""
           }`}
         >
           <p className="text-sm text-[#3d3d3d] font-semibold mb-[0.5rem]">선물 선택</p>
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-5 select-none">
             <button className="text-left" onClick={(e) => alert("준비중입니다")}>
               <div className="border p-5 rounded-md shadow-[0px_1px_0px_rgba(0,0,0,0.1),_0px_2px_4px_rgba(0,0,0,0.04)]">
                 <p className="text-2xl leading-[36px] mb-[6px] tracking-[-0.025em]">1000원 +</p>
@@ -96,13 +97,13 @@ export default function ProjectInfo({
                     </p>
                     <p className="text-sm text-gray-500">{item.description}</p>
                   </div>
-                  
+
                   {/* 선택된 선물이 있으면 수량 조절 UI 표시 */}
-                  {selectedRewards.find(r => r.id === item.id) && (
+                  {selectedRewards.find((r) => r.id === item.id) && (
                     <div className="mt-3 pt-3 border-t border-gray-200">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">
-                          수량: {selectedRewards.find(r => r.id === item.id)?.quantity || 0}개
+                          수량: {selectedRewards.find((r) => r.id === item.id)?.quantity || 0}개
                         </span>
                         <div className="flex items-center gap-2">
                           <Button
@@ -110,21 +111,27 @@ export default function ProjectInfo({
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation();
-                              onUpdateQuantity?.(item.id, (selectedRewards.find(r => r.id === item.id)?.quantity || 1) - 1);
+                              onUpdateQuantity?.(
+                                item.id,
+                                (selectedRewards.find((r) => r.id === item.id)?.quantity || 1) - 1
+                              );
                             }}
-                            disabled={(selectedRewards.find(r => r.id === item.id)?.quantity || 1) <= 1}
+                            disabled={(selectedRewards.find((r) => r.id === item.id)?.quantity || 1) <= 1}
                           >
                             <Minus className="w-3 h-3" />
                           </Button>
                           <span className="w-8 text-center text-sm">
-                            {selectedRewards.find(r => r.id === item.id)?.quantity || 1}
+                            {selectedRewards.find((r) => r.id === item.id)?.quantity || 1}
                           </span>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation();
-                              onUpdateQuantity?.(item.id, (selectedRewards.find(r => r.id === item.id)?.quantity || 1) + 1);
+                              onUpdateQuantity?.(
+                                item.id,
+                                (selectedRewards.find((r) => r.id === item.id)?.quantity || 1) + 1
+                              );
                             }}
                           >
                             <Plus className="w-3 h-3" />
@@ -155,9 +162,7 @@ export default function ProjectInfo({
           {selectedRewards.length > 0 && (
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <div className="text-sm font-medium mb-2">선택된 선물: {selectedRewards.length}개</div>
-              <div className="text-sm text-gray-600 mb-3">
-                총액: {selectedRewardsTotal.toLocaleString()}원
-              </div>
+              <div className="text-sm text-gray-600 mb-3">총액: {selectedRewardsTotal.toLocaleString()}원</div>
               <button
                 onClick={handlePledge}
                 className="w-full h-[48px] cursor-pointer py-[14px] px-5 rounded-[8px] gap-1 flex items-center justify-center border-0 text-base bg-[#1c1c1c] text-white hover:bg-[#333] transition-colors"
