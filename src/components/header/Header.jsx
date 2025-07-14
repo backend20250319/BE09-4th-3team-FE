@@ -6,28 +6,20 @@ import Link from "next/link";
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
-// 프로필 이미지 경로 안전하게 처리하는 함수
-// const getProfileImgUrl = (img) => {
-//   if (!img || img === "null" || typeof img !== "string")
-//     return "/images/default_login_icon.png";
-//   // base64는 미리보기 용
-//   if (img.startsWith("data:")) return img;
-//   // 절대경로(http/https)
-//   if (img.startsWith("http")) return img;
-//   // 상대경로(/profile_images/xxx.png) -> 도메인 붙여서 (한글, 공백 등 인코딩)
-//   if (img.startsWith("/")) return "http://localhost:8888" + encodeURI(img);
-//   // 그 외엔 기본 이미지
-//   return "/images/default_login_icon.png";
-// };
+
+// 석근: API BASE URL 추가
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8888";
+console.log("석근: 헤더 API_BASE_URL:", API_BASE_URL);
 
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
 
   const hiddenPaths = [
-    /^\/seokgeun\/login$/,
-    /^\/seokgeun\/register$/,
-    /^\/seokgeun$/,
+    /^\/users\/login$/,
+    /^\/users\/register$/,
+    /^\/users$/,
     /^\/project(?:\/[^/]+)*\/pledge(?:\/[^/]+)*$/,
   ];
   const shouldShow = !hiddenPaths.some((pattern) => pattern.test(pathname));
@@ -71,7 +63,21 @@ export default function Header() {
     return () => window.removeEventListener("storage", updateNickname);
   }, []);
 
-  // 사용자 정보 fetch
+  // storage 이벤트 감지 시 사용자 정보 다시 fetch (OAuth 로그인 후 동기화)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const accessToken = sessionStorage.getItem("accessToken");
+      if (accessToken && !isLogin) {
+        console.log("석근: storage 이벤트 감지, 사용자 정보 다시 fetch");
+        fetchUserInfo();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [isLogin]);
+
+  // 사용자 정보 fetch - 실제 백엔드 API 사용
   const fetchUserInfo = async () => {
     const accessToken = sessionStorage.getItem("accessToken");
     if (!accessToken) {
@@ -184,10 +190,12 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // 로그아웃 - 실제 백엔드 API 사용
   const handleLogout = async () => {
     const accessToken = sessionStorage.getItem("accessToken");
     try {
-      await fetch("/api/register/user/me/logout", {
+      // 실제 백엔드 로그아웃 API 호출
+      await fetch(`${API_BASE_URL}/api/user/logout`, {
         method: "POST",
         headers: { Authorization: `Bearer ${accessToken}` },
       });
@@ -198,8 +206,7 @@ export default function Header() {
     // sessionStorage.removeItem("profileImg");
     setIsLogin(false);
     setNickname("");
-    // setProfileImg("/images/default_login_icon.png");
-    router.push("/seokgeun/main");
+    router.push("/");
   };
 
   const handleNicknameClick = () => setDropdownOpen(!dropdownOpen);
@@ -378,12 +385,20 @@ export default function Header() {
           {isLogin ? (
             <>
               <li className="p-4">
-                <Link href="/seokgeun/dropdownmenu/myliked">
+                <Link href="/users/dropdownmenu/myliked">
                   <Heart />
                 </Link>
               </li>
-              <li className="p-4 relative">
-                <Link href="/notification" className="relative">
+              {/* ADMIN으로 가는 icon 추가 */}
+              {roleType === "ADMIN" && (
+                  <li className="p-4">
+                    <Link href="/junbem">
+                      <User />
+                    </Link>
+                  </li>
+              )}
+              <li className="p-4">
+                <Link href="/users/dropdownmenu/mynotification">
                   <Bell />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] min-w-[16px] h-[16px] px-[4px] rounded-full flex items-center justify-center leading-none">
@@ -397,7 +412,7 @@ export default function Header() {
                   className="flex cursor-pointer items-center border-1 ml-[10px] p-4 border-[#dfdfdf] rounded-[4px] min-w-[30px] max-h-[44px]"
                   onClick={handleNicknameClick}
                 >
-                  <Link href="/seokgeun/dropdownmenu/mypage">
+                  <Link href="/users/dropdownmenu/mypage">
                     <Image
                       src={"/images/default_login_icon.png"}
                       width={24}
@@ -420,7 +435,7 @@ export default function Header() {
                     <ul>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/mypage"
+                          href="/users/dropdownmenu/mypage"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           프로필
@@ -444,7 +459,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/myliked"
+                          href="/users/dropdownmenu/myliked"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           관심 프로젝트
@@ -452,7 +467,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/myfollow"
+                          href="/users/dropdownmenu/myfollow"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           팔로우
@@ -468,7 +483,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/mymessage"
+                          href="/users/dropdownmenu/mymessage"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           메시지
@@ -476,7 +491,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/myproject"
+                          href="/users/dropdownmenu/myproject"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           내가 만든 프로젝트
@@ -484,7 +499,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/mysettings/profile"
+                          href="/users/dropdownmenu/mysettings/profile"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           설정
@@ -505,7 +520,7 @@ export default function Header() {
             <li>
               <Link
                 className="flex cursor-pointer items-center border-1 ml-[10px] p-4 border-[#dfdfdf] rounded-[4px] min-w-[30px] max-h-[44px]"
-                href={"/seokgeun"}
+                href={"/users"}
               >
                 <User className="bg-[#ddd] rounded-3xl" color="#fff" />
                 <div className="font-bold text-[12px] ml-[10px]">
@@ -588,7 +603,7 @@ export default function Header() {
             </li>
             <li>
               <Link
-                href={"#"}
+                href={"/"}
                 className="hover:text-[#FF5757] transition-all duration-300"
               >
                 <span className="pt-[1px] px-[6px]">홈</span>
@@ -596,7 +611,7 @@ export default function Header() {
             </li>
             <li>
               <Link
-                href={"#"}
+                href={"/project/list"}
                 className="hover:text-[#FF5757] transition-all duration-300"
               >
                 <span className="pt-[1px] px-[6px]">인기</span>
@@ -604,7 +619,7 @@ export default function Header() {
             </li>
             <li>
               <Link
-                href={"#"}
+                href={"/project/list"}
                 className="hover:text-[#FF5757] transition-all duration-300"
               >
                 <span className="pt-[1px] px-[6px]">신규</span>
