@@ -42,6 +42,7 @@ export default function Header() {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [roleType, setRoleType] = useState(""); // ✅ ADMIN 구분용 상태 추가
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -101,6 +102,8 @@ export default function Header() {
       //   setProfileImg(url);
       //   sessionStorage.setItem("profileImg", url);
       // }
+
+      setRoleType(data.roleType || ""); // ✅ roleType 상태 저장
 
       setIsLogin(true);
     } catch (error) {
@@ -340,6 +343,15 @@ export default function Header() {
                   <Heart />
                 </Link>
               </li>
+              {/* ADMIN으로 가는 icon 추가 */}
+              {roleType === "ADMIN" && (
+                  <li className="p-4">
+                    <Link href="/junbem">
+                      <User />
+                    </Link>
+                  </li>
+              )}
+
               <li className="p-4">
                 <Link href="/seokgeun/dropdownmenu/mynotification">
                   <Bell />
