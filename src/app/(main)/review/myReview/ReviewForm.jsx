@@ -11,7 +11,6 @@ const satisfactionMap = {
 };
 
 const ReviewForm = ({ project, onClose, onSubmit }) => {
-  console.log("Received project prop:", project);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [ratings, setRatings] = useState({
