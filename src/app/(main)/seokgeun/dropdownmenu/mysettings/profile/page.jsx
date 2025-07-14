@@ -67,7 +67,7 @@ export default function MySettingsPage() {
 
   // 사용자 정보 fetch 함수 추가
   const fetchUserInfo = async () => {
-    const res = await fetchWithAuth("/api/register/user/me");
+    const res = await fetchWithAuth("/api/user/me");
     if (res && res.ok) {
       const user = await res.json();
       setNickname(user.nickname || "");
@@ -156,7 +156,7 @@ export default function MySettingsPage() {
         formData.append("file", editFile);
 
         try {
-          const uploadRes = await fetch("/api/register/user/me/profile-image", {
+          const uploadRes = await fetchWithAuth("/api/user/me/profile-image", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -206,7 +206,7 @@ export default function MySettingsPage() {
       if (nameError) return;
       try {
         const accessToken = sessionStorage.getItem("accessToken");
-        const userRes = await fetchWithAuth("/api/register/user/me");
+        const userRes = await fetchWithAuth("/api/user/me");
         if (!userRes) return;
         const user = await userRes.json();
         const updateData = {
@@ -216,7 +216,7 @@ export default function MySettingsPage() {
           address: user.address || "",
           addressDetail: user.addressDetail || "",
         };
-        const patchRes = await fetchWithAuth("/api/register/user/me/profile", {
+        const patchRes = await fetchWithAuth("/api/user/me/profile", {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",

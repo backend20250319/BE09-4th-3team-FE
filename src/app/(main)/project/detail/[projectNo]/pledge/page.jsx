@@ -359,15 +359,15 @@ export default function PledgePage() {
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <Checkbox 
-                      id="terms" 
-                      checked={termsConsent} 
+                    <Checkbox
+                      id="terms"
+                      checked={termsConsent}
                       onCheckedChange={(checked) => {
                         setTermsConsent(checked);
                         if (checked) {
                           setTermsExpanded(false);
                         }
-                      }} 
+                      }}
                     />
                     <div className="flex-1">
                       <div className="flex items-center justify-between">

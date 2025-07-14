@@ -1,16 +1,38 @@
-// app/home/page.jsx
-// 로그인 성공 후 임시 홈 페이지
-
 "use client";
 
 import React, { useEffect, useState } from "react"; // 개선점: useEffect, useState 추가
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
   // 개선점: 사용자 정보 상태 관리 추가
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  // 컴포넌트 마운트 시 사용자 정보 확인
+  // 👇 이 부분 수정! 바로 마이페이지로 리다이렉트
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get("accessToken");
+    const refreshToken = urlParams.get("refreshToken");
+
+    if (accessToken) {
+      sessionStorage.setItem("accessToken", accessToken);
+    }
+    if (refreshToken) {
+      sessionStorage.setItem("refreshToken", refreshToken);
+    }
+
+    // accessToken이 있으면 바로 마이페이지로 이동 (중간 페이지 없이)
+    if (accessToken) {
+      router.replace("/seokgeun/dropdownmenu/mypage");
+      return; // 리다이렉트 후 아래 코드 실행 방지
+    }
+
+    // 토큰이 없으면 로그인 페이지로 이동
+    router.replace("/seokgeun/login");
+  }, [router]);
+
+  // 컴포넌트 마운트 시 사용자 정보 확인 (토큰이 있을 때만)
   useEffect(() => {
     const checkUserInfo = () => {
       try {
@@ -37,7 +59,13 @@ export default function HomePage() {
       }
     };
 
-    checkUserInfo();
+    // URL 파라미터에 토큰이 없을 때만 사용자 정보 확인
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get("accessToken");
+
+    if (!accessToken) {
+      checkUserInfo();
+    }
   }, []);
 
   // 🚀 개선점: 메인 페이지로 이동 핸들러
@@ -52,6 +80,34 @@ export default function HomePage() {
     sessionStorage.clear();
     window.location.href = "/seokgeun/login";
   };
+
+  // 토큰이 있으면 로딩 화면만 표시 (리다이렉트 중)
+  const urlParams = new URLSearchParams(window.location.search);
+  const accessToken = urlParams.get("accessToken");
+
+  if (accessToken) {
+    return (
+      <div
+        style={{
+          padding: "50px",
+          textAlign: "center",
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          color: "white",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div>
+          <h1 style={{ fontSize: "2rem", marginBottom: "20px" }}>
+            로그인 성공! 마이페이지로 이동 중...
+          </h1>
+          <div style={{ fontSize: "1.2rem" }}>잠시만 기다려주세요.</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -88,50 +144,36 @@ export default function HomePage() {
           수 있습니다.
         </p>
 
-        {/* 개선점: 토큰 정보 표시 */}
-        {!loading && userInfo && (
-          <div
-            style={{
-              background: "rgba(0, 0, 0, 0.2)",
-              padding: "20px",
-              borderRadius: "10px",
-              marginTop: "20px",
-              textAlign: "left",
-            }}
-          >
-            <h3 style={{ marginBottom: "15px" }}>🔐 인증 상태</h3>
+        {/* 로딩 상태 표시 */}
+        {loading && (
+          <div style={{ marginBottom: "20px", color: "#ccc" }}>
+            사용자 정보를 확인하는 중...
+          </div>
+        )}
+
+        {/* 사용자 정보 표시 */}
+        {userInfo && !loading && (
+          <div style={{ marginBottom: "20px" }}>
+            <h3 style={{ marginBottom: "10px" }}>현재 상태:</h3>
             {userInfo.hasToken ? (
-              <div>
-                <p style={{ marginBottom: "10px" }}>
-                  <strong>토큰 상태:</strong> 정상
-                </p>
-                <p style={{ marginBottom: "10px", fontSize: "0.9rem" }}>
-                  <strong>Access Token:</strong>{" "}
-                  {userInfo.tokenInfo.accessToken}
-                </p>
-                <p style={{ fontSize: "0.9rem" }}>
-                  <strong>Refresh Token:</strong>{" "}
-                  {userInfo.tokenInfo.refreshToken}
-                </p>
+              <div style={{ textAlign: "left" }}>
+                <p>✅ 토큰이 저장되어 있습니다.</p>
+                <p>Access Token: {userInfo.tokenInfo.accessToken}</p>
+                <p>Refresh Token: {userInfo.tokenInfo.refreshToken}</p>
               </div>
             ) : (
-              <p style={{ color: "#ff6b6b" }}>
-                <strong>토큰 상태:</strong> 토큰이 없습니다.
-              </p>
+              <div>
+                <p>❌ 토큰이 없습니다.</p>
+                {userInfo.error && (
+                  <p style={{ color: "#ff6b6b" }}>오류가 발생했습니다.</p>
+                )}
+              </div>
             )}
           </div>
         )}
 
-        {/* 개선점: 네비게이션 버튼들 */}
-        <div
-          style={{
-            display: "flex",
-            gap: "15px",
-            justifyContent: "center",
-            marginTop: "30px",
-            flexWrap: "wrap",
-          }}
-        >
+        {/* 버튼들 */}
+        <div style={{ display: "flex", gap: "15px", justifyContent: "center" }}>
           <button
             onClick={handleGoToMain}
             style={{
@@ -143,12 +185,9 @@ export default function HomePage() {
               cursor: "pointer",
               fontSize: "16px",
               fontWeight: "bold",
-              transition: "background-color 0.3s",
             }}
-            onMouseOver={(e) => (e.target.style.backgroundColor = "#45a049")}
-            onMouseOut={(e) => (e.target.style.backgroundColor = "#4CAF50")}
           >
-            🏠 메인 페이지로 이동
+            메인 페이지로
           </button>
 
           <button
@@ -162,33 +201,10 @@ export default function HomePage() {
               cursor: "pointer",
               fontSize: "16px",
               fontWeight: "bold",
-              transition: "background-color 0.3s",
             }}
-            onMouseOver={(e) => (e.target.style.backgroundColor = "#da190b")}
-            onMouseOut={(e) => (e.target.style.backgroundColor = "#f44336")}
           >
-            🚪 로그아웃
+            로그아웃
           </button>
-        </div>
-
-        {/* 개선점: 추가 정보 */}
-        <div
-          style={{
-            marginTop: "30px",
-            fontSize: "0.9rem",
-            opacity: "0.8",
-            background: "rgba(0, 0, 0, 0.1)",
-            padding: "15px",
-            borderRadius: "8px",
-          }}
-        >
-          <h4 style={{ marginBottom: "10px" }}>💡 개발 정보</h4>
-          <ul style={{ textAlign: "left", listStyle: "none", padding: 0 }}>
-            <li>• 이 페이지는 로그인 성공 후 임시로 표시됩니다</li>
-            <li>• 실제 프로덕션에서는 메인 페이지로 리다이렉트됩니다</li>
-            <li>• 토큰은 sessionStorage에 안전하게 저장됩니다</li>
-            <li>• API 호출 시 자동으로 토큰이 첨부됩니다</li>
-          </ul>
         </div>
       </div>
     </div>
