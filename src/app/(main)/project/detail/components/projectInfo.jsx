@@ -1,9 +1,8 @@
 "use client";
-import { Dialog } from "@/components/ui/dialog";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
 
@@ -72,7 +71,7 @@ export default function ProjectInfo({
         <div
           className={`pt-6 transition-all duration-300 ease-in-out ${
             isScrolled
-              ? "fixed top-[50px] h-[calc(100%-52px)] scrollbar-hide overflow-auto right-[19.5%] w-[352px] z-10"
+              ? "fixed top-[50px] h-[calc(100%-52px)] scrollbar-hide overflow-auto right-[13%] w-[352px] z-10"
               : ""
           }`}
         >
