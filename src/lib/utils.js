@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import { twMerge } from "tailwind-merge"
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -10,11 +10,13 @@ export function cn(...inputs) {
  * @returns {string|null} accessToken (있으면 반환, 없으면 이동)
  */
 export function requireAccessTokenOrRedirect() {
-  const token = sessionStorage.getItem("accessToken")
+  const token = sessionStorage.getItem("accessToken");
   if (!token) {
-    const currentPath = window.location.pathname + window.location.search
-    window.location.href = `/seokgeun/login?redirection=${encodeURIComponent(currentPath)}`
-    return null
+    const currentPath = window.location.pathname + window.location.search;
+    window.location.href = `/users/login?redirection=${encodeURIComponent(
+      currentPath
+    )}`;
+    return null;
   }
-  return token
+  return token;
 }

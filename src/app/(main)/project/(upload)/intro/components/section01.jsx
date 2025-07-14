@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Section01() {
   const [isLogin, setIsLogin] = useState(false);
@@ -24,7 +24,7 @@ export default function Section01() {
         <p className="mt-5 text-[#6d6d6d] text-center">취향이 모여 세상을 바꾸는 텀블벅에서</p>
         <div className="flex justify-center gap-3 mt-9">
           <Link
-            href={`${isLogin ? "/project/main" : "/seokgeun/login"}`}
+            href={`${isLogin ? "/project/main" : "/users/login"}`}
             className="py-[11px] px-6 bg-[#f86453] cursor-pointer text-white text-[14px]"
           >
             지금 시작하기
