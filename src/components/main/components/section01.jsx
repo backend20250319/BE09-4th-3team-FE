@@ -80,14 +80,46 @@ export default function Section01({ projects }) {
             </div>
           </div>
           <div className="flex overflow-x-hidden gap-[26px] min-h-[92px] mb-7 mt-3 py-5 px-4">
-            <CategoryBtn src="/main/category-img-1.jpg" alt="카테고리 이미지-1" label="여름방학" />
-            <CategoryBtn src="/main/category-img-2.jpg" alt="카테고리 이미지-1" label="여름 추구미" />
-            <CategoryBtn src="/main/category-img-3.jpg" alt="카테고리 이미지-1" label="좋은 창작자" />
-            <CategoryBtn src="/main/category-img-4.jpg" alt="카테고리 이미지-1" label="캐릭터 굿즈" />
-            <CategoryBtn src="/main/category-img-5.jpg" alt="카테고리 이미지-1" label="푸드" />
-            <CategoryBtn src="/main/category-img-6.png" alt="카테고리 이미지-1" label="출판" />
-            <CategoryBtn src="/main/category-img-7.png" alt="카테고리 이미지-1" label="향수" />
-            <CategoryBtn src="/main/category-img-8.png" alt="카테고리 이미지-1" label="가방" />
+            <CategoryBtn
+              src="/main/category-img-1.jpg"
+              alt="카테고리 이미지-1"
+              label="여름방학"
+            />
+            <CategoryBtn
+              src="/main/category-img-2.jpg"
+              alt="카테고리 이미지-1"
+              label="여름 추구미"
+            />
+            <CategoryBtn
+              src="/main/category-img-3.jpg"
+              alt="카테고리 이미지-1"
+              label="좋은 창작자"
+            />
+            <CategoryBtn
+              src="/main/category-img-4.jpg"
+              alt="카테고리 이미지-1"
+              label="캐릭터 굿즈"
+            />
+            <CategoryBtn
+              src="/main/category-img-5.jpg"
+              alt="카테고리 이미지-1"
+              label="푸드"
+            />
+            <CategoryBtn
+              src="/main/category-img-6.png"
+              alt="카테고리 이미지-1"
+              label="출판"
+            />
+            <CategoryBtn
+              src="/main/category-img-7.png"
+              alt="카테고리 이미지-1"
+              label="향수"
+            />
+            <CategoryBtn
+              src="/main/category-img-8.png"
+              alt="카테고리 이미지-1"
+              label="가방"
+            />
           </div>
           <div className="mx-[-6px]relative w-[778px] text-sm leading-[24px] tracking-[-0.015em] font-normal bg-white text-[#3d3d3d]">
             <h2 className="pl-[7px] text-xl leading-[29px] tracking-[-0.025em] font-bold my-4 text-[#1c1c1c] ">
@@ -95,7 +127,10 @@ export default function Section01({ projects }) {
             </h2>
             <div className="grid grid-cols-4 gap-4">
               {projects.slice(0, 8).map((project) => (
-                <Link key={project.projectNo} href={`/project/detail/${project.projectNo}`}>
+                <Link
+                  key={project.projectNo}
+                  href={`/project/detail/${project.projectNo}`}
+                >
                   <div className="rounded-t-[8px]">
                     {project.thumbnailUrl ? (
                       <div className="overflow-hidden rounded-t-[8px]">
@@ -119,7 +154,9 @@ export default function Section01({ projects }) {
                     <div className="pb-1 text-sm">
                       <div className="flex justify-between">
                         <div className="flex gap-1">
-                          <p className="text-sm text-[#eb4b38] font-bold">{project.percent}% 달성</p>
+                          <p className="text-sm text-[#eb4b38] font-bold">
+                            {project.percent}% 달성
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -161,11 +198,16 @@ export default function Section01({ projects }) {
                 전체보기
               </Link>
             </div>
-            <span className="text-xs text-[#6d6d6d] font-normal mt-[2px]]">{formatCustomDate()} 기준</span>
+            <span className="text-xs text-[#6d6d6d] font-normal mt-[2px]]">
+              {formatCustomDate()} 기준
+            </span>
           </div>
           <div className="grid grid-cols-1 gap-4">
             {projects.slice(0, 8).map((project, idx) => (
-              <Link key={project.projectNo} href={`/project/detail/${project.projectNo}`}>
+              <Link
+                key={project.projectNo}
+                href={`/project/detail/${project.projectNo}`}
+              >
                 <div className="flex rounded-[8px] overflow-hidden hover:shadow-md transition">
                   {/* 이미지 */}
                   {project.thumbnailUrl ? (
@@ -192,10 +234,13 @@ export default function Section01({ projects }) {
                   {/* 텍스트 설명 */}
                   <div className="ml-4 flex flex-col justify-start gap-1 flex-1">
                     <div>
-                      <p className="text-xs leading-[120%] text-[#545454]">{project.creatorName}</p>
-                      <h2 className="text-base text-[#1c1c1c]">{project.title}</h2>
+                      <p className="text-xs leading-[120%] text-[#545454]">
+                        {project.creatorName}
+                      </p>
+                      <h2 className="text-base text-[#1c1c1c]">
+                        {project.title}
+                      </h2>
                     </div>
-
                     <div className="pb-1 text-sm flex flex-col gap-1">
                       <p className="text-sm text-[#eb4b38] font-bold">{project.percent}% 달성</p>
                     </div>
@@ -218,7 +263,12 @@ export default function Section01({ projects }) {
                       )}
                       {project.creatorName == "hoya" && (
                         <div>
-                          <Image src={"/main/goodCreator.png"} alt="좋은 창작자" width={60} height={17} />
+                          <Image
+                            src={"/main/goodCreator.png"}
+                            alt="좋은 창작자"
+                            width={60}
+                            height={17}
+                          />
                         </div>
                       )}
                     </div>

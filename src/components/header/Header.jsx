@@ -9,16 +9,16 @@ import { useRouter, usePathname } from "next/navigation";
 // 석근: API BASE URL 추가
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8888";
-console.log("석근: 헤더 API_BASE_URL:", API_BASE_URL); // 이 줄 추가!
+console.log("석근: 헤더 API_BASE_URL:", API_BASE_URL);
 
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
 
   const hiddenPaths = [
-    /^\/seokgeun\/login$/,
-    /^\/seokgeun\/register$/,
-    /^\/seokgeun$/,
+    /^\/users\/login$/,
+    /^\/users\/register$/,
+    /^\/users$/,
     /^\/project(?:\/[^/]+)*\/pledge(?:\/[^/]+)*$/,
   ];
   const shouldShow = !hiddenPaths.some((pattern) => pattern.test(pathname));
@@ -47,7 +47,7 @@ export default function Header() {
     return () => window.removeEventListener("storage", updateNickname);
   }, []);
 
-  // 석근: storage 이벤트 감지 시 사용자 정보 다시 fetch (OAuth 로그인 후 동기화)
+  // storage 이벤트 감지 시 사용자 정보 다시 fetch (OAuth 로그인 후 동기화)
   useEffect(() => {
     const handleStorageChange = () => {
       const accessToken = sessionStorage.getItem("accessToken");
@@ -153,11 +153,11 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 석근: 로그아웃 - 실제 백엔드 API 사용
+  // 로그아웃 - 실제 백엔드 API 사용
   const handleLogout = async () => {
     const accessToken = sessionStorage.getItem("accessToken");
     try {
-      // 석근: 실제 백엔드 로그아웃 API 호출
+      // 실제 백엔드 로그아웃 API 호출
       await fetch(`${API_BASE_URL}/api/user/logout`, {
         method: "POST",
         headers: {
@@ -173,7 +173,7 @@ export default function Header() {
     sessionStorage.removeItem("nickname");
     setIsLogin(false);
     setNickname("");
-    router.push("/seokgeun/main");
+    router.push("/");
   };
 
   const handleNicknameClick = () => setDropdownOpen(!dropdownOpen);
@@ -324,24 +324,35 @@ export default function Header() {
   ];
 
   return (
-    <div className={`mx-auto h-[116px] ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"}`}>
+    <div
+      className={`mx-auto h-[116px] ${
+        isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"
+      }`}
+    >
       {/* 1번째 헤더 */}
       <div className="max-w-[1160px] w-full mx-auto flex justify-between items-center h-[60px] mt-[10px]">
         <div className="w-[132px] h-[60px] flex items-center">
           <Link href={"/"}>
-            <Image src="/images/tumblbug_logo.png" alt="텀블벅 로고" width={132} height={36} />
+            <Image
+              src="/images/tumblbug_logo.png"
+              alt="텀블벅 로고"
+              width={132}
+              height={36}
+            />
           </Link>
         </div>
         <ul className="flex items-center">
           <li className="p-4">
             <Link href={"/project/intro"}>
-              <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">프로젝트 올리기</span>
+              <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">
+                프로젝트 올리기
+              </span>
             </Link>
           </li>
           {isLogin ? (
             <>
               <li className="p-4">
-                <Link href="/seokgeun/dropdownmenu/myliked">
+                <Link href="/users/dropdownmenu/myliked">
                   <Heart />
                 </Link>
               </li>
@@ -355,7 +366,7 @@ export default function Header() {
               )}
 
               <li className="p-4">
-                <Link href="/seokgeun/dropdownmenu/mynotification">
+                <Link href="/users/dropdownmenu/mynotification">
                   <Bell />
                 </Link>
               </li>
@@ -364,7 +375,7 @@ export default function Header() {
                   className="flex cursor-pointer items-center border-1 ml-[10px] p-4 border-[#dfdfdf] rounded-[4px] min-w-[30px] max-h-[44px]"
                   onClick={handleNicknameClick}
                 >
-                  <Link href="/seokgeun/dropdownmenu/mypage">
+                  <Link href="/users/dropdownmenu/mypage">
                     <Image
                       src={"/images/default_login_icon.png"}
                       width={24}
@@ -375,7 +386,9 @@ export default function Header() {
                       }}
                     />
                   </Link>
-                  <div className="font-bold text-[12px] ml-[10px]">{nickname}</div>
+                  <div className="font-bold text-[12px] ml-[10px]">
+                    {nickname}
+                  </div>
                 </button>
                 {dropdownOpen && (
                   <div
@@ -385,20 +398,23 @@ export default function Header() {
                     <ul>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/mypage"
+                          href="/users/dropdownmenu/mypage"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           프로필
                         </Link>
                       </li>
                       <li>
-                        <Link href="/pledges" className="block px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                        <Link
+                          href="/pledges"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
                           후원한 프로젝트
                         </Link>
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/myreview"
+                          href="/users/dropdownmenu/myreview"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           내 후기
@@ -406,7 +422,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/myliked"
+                          href="/users/dropdownmenu/myliked"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           관심 프로젝트
@@ -414,7 +430,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/myfollow"
+                          href="/users/dropdownmenu/myfollow"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           팔로우
@@ -422,7 +438,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/mynotification"
+                          href="/users/dropdownmenu/mynotification"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           알림
@@ -430,7 +446,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/mymessage"
+                          href="/users/dropdownmenu/mymessage"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           메시지
@@ -438,7 +454,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/myproject"
+                          href="/users/dropdownmenu/myproject"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           내가 만든 프로젝트
@@ -446,13 +462,16 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/seokgeun/dropdownmenu/mysettings/profile"
+                          href="/users/dropdownmenu/mysettings/profile"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           설정
                         </Link>
                       </li>
-                      <li className="block px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={handleLogout}>
+                      <li
+                        className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={handleLogout}
+                      >
                         로그아웃
                       </li>
                     </ul>
@@ -464,10 +483,12 @@ export default function Header() {
             <li>
               <Link
                 className="flex cursor-pointer items-center border-1 ml-[10px] p-4 border-[#dfdfdf] rounded-[4px] min-w-[30px] max-h-[44px]"
-                href={"/seokgeun"}
+                href={"/users"}
               >
                 <User className="bg-[#ddd] rounded-3xl" color="#fff" />
-                <div className="font-bold text-[12px] ml-[10px]">로그인/회원가입</div>
+                <div className="font-bold text-[12px] ml-[10px]">
+                  로그인/회원가입
+                </div>
               </Link>
             </li>
           )}
@@ -477,7 +498,11 @@ export default function Header() {
       {/* 2번째 헤더 */}
       <div
         className={`w-full bg-white ${
-          isScrolled ? `fixed top-0 left-0 z-50 ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"}` : ""
+          isScrolled
+            ? `fixed top-0 left-0 z-50 ${
+                isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"
+              }`
+            : ""
         }`}
         style={{ overflow: "visible" }}
       >
@@ -489,7 +514,9 @@ export default function Header() {
               onMouseLeave={() => setIsCategoryOpen(false)}
             >
               <Menu className="mr-[8px] group-hover:text-[#FF5757] transition-all duration-300" />
-              <span className="pt-[1px] px-[6px] group-hover:text-[#FF5757] transition-all duration-300">카테고리</span>
+              <span className="pt-[1px] px-[6px] group-hover:text-[#FF5757] transition-all duration-300">
+                카테고리
+              </span>
               {/* 카테고리 메뉴 전체 */}
               {isCategoryOpen && (
                 <div
@@ -499,7 +526,10 @@ export default function Header() {
                 >
                   <div className="w-[1160px] mx-auto relative flex justify-between mt-[16px] px-[10px] after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:shadow-[0_6px_7px_rgba(0,0,0,0.08)] after:pointer-events-none">
                     {categoryData.map((column, colIndex) => (
-                      <div key={colIndex} className="flex-grow flex-shrink-0 basis-[20%]">
+                      <div
+                        key={colIndex}
+                        className="flex-grow flex-shrink-0 basis-[20%]"
+                      >
                         {column.map((item, itemIndex) => (
                           <div
                             key={itemIndex}
@@ -535,17 +565,26 @@ export default function Header() {
               )}
             </li>
             <li>
-              <Link href={"/"} className="hover:text-[#FF5757] transition-all duration-300">
+              <Link
+                href={"/"}
+                className="hover:text-[#FF5757] transition-all duration-300"
+              >
                 <span className="pt-[1px] px-[6px]">홈</span>
               </Link>
             </li>
             <li>
-              <Link href={"/project/list"} className="hover:text-[#FF5757] transition-all duration-300">
+              <Link
+                href={"/project/list"}
+                className="hover:text-[#FF5757] transition-all duration-300"
+              >
                 <span className="pt-[1px] px-[6px]">인기</span>
               </Link>
             </li>
             <li>
-              <Link href={"/project/list"} className="hover:text-[#FF5757] transition-all duration-300">
+              <Link
+                href={"/project/list"}
+                className="hover:text-[#FF5757] transition-all duration-300"
+              >
                 <span className="pt-[1px] px-[6px]">신규</span>
               </Link>
             </li>
