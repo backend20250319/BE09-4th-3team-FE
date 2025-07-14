@@ -33,7 +33,7 @@ export default function ProjectInfo({
 
   const handlePledge = () => {
     if (!token) {
-      router.push("/seokgeun");
+      router.push("/users/login");
       return;
     }
 
