@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function ProjectInfo({
   project,
@@ -18,6 +19,7 @@ export default function ProjectInfo({
   const router = useRouter();
   const token = sessionStorage.getItem("accessToken");
   const [isScrolled, setIsScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -71,13 +73,13 @@ export default function ProjectInfo({
         <div
           className={`pt-6 transition-all duration-300 ease-in-out ${
             isScrolled
-              ? "fixed top-[50px] h-[calc(100%-52px)] scrollbar-hide overflow-auto right-[13%] w-[352px] z-10"
+              ? "fixed top-[8%] h-[calc(100%-52px)] scrollbar-hide overflow-auto right-[13%] w-[352px] z-10"
               : ""
           }`}
         >
           <p className="text-sm text-[#3d3d3d] font-semibold mb-[0.5rem]">선물 선택</p>
           <div className="flex flex-col gap-5 select-none">
-            <button className="text-left" onClick={(e) => alert("준비중입니다")}>
+            <button className="text-left" onClick={() => alert("준비중입니다")}>
               <div className="border p-5 rounded-md shadow-[0px_1px_0px_rgba(0,0,0,0.1),_0px_2px_4px_rgba(0,0,0,0.04)]">
                 <p className="text-2xl leading-[36px] mb-[6px] tracking-[-0.025em]">1000원 +</p>
                 <p className="text-[13px] leading-[20px]">선물 없이 후원하기</p>
@@ -163,12 +165,36 @@ export default function ProjectInfo({
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <div className="text-sm font-medium mb-2">선택된 선물: {selectedRewards.length}개</div>
               <div className="text-sm text-gray-600 mb-3">총액: {selectedRewardsTotal.toLocaleString()}원</div>
-              <button
-                onClick={handlePledge}
-                className="w-full h-[48px] cursor-pointer py-[14px] px-5 rounded-[8px] gap-1 flex items-center justify-center border-0 text-base bg-[#1c1c1c] text-white hover:bg-[#333] transition-colors"
-              >
-                후원하기
-              </button>
+              {project.status == "IN_PROGRESS" ? (
+                <button
+                  onClick={handlePledge}
+                  className="w-full h-[48px] cursor-pointer py-[14px] px-5 rounded-[8px] gap-1 flex items-center justify-center border-0 text-base bg-[#1c1c1c] text-white hover:bg-[#333] transition-colors"
+                >
+                  후원하기
+                </button>
+              ) : (
+                <Dialog open={open} onOpenChange={setOpen}>
+                  <DialogTrigger asChild>
+                    <button
+                      onClick={() => setOpen(true)}
+                      className="w-full h-[48px] cursor-pointer py-[14px] px-5 rounded-[8px] gap-1 flex items-center justify-center border-0 text-base bg-[#1c1c1c] text-white hover:bg-[#6d6d6d] transition-colors"
+                    >
+                      공개예정
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="w-[400px] flex justify-center items-center flex-col">
+                    <DialogHeader>
+                      <DialogTitle>공개예정 안내</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex flex-col gap-2 items-center">
+                      <p className="mt-4 text-sm text-gray-700 font-medium">
+                        이 프로젝트는 <span className="text-purple-600 font-semibold">{project.startLine}</span>에
+                        공개될 예정입니다.
+                      </p>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
             </div>
           )}
         </div>
