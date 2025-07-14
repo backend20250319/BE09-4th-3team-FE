@@ -129,3 +129,12 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* 프로젝트 상세 페이지 선물 선택 스크롤 안보이게 하기 위한 css */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none; /* Firefox */
+}
