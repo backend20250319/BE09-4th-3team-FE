@@ -25,13 +25,13 @@ export default function FollowsPage() {
       <div className="follow-tab-group">
         <div
           className="follow-tab"
-          onClick={() => router.push("/seokgeun/myfollow")}
+          onClick={() => router.push("/users/myfollow")}
         >
           후원한 창작자 0
         </div>
         <div
           className="follow-tab"
-          onClick={() => router.push("/seokgeun/myfollow/following")}
+          onClick={() => router.push("/users/myfollow/following")}
         >
           팔로잉 0
         </div>
