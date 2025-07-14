@@ -112,7 +112,7 @@ export default function ProjectReviewPage() {
             </div>
 
             <div className="mb-4">
-                <Link href="/junbem/projects" className="btn-back">
+                <Link href="/src/app/admin/projects" className="btn-back">
                     ← Back to Overview
                 </Link>
             </div>

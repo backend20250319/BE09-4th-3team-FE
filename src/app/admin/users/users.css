@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "../../../../node_modules/tailwindcss/dist/lib.d.mts";
 
 /* 뱃지 스타일 */
 .badge {

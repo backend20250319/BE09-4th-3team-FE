@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "../../../../../node_modules/tailwindcss/dist/lib.d.mts";
 
 .review-main {
     @apply p-6 bg-gray-50 min-h-screen;

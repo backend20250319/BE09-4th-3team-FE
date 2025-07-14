@@ -149,7 +149,7 @@ useEffect(() => {
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
                     </select>
-                    <Link href="/junbem/projects/reviews" className="projects-review-btn">
+                    <Link href="/src/app/admin/projects/reviews" className="projects-review-btn">
                         프로젝트 승인 <ExternalLink className="ml-2 h-4 w-4" />
                     </Link>
                 </div>
@@ -217,7 +217,7 @@ useEffect(() => {
                                         </button>
                                         {/*승인하기 버튼*/}
                                         {project.status === "pending" && (
-                                            <Link href="/junbem/projects/reviews" className="action-button cursor-pointer">
+                                            <Link href="/src/app/admin/projects/reviews" className="action-button cursor-pointer">
                                                 승인하기
                                             </Link>
                                         )}

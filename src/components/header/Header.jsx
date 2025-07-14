@@ -346,7 +346,7 @@ export default function Header() {
               {/* ADMIN으로 가는 icon 추가 */}
               {roleType === "ADMIN" && (
                   <li className="p-4">
-                    <Link href="/junbem">
+                    <Link href="/admin">
                       <User />
                     </Link>
                   </li>
