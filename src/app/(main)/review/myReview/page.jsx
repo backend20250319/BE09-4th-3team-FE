@@ -381,7 +381,7 @@ const Page = () => {
                         gap: "12px",
                       }}
                     >
-                      {/* <img
+                      <img
                         src={review.projectThumbnailUrl || "/placeholder.svg"}
                         alt="프로젝트 이미지"
                         style={{
@@ -391,7 +391,7 @@ const Page = () => {
                           objectFit: "cover",
                           flexShrink: 0,
                         }}
-                      /> 추후 추가 */}
+                      />
                       <div style={{ flex: 1 }}>
                         <div
                           style={{
@@ -419,10 +419,8 @@ const Page = () => {
                                 marginBottom: "4px",
                               }}
                             >
-                              {review.reviewDate}{" "}
-                              {isToday(review.reviewDate)
-                                ? "(오늘 작성됨)"
-                                : ""}
+                              {review.createdAt.slice(0, 10)}{" "}
+                              {isToday(review.createdAt) ? "(오늘 작성됨)" : ""}
                             </div>
                           </div>
                           <div style={{ position: "relative" }}>
@@ -531,7 +529,6 @@ const Page = () => {
                                 border: "1px solid #e9ecef",
                               }}
                             >
-                              {" "}
                               {getRatingLabel("plan", review.planStatus)}
                             </span>
                             <span
@@ -544,7 +541,6 @@ const Page = () => {
                                 border: "1px solid #e9ecef",
                               }}
                             >
-                              {" "}
                               {getRatingLabel(
                                 "communication",
                                 review.commStatus

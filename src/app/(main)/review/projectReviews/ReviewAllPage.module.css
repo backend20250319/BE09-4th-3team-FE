@@ -2,7 +2,7 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 24px;
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   min-height: 100vh;
 }
 
@@ -10,7 +10,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   background: white;
   padding: 24px;
   border-radius: 8px;
@@ -19,6 +19,20 @@
 
 .headerContent {
   flex: 1;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 8px;
+  padding: 4px 0;
+}
+
+.backButton:hover {
+  color: #333;
 }
 
 .title {
@@ -54,10 +68,24 @@
   border-color: #ff6b35;
 }
 
+.pageInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #666;
+}
+
 .reviewList {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-bottom: 32px;
 }
 
 .reviewCard {
@@ -175,6 +203,22 @@
   margin-bottom: 16px;
 }
 
+.tagContainer {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 12px;
+  color: #666;
+  background: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
 .statusTags {
   display: flex;
   gap: 6px;
@@ -264,25 +308,47 @@
   background: #f5f5f5;
 }
 
-.loadMoreContainer {
-  text-align: center;
-  margin-top: 32px;
+/* 페이지네이션 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
 }
 
-.loadMoreButton {
+.pageButton {
   background: white;
   border: 1px solid #e0e0e0;
-  padding: 12px 32px;
+  padding: 8px 12px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
   color: #333;
+  min-width: 40px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s;
 }
 
-.loadMoreButton:hover {
+.pageButton:hover {
   background: #f5f5f5;
   border-color: #d0d0d0;
+}
+
+.activePage {
+  background: #ff6b35 !important;
+  color: white !important;
+  border-color: #ff6b35 !important;
+}
+
+.activePage:hover {
+  background: #e55a2b !important;
 }
 
 /* 반응형 */
@@ -295,6 +361,12 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
+  }
+
+  .pageInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
   }
 
   .reviewCard {
@@ -310,5 +382,17 @@
   .helpfulButtons {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .pagination {
+    padding: 16px;
+    gap: 4px;
+  }
+
+  .pageButton {
+    min-width: 36px;
+    height: 32px;
+    padding: 6px 10px;
+    font-size: 13px;
   }
 }

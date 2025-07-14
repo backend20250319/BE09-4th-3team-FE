@@ -6,6 +6,7 @@ import Link from "next/link";
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
+
 // 석근: API BASE URL 추가
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8888";
@@ -27,15 +28,30 @@ export default function Header() {
   const [nickname, setNickname] = useState("");
   const [isLogin, setIsLogin] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  // const [profileImg, setProfileImg] = useState(
+  //   "/images/default_login_icon.png"
+  // );
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [roleType, setRoleType] = useState(""); // ✅ ADMIN 구분용 상태 추가
   const dropdownRef = useRef(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // sessionStorage에서 이미지, 닉네임 동기화 (storage 이벤트 포함)
+  // useEffect(() => {
+  //   const updateProfileImg = () => {
+  //     const savedImg = sessionStorage.getItem("profileImg");
+  //     setProfileImg(
+  //       getProfileImgUrl(savedImg) || "/images/default_login_icon.png"
+  //     );
+  //   };
+  //   updateProfileImg();
+  //   window.addEventListener("storage", updateProfileImg);
+  //   return () => window.removeEventListener("storage", updateProfileImg);
+  // }, []);
 
   useEffect(() => {
     const updateNickname = () => {
@@ -70,40 +86,21 @@ export default function Header() {
       return;
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/api/user/me`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
+      const response = await fetch("/api/register/user/me", {
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
-      if (!response.ok) {
-        if (response.status === 401) {
-          // 인증 실패(로그인 만료 등)는 에러로 남기지 않고 조용히 처리
-          setIsLogin(false);
-          setNickname("");
-          return;
-        } else {
-          // 기타 에러는 콘솔에만 표시
-          console.error(
-            "[Header] 사용자 정보 로드 실패 - HTTP 상태:",
-            response.status
-          );
-          setIsLogin(false);
-          setNickname("");
-          return;
-        }
-      }
+      if (!response.ok) throw new Error("not logged in");
       const data = await response.json();
-      // 닉네임이 있으면 세션과 상태에 저장
-      if (data.nickname) {
+
+      // 닉네임 처리
+      const savedNickname = sessionStorage.getItem("nickname");
+      if (data.nickname && data.nickname !== savedNickname) {
         setNickname(data.nickname);
         sessionStorage.setItem("nickname", data.nickname);
-        setIsLogin(true);
-      } else {
-        setNickname("");
-        setIsLogin(false);
+      } else if (data.nickname && !savedNickname) {
+        setNickname(data.nickname);
+        sessionStorage.setItem("nickname", data.nickname);
       }
-
       // 프로필 이미지 처리 (항상 가공 후 저장)
       // if (data.profileImg) {
       //   const url = getProfileImgUrl(data.profileImg);
@@ -111,14 +108,12 @@ export default function Header() {
       //   sessionStorage.setItem("profileImg", url);
       // }
 
-      setRoleType(data.roleType || ""); // ✅ roleType 상태 저장
-
       setIsLogin(true);
     } catch (error) {
-      // 네트워크 등 예외 상황만 에러로 표시
-      console.error("[Header] 사용자 정보 로드 실패:", error);
       setIsLogin(false);
       setNickname("");
+      setProfileImg("/images/default_login_icon.png");
+      // sessionStorage.setItem("profileImg", "/images/default_login_icon.png");
     }
   };
 
@@ -143,6 +138,48 @@ export default function Header() {
     return () => window.removeEventListener("focus", handleFocus);
   }, [isLogin]);
 
+  // 알림 읽음 처리
+  const fetchUnreadCount = async () => {
+    const token = sessionStorage.getItem("accessToken");
+    if (!token) {
+      setUnreadCount(0);
+      return;
+    }
+    try {
+      const res = await fetch(
+        "http://localhost:8888/notifications/unread-count",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      setUnreadCount(data);
+    } catch (error) {
+      console.error("읽지 않은 알림 개수 가져오기 실패", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!isLogin) return;
+    fetchUnreadCount(); // 초기 호출
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, [isLogin]);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      if (isLogin) {
+        fetchUserInfo();
+        fetchUnreadCount();
+      }
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [isLogin]);
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 60);
@@ -160,17 +197,13 @@ export default function Header() {
       // 실제 백엔드 로그아웃 API 호출
       await fetch(`${API_BASE_URL}/api/user/logout`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
-    } catch (e) {
-      console.error("석근: 로그아웃 API 호출 실패:", e);
-    }
+    } catch (e) {}
     sessionStorage.removeItem("accessToken");
     sessionStorage.removeItem("refreshToken");
     sessionStorage.removeItem("nickname");
+    // sessionStorage.removeItem("profileImg");
     setIsLogin(false);
     setNickname("");
     router.push("/");
@@ -364,10 +397,14 @@ export default function Header() {
                     </Link>
                   </li>
               )}
-
               <li className="p-4">
                 <Link href="/users/dropdownmenu/mynotification">
                   <Bell />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] min-w-[16px] h-[16px] px-[4px] rounded-full flex items-center justify-center leading-none">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
                 </Link>
               </li>
               <li className="relative">
@@ -414,7 +451,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/users/dropdownmenu/myreview"
+                          href="/review/myreview"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           내 후기
@@ -438,7 +475,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/users/dropdownmenu/mynotification"
+                          href="/notification"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           알림
