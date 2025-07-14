@@ -35,7 +35,7 @@ api.interceptors.response.use(
     // 401 에러(인증 실패) 처리
     if (error.response && error.response.status === 401) {
       // 로그인 페이지에서는 새로고침/이동하지 않음
-      if (window.location.pathname.startsWith("/userslogin")) {
+      if (window.location.pathname.startsWith("/users/login")) {
         return Promise.reject(error);
       }
       // 1. 클라이언트 인증 정보 정리
