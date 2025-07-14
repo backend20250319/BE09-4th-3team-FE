@@ -60,9 +60,8 @@ export default function Header() {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, [isLogin]);
 
-  // 석근: 사용자 정보 fetch - 실제 백엔드 API 사용
+  // 사용자 정보 fetch - 실제 백엔드 API 사용
   const fetchUserInfo = async () => {
-    console.log("석근: fetchUserInfo called"); // 이 줄 추가!
     const accessToken = sessionStorage.getItem("accessToken");
     if (!accessToken) {
       setIsLogin(false);
@@ -70,34 +69,44 @@ export default function Header() {
       return;
     }
     try {
-      // 석근: 실제 백엔드 API 호출
       const response = await fetch(`${API_BASE_URL}/api/user/me`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
       });
-      if (!response.ok) throw new Error("not logged in");
-      const data = await response.json();
-
-      console.log("석근: 헤더 사용자 정보 로드 성공:", data);
-
-      // 닉네임 처리
-      const savedNickname = sessionStorage.getItem("nickname");
-      if (data.nickname && data.nickname !== savedNickname) {
-        setNickname(data.nickname);
-        sessionStorage.setItem("nickname", data.nickname);
-      } else if (data.nickname && !savedNickname) {
-        setNickname(data.nickname);
-        sessionStorage.setItem("nickname", data.nickname);
+      if (!response.ok) {
+        if (response.status === 401) {
+          // 인증 실패(로그인 만료 등)는 에러로 남기지 않고 조용히 처리
+          setIsLogin(false);
+          setNickname("");
+          return;
+        } else {
+          // 기타 에러는 콘솔에만 표시
+          console.error(
+            "[Header] 사용자 정보 로드 실패 - HTTP 상태:",
+            response.status
+          );
+          setIsLogin(false);
+          setNickname("");
+          return;
+        }
       }
-
-      setIsLogin(true);
+      const data = await response.json();
+      // 닉네임이 있으면 세션과 상태에 저장
+      if (data.nickname) {
+        setNickname(data.nickname);
+        sessionStorage.setItem("nickname", data.nickname);
+        setIsLogin(true);
+      } else {
+        setNickname("");
+        setIsLogin(false);
+      }
     } catch (error) {
-      console.error("석근: 헤더 사용자 정보 로드 실패:", error);
+      // 네트워크 등 예외 상황만 에러로 표시
+      console.error("[Header] 사용자 정보 로드 실패:", error);
       setIsLogin(false);
       setNickname("");
-      // setProfileImg("/images/default_login_icon.png");
     }
   };
 
