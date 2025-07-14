@@ -97,6 +97,7 @@ export default function LoginPage() {
       console.log("에러 상세:", err.response); // 디버깅용
       console.log("에러 상태:", err.response?.status); // 상태 코드 확인
       console.log("에러 메시지:", err.message); // 에러 메시지 확인
+      console.log("에러 응답 데이터:", err.response?.data); // 에러 응답 데이터 확인
       console.log("전체 에러 객체:", err); // 전체 에러 객체 확인
 
       // 로그인 실패 시 토큰 삭제
@@ -104,9 +105,21 @@ export default function LoginPage() {
       sessionStorage.removeItem("refreshToken");
 
       if (err.response?.status === 403) {
-        setModalMsg(
-          "이미 회원탈퇴 처리된 계정입니다.\n이용 문의: choseokgeun@gmail.com"
-        );
+        // BANNED 사용자 또는 회원탈퇴 처리된 계정
+        const errorMessage =
+          err.response?.data?.message || "계정이 제한되었습니다.";
+
+        // BANNED 상태인 경우 (정지된 계정 메시지)
+        if (errorMessage.includes("정지된")) {
+          setModalMsg(
+            "이미 밴 처리된 계정입니다.\n이용 문의: choseokgeun@gmail.com"
+          );
+        } else {
+          // QUIT 상태인 경우 (탈퇴한 회원 메시지)
+          setModalMsg(
+            "이미 회원탈퇴 처리된 계정입니다.\n이용 문의: choseokgeun@gmail.com"
+          );
+        }
         setShowModal(true);
         setModalReload(true); // 새로고침 O
       } else if (err.response?.status === 401) {
