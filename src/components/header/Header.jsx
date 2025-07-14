@@ -30,6 +30,7 @@ export default function Header() {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [roleType, setRoleType] = useState(""); // ✅ ADMIN 구분용 상태 추가
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -102,6 +103,17 @@ export default function Header() {
         setNickname("");
         setIsLogin(false);
       }
+
+      // 프로필 이미지 처리 (항상 가공 후 저장)
+      // if (data.profileImg) {
+      //   const url = getProfileImgUrl(data.profileImg);
+      //   setProfileImg(url);
+      //   sessionStorage.setItem("profileImg", url);
+      // }
+
+      setRoleType(data.roleType || ""); // ✅ roleType 상태 저장
+
+      setIsLogin(true);
     } catch (error) {
       // 네트워크 등 예외 상황만 에러로 표시
       console.error("[Header] 사용자 정보 로드 실패:", error);
@@ -344,6 +356,15 @@ export default function Header() {
                   <Heart />
                 </Link>
               </li>
+              {/* ADMIN으로 가는 icon 추가 */}
+              {roleType === "ADMIN" && (
+                  <li className="p-4">
+                    <Link href="/junbem">
+                      <User />
+                    </Link>
+                  </li>
+              )}
+
               <li className="p-4">
                 <Link href="/users/dropdownmenu/mynotification">
                   <Bell />

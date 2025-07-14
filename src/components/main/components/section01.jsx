@@ -1,26 +1,17 @@
 "use client";
-import axios from "axios";
 import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
-import { CategoryBtn } from "./components/categoryBtn";
+import { CategoryBtn } from "./categoryBtn";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { getDday } from "../utils/dday";
+import { getDday } from "@/components/utils/dday";
 
-export default function Section01() {
-  const [projects, setProjects] = useState([]);
-  const [pagination, setPagination] = useState({
-    page: 0,
-    size: 12,
-    totalPages: 0,
-    totalElements: 0,
-  });
-
+export default function Section01({ projects }) {
   const [currentIndex, setCurrentIndex] = useState(1);
   const swiperRef = useRef(null);
 
@@ -35,6 +26,7 @@ export default function Section01() {
     }
   }, []);
 
+<<<<<<< HEAD:src/components/main/section01.jsx
   const fetchProjects = async (page = 0, size = 12) => {
     try {
       const response = await axios.get(
@@ -56,6 +48,8 @@ export default function Section01() {
     fetchProjects();
   }, []);
 
+=======
+>>>>>>> 8ecbd3a2981a7ffd51b733ef1df329bc3e056a99:src/components/main/components/section01.jsx
   const formatCustomDate = (date = new Date()) => {
     const yy = String(date.getFullYear()).slice(2);
     const mm = String(date.getMonth() + 1).padStart(2, "0");
@@ -179,13 +173,23 @@ export default function Section01() {
                     )}
 
                     <div className="pt-4 flex flex-col">
+<<<<<<< HEAD:src/components/main/section01.jsx
                       <p className="text-xs leading-[120%] text-[#545454]">
                         {project.creatorName}
                       </p>
                       <h2 className="text-base pb-1 text-[#1c1c1c] mb-[6px] ">
                         {project.title}
                       </h2>
+=======
+                      <p className="text-xs leading-[120%] text-[#545454]">{project.creatorName}</p>
+                      <h2 className="text-base pb-1 text-[#1c1c1c] ">{project.title}</h2>
+>>>>>>> 8ecbd3a2981a7ffd51b733ef1df329bc3e056a99:src/components/main/components/section01.jsx
                     </div>
+                    {project.creatorName == "hoya" && (
+                      <div>
+                        <Image src={"/main/goodCreator.png"} alt="좋은 창작자" width={60} height={17} />
+                      </div>
+                    )}
                     <div className="pb-1 text-sm">
                       <div className="flex justify-between">
                         <div className="flex gap-1">
@@ -230,7 +234,7 @@ export default function Section01() {
                       alt={project.title}
                       width={116}
                       height={116}
-                      className="object-cover w-[116px] h-[116px] flex-shrink-0 rounded-[8px]"
+                      className="object-cover w-[116px] h-[116px] flex-shrink-0 rounded-[8px] hover:scale-110 duration-300 ease-in-out transition-all"
                     />
                   ) : (
                     <div className="w-[116px] h-[116px] bg-gray-200 flex items-center justify-center text-sm text-gray-500 rounded-[8px] flex-shrink-0">
@@ -246,8 +250,9 @@ export default function Section01() {
                   </span>
 
                   {/* 텍스트 설명 */}
-                  <div className="ml-4 flex flex-col justify-between flex-1">
+                  <div className="ml-4 flex flex-col justify-between flex-1 gap-2">
                     <div>
+<<<<<<< HEAD:src/components/main/section01.jsx
                       <p className="text-xs leading-[120%] text-[#545454]">
                         {project.creatorName}
                       </p>
@@ -259,6 +264,21 @@ export default function Section01() {
                       <p className="text-sm text-[#eb4b38] font-bold">
                         {project.percent}% 달성
                       </p>
+=======
+                      <p className="text-xs leading-[120%] text-[#545454]">{project.creatorName}</p>
+                      <h2 className="text-base text-[#1c1c1c]">{project.title}</h2>
+                    </div>
+                    <div className="bg-[#f0f0f0] w-12 text-[#545454] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center px-1 rounded-[2px]">
+                      {getDday(project.startLine, project.deadLine)}일 남음
+                    </div>
+                    <div className="pb-1 text-sm flex flex-col">
+                      <p className="text-sm text-[#eb4b38] font-bold">{project.percent}% 달성</p>
+                      {project.creatorName == "hoya" && (
+                        <div>
+                          <Image src={"/main/goodCreator.png"} alt="좋은 창작자" width={60} height={17} />
+                        </div>
+                      )}
+>>>>>>> 8ecbd3a2981a7ffd51b733ef1df329bc3e056a99:src/components/main/components/section01.jsx
                     </div>
                   </div>
                 </div>
