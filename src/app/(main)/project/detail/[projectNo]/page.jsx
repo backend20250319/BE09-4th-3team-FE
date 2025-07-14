@@ -15,6 +15,7 @@ import ProjectCommunity from "../components/projectCommunity";
 import ProjectInfo from "../components/projectInfo";
 import ScrollToTopButton from "@/components/scrollTopBtn/ScrollToTopButton";
 import { v4 as uuidv4 } from "uuid";
+import LoadingSpinner from "@/components/loading";
 
 export default function Page() {
   const { projectNo } = useParams();
@@ -113,7 +114,7 @@ export default function Page() {
               <div className="flex gap-[6px] flex-col leading-[120%]">
                 <p className="text-sm font-normal text-[#545454]">모인금액</p>
                 <p className="text-2xl font-bold leading-[120%]">
-                  {project.currentAmount}
+                  {numberWithCommas(project.currentAmount)}
                   <span className="text-sm font-normal ml-[2px]">원</span>
                   <span className="text-lg ml-2 text-[#eb4b38]">{project.percentFunded}%</span>
                 </p>
@@ -162,12 +163,21 @@ export default function Page() {
               <div>
                 <Share2 />
               </div>
-              <button
-                onClick={onClickGoPledge}
-                className="w-full h-[48px] cursor-pointer py-[14px] px-5 rounded-[8px] gap-1 flex items-center justify-center border-0 text-base bg-[#1c1c1c] text-white"
-              >
-                후원하기
-              </button>
+              {project.status == "IN_PROGRESS" ? (
+                <button
+                  onClick={onClickGoPledge}
+                  className="w-full h-[48px] cursor-pointer py-[14px] px-5 rounded-[8px] gap-1 flex items-center justify-center border-0 text-base bg-[#1c1c1c] text-white"
+                >
+                  후원하기
+                </button>
+              ) : (
+                <button
+                  onClick={onClickGoPledge}
+                  className="w-full h-[48px] cursor-pointer py-[14px] px-5 rounded-[8px] gap-1 flex items-center justify-center border-0 text-base bg-[#1c1c1c] text-white"
+                >
+                  공개예정
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -237,9 +247,9 @@ export default function Page() {
           </Tabs>
         </div>
       </div>
-      <ScrollToTopButton />;
+      <ScrollToTopButton />
     </main>
   ) : (
-    <div className="flex justify-center items-center h-screen">로딩중...</div>
+    <LoadingSpinner />
   );
 }

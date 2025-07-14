@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 import Image from "next/image";
@@ -92,6 +92,31 @@ export default function Page() {
                   마감일:
                   <span className="text-[#545454]">{project.deadLine}</span>
                 </p>
+
+                <div className="flex gap-1 mb-[6px]">
+                  {new Date(project.startLine) > new Date() ? (
+                    // 시작일이 미래 → 공개예정
+                    <div className="bg-[#EDE9FE] w-12 text-[#7C3AED] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                      공개예정
+                    </div>
+                  ) : (
+                    // 시작일이 오늘이거나 지남 → 진행중 + 남은 일수
+                    <div className="flex gap-1">
+                      <div className="bg-[#e0f7e9] w-12 text-[#34a853] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                        진행중
+                      </div>
+                      <div className="bg-[#F3F4F6] w-12 text-[#374151] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                        {getDday(project.startLine, project.deadLine)}일 남음
+                      </div>
+                    </div>
+                  )}
+                  {project.creatorName == "hoya" && (
+                    <div>
+                      <Image src={"/main/goodCreator.png"} alt="좋은 창작자" width={60} height={17} />
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex justify-between">
                   <div className="flex gap-1">
                     <p className="text-sm text-[#eb4b38] font-bold">{project.percent}%</p>
