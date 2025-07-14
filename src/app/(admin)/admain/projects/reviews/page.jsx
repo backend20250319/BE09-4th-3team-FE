@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Eye, Check, X } from "lucide-react";
 import "./reviews.css";
+import Pagination from "@/components/pagination/pagination";
 
 export default function ProjectReviewPage() {
     const [projects, setProjects] = useState([]);
     const [selectedProject, setSelectedProject] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
-    const [currentPage, setCurrentPage] = useState(1); // 페이지 번호 (1부터 시작)
+    const [currentPage, setCurrentPage] = useState(0); // 페이지 번호 (1부터 시작)
     const [totalPages, setTotalPages] = useState(1);   // 총 페이지 수 (API 응답 기반)
 
 
@@ -21,7 +22,7 @@ export default function ProjectReviewPage() {
                 const token = sessionStorage.getItem("accessToken");
 
                 const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/projects?page=${currentPage - 1}&productStatus=WAITING_APPROVAL`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/projects?page=${currentPage}&productStatus=WAITING_APPROVAL`,
                     {
                         headers: {
                             "Content-Type": "application/json",
@@ -112,7 +113,7 @@ export default function ProjectReviewPage() {
             </div>
 
             <div className="mb-4">
-                <Link href="/junbem/projects" className="btn-back">
+                <Link href="/admain/projects" className="btn-back">
                     ← Back to Overview
                 </Link>
             </div>
@@ -178,38 +179,32 @@ export default function ProjectReviewPage() {
                 </div>
             </div>
 
-            <div className="flex justify-center mt-6 gap-2">
-                <button
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                    className="px-3 py-1 border rounded disabled:opacity-50  cursor-pointer"
-                >
-                    이전
-                </button>
-                <span className="text-sm py-1">
-                    {currentPage} / {totalPages}
-                </span>
-                <button
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                    className="px-3 py-1 border rounded disabled:opacity-50  cursor-pointer"
-                >
-                    다음
-                </button>
-            </div>
+            {/* 페이징 처리 */}
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => setCurrentPage(page)}
+            />
 
 
             {/* 🔹 모달 */}
             {showModal && selectedProject && (
                 <div className="modal-overlay">
-                    <div className="modal-content">
+                    <div className="modal-content relative">
+                        {/* 닫기 아이콘 버튼 (오른쪽 상단) */}
+                        <button
+                            onClick={closeModal}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-black cursor-pointer"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
                         <h3 className="text-xl font-semibold mb-2">{selectedProject.name}</h3>
                         <p className="text-gray-600 text-sm mb-4">by {selectedProject.creator}</p>
                         <p className="text-sm mb-2"><strong>카테고리:</strong> {selectedProject.category}</p>
                         <p className="text-sm mb-2"><strong>목표 금액:</strong> {selectedProject.goal}</p>
                         <p className="text-sm mb-2"><strong>신청 날짜:</strong> {selectedProject.date}</p>
                         <p className="text-sm mb-4"><strong>설명:</strong> {selectedProject.description}</p>
-                        <button onClick={closeModal} className="btn-close cursor-pointer">닫기</button>
                     </div>
                 </div>
             )}

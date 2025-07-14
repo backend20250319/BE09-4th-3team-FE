@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import "./projects.css";
-import { Eye, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import { Eye, ChevronLeft, ChevronRight, ExternalLink, X } from "lucide-react";
+import Pagination from "@/components/pagination/pagination";
 
 export default function ProjectsPage() {
     const [allProjects, setAllProjects] = useState([]);
@@ -11,7 +12,7 @@ export default function ProjectsPage() {
     const [selectedProject, setSelectedProject] = useState(null);
     const [statusFilter, setStatusFilter] = useState("all");
     const [showModal, setShowModal] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(0);
 
     const [totalCount, setTotalCount] = useState(0); // 전체 프로젝트 수
     const [statusCounts, setStatusCounts] = useState({
@@ -33,7 +34,7 @@ useEffect(() => {
         try {
             const token = sessionStorage.getItem("accessToken");
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/projects?page=${currentPage - 1}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/projects?page=${currentPage}`, {
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
@@ -149,7 +150,7 @@ useEffect(() => {
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
                     </select>
-                    <Link href="/junbem/projects/reviews" className="projects-review-btn">
+                    <Link href="/admain/projects/reviews" className="projects-review-btn">
                         프로젝트 승인 <ExternalLink className="ml-2 h-4 w-4" />
                     </Link>
                 </div>
@@ -217,7 +218,7 @@ useEffect(() => {
                                         </button>
                                         {/*승인하기 버튼*/}
                                         {project.status === "pending" && (
-                                            <Link href="/junbem/projects/reviews" className="action-button cursor-pointer">
+                                            <Link href="/projects/reviews" className="action-button cursor-pointer">
                                                 승인하기
                                             </Link>
                                         )}
@@ -231,38 +232,45 @@ useEffect(() => {
             </div>
 
             {/* 페이징 버튼 */}
-            <div className="pagination mt-4 flex justify-center items-center gap-4">
-                <button
-                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                    disabled={currentPage === 1}
-                    className="px-2 py-1 border rounded disabled:opacity-50 cursor-pointer"
-                >
-                    <ChevronLeft className="inline w-4 h-4" /> 이전
-                </button>
-                <span className="text-sm">{currentPage} / {totalPages}</span>
-                <button
-                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className="px-2 py-1 border rounded disabled:opacity-50 cursor-pointer"
-                >
-                    다음 <ChevronRight className="inline w-4 h-4" />
-                </button>
-            </div>
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => setCurrentPage(page)}
+            />
 
             {/* 🔹 상세 보기 모달 */}
             {showModal && selectedProject && (
                 <div className="modal-overlay">
-                    <div className="modal-content">
+                    <div className="modal-content relative">
+                        {/* 상단 우측 닫기 아이콘 버튼 */}
+                        <button
+                            onClick={closeModal}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-black cursor-pointer"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
                         <h2 className="text-xl font-bold mb-2">{selectedProject.name}</h2>
-                        <p className="text-sm text-gray-500 mb-2"><strong>신청자:</strong> {selectedProject.creator}</p>
-                        <p className="text-sm mb-1"><strong>카테고리:</strong> {selectedProject.category}</p>
-                        <p className="text-sm mb-1"><strong>목표 금액:</strong> {selectedProject.goal}</p>
-                        <p className="text-sm mb-1"><strong>신청 날짜:</strong> {selectedProject.date}</p>
-                        <p className="text-sm mt-4"><strong>설명:</strong><br />{selectedProject.description}</p>
-                        <button onClick={closeModal} className="btn-close cursor-pointer mt-4">닫기</button>
+                        <p className="text-sm mb-1">
+                            <strong>신청자:</strong> {selectedProject.creator}
+                        </p>
+                        <p className="text-sm mb-1">
+                            <strong>카테고리:</strong> {selectedProject.category}
+                        </p>
+                        <p className="text-sm mb-1">
+                            <strong>목표 금액:</strong> {selectedProject.goal}
+                        </p>
+                        <p className="text-sm mb-1">
+                            <strong>신청 날짜:</strong> {selectedProject.date}
+                        </p>
+                        <p className="text-sm mt-4">
+                            <strong>설명:</strong><br />
+                            {selectedProject.description}
+                        </p>
                     </div>
                 </div>
             )}
+
         </main>
     );
 }

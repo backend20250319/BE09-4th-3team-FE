@@ -12,7 +12,7 @@ import {
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import './dashboard.css'
-import PieChart from "@/app/(admin)/junbem/piechart";
+import PieChart from "@/app/(admin)/admain/piechart";
 
 
 export default function AdminDashboard() {

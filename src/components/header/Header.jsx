@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
+
 // 석근: API BASE URL 추가
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8888";
 console.log("석근: 헤더 API_BASE_URL:", API_BASE_URL);
@@ -379,13 +380,16 @@ export default function Header() {
                   <Heart />
                 </Link>
               </li>
+
               {/* ADMIN으로 가는 icon 추가 */}
               {roleType === "ADMIN" && (
-                <li className="p-4">
-                  <Link href="/junbem">
-                    <User />
-                  </Link>
-                </li>
+
+                  <li className="p-4">
+                    <Link href="/admain">
+                      <User />
+                    </Link>
+                  </li>
+
               )}
               <li className="p-4">
                 <Link href="/users/dropdownmenu/mynotification">

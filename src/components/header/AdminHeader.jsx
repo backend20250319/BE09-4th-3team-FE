@@ -10,11 +10,11 @@ export default function AdminHeader() {
                     <BarChart3 className="h-6 w-6" />
                     <span className="sr-only">Admin Dashboard</span>
                 </Link>
-                <Link href="/junbem" className="dashboard-link-active">대시 보드</Link>
-                <Link href="/junbem/projects" className="dashboard-link">프로젝트 관리</Link>
-                <Link href="/junbem/users" className="dashboard-link">회원 관리</Link>
-                <Link href="/junbem/fundings" className="dashboard-link">펀딩 관리</Link>
-                <Link href="/junbem/review" className="dashboard-link">리뷰 관리</Link>
+                <Link href="/admain" className="dashboard-link-active">대시 보드</Link>
+                <Link href="/admain/projects" className="dashboard-link">프로젝트 관리</Link>
+                <Link href="/admain/users" className="dashboard-link">회원 관리</Link>
+                <Link href="/admain/fundings" className="dashboard-link">펀딩 관리</Link>
+                <Link href="/admain/review" className="dashboard-link">리뷰 관리</Link>
             </nav>
 
             {/* 모바일 햄버거 메뉴 */}
