@@ -13,6 +13,45 @@ const TABS = [
   { label: "알림", path: "/seokgeun/dropdownmenu/mysettings/notifications" },
 ];
 
+// 모달 컴포넌트
+const Modal = ({ isOpen, onClose, title, message, type = "info" }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className={`modal-title ${type}`}>{title}</div>
+        <div className="modal-message">{message}</div>
+        <button className={`modal-button ${type}`} onClick={onClose}>
+          확인
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// 확인 모달 컴포넌트
+const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-title info">{title}</div>
+        <div className="modal-message">{message}</div>
+        <div className="confirm-modal-actions">
+          <button className="confirm-modal-cancel-btn" onClick={onClose}>
+            취소
+          </button>
+          <button className="confirm-modal-confirm-btn" onClick={onConfirm}>
+            삭제
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function AddressesPage() {
   const pathname = usePathname();
   const router = useRouter();
@@ -27,6 +66,37 @@ export default function AddressesPage() {
     address: "",
     detail: "",
   });
+
+  // 모달 상태
+  const [modal, setModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "info",
+  });
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    addressId: null,
+  });
+
+  // 모달 표시 함수
+  const showModal = (title, message, type = "info") => {
+    setModal({ isOpen: true, title, message, type });
+  };
+
+  const hideModal = () => {
+    setModal({ isOpen: false, title: "", message: "", type: "info" });
+  };
+
+  const showConfirmModal = (title, message, addressId) => {
+    setConfirmModal({ isOpen: true, title, message, addressId });
+  };
+
+  const hideConfirmModal = () => {
+    setConfirmModal({ isOpen: false, title: "", message: "", addressId: null });
+  };
 
   // 카카오 주소 검색 스크립트 로드
   const loadDaumPostcodeScript = () => {
@@ -63,7 +133,11 @@ export default function AddressesPage() {
     if (res.status === 401 || res.status === 419) {
       sessionStorage.removeItem("accessToken");
       sessionStorage.removeItem("refreshToken");
-      alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+      showModal(
+        "로그인 만료",
+        "로그인 세션이 만료되었습니다. 다시 로그인 해주세요.",
+        "error"
+      );
       router.replace("/seokgeun/login");
       return null;
     }
@@ -73,8 +147,10 @@ export default function AddressesPage() {
   // 주소 검색 팝업
   const handleAddressSearch = () => {
     if (!window.daum || !window.daum.Postcode) {
-      alert(
-        "주소 검색 스크립트가 아직 로드되지 않았습니다. 잠시 후 다시 시도해주세요."
+      showModal(
+        "주소 검색 오류",
+        "주소 검색 스크립트가 아직 로드되지 않았습니다. 잠시 후 다시 시도해주세요.",
+        "error"
       );
       return;
     }
@@ -100,19 +176,26 @@ export default function AddressesPage() {
 
     // 폼 유효성 검사
     if (!form.name.trim()) {
-      alert("수령인 이름을 입력해주세요.");
+      showModal("입력 오류", "수령인 이름을 입력해주세요.", "error");
       return;
     }
     if (!form.phone.trim()) {
-      alert("연락처를 입력해주세요.");
+      showModal("입력 오류", "연락처를 입력해주세요.", "error");
       return;
     }
     if (!form.zipcode.trim()) {
-      alert("우편번호를 검색해주세요.");
+      showModal("입력 오류", "우편번호를 검색해주세요.", "error");
       return;
     }
     if (!form.address.trim()) {
-      alert("주소를 검색해주세요.");
+      showModal("입력 오류", "주소를 검색해주세요.", "error");
+      return;
+    }
+
+    // 전화번호 형식 검증
+    const phoneRegex = /^[0-9-+\s()]+$/;
+    if (!phoneRegex.test(form.phone)) {
+      showModal("입력 오류", "올바른 전화번호 형식을 입력해주세요.", "error");
       return;
     }
 
@@ -122,16 +205,16 @@ export default function AddressesPage() {
       console.log("1. 토큰 확인:", accessToken ? "토큰 존재" : "토큰 없음");
 
       if (!accessToken) {
-        alert("로그인이 필요합니다.");
+        showModal("로그인 필요", "로그인이 필요합니다.", "error");
         return;
       }
 
       const requestData = {
-        name: form.name,
-        phone: form.phone,
-        zipcode: form.zipcode,
-        address: form.address,
-        detail: form.detail,
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        zipcode: form.zipcode.trim(),
+        address: form.address.trim(),
+        detail: form.detail.trim(),
         isDefault: addresses.length === 0, // 첫 번째 배송지는 기본으로 설정
       };
 
@@ -140,7 +223,7 @@ export default function AddressesPage() {
 
       console.log("4. API 호출 시작...");
       const response = await fetch(
-        "http://localhost:8888/api/register/user/me/addresses",
+        "http://localhost:8888/api/user/me/addresses",
         {
           method: "POST",
           headers: {
@@ -163,7 +246,11 @@ export default function AddressesPage() {
         setAddresses([...addresses, newAddress]);
         setShowForm(false);
         setForm({ name: "", phone: "", zipcode: "", address: "", detail: "" });
-        alert("배송지가 등록되었습니다.");
+        showModal(
+          "등록 완료",
+          "배송지가 성공적으로 등록되었습니다.",
+          "success"
+        );
       } else {
         console.log("8. 오류 응답 처리 시작...");
         let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
@@ -179,8 +266,30 @@ export default function AddressesPage() {
               errorData.message || errorData.error || "알 수 없는 서버 오류"
             }`;
             console.error("백엔드 서버 오류 상세:", errorData);
-            alert(
-              `백엔드 서버에서 오류가 발생했습니다.\n\n오류 코드: ${errorData.error}\n메시지: ${errorData.message}\n\n백엔드 개발자에게 이 정보를 전달해주세요.`
+            showModal(
+              "서버 오류",
+              `백엔드 서버에서 오류가 발생했습니다.\n\n오류 코드: ${errorData.error}\n메시지: ${errorData.message}\n\n백엔드 개발자에게 이 정보를 전달해주세요.`,
+              "error"
+            );
+            return;
+          }
+
+          // 400 에러 (잘못된 요청)
+          if (response.status === 400) {
+            showModal(
+              "입력 오류",
+              errorData.message || "잘못된 입력 정보입니다.",
+              "error"
+            );
+            return;
+          }
+
+          // 401 에러 (인증 실패)
+          if (response.status === 401) {
+            showModal(
+              "인증 실패",
+              "로그인이 필요하거나 인증이 만료되었습니다.",
+              "error"
             );
             return;
           }
@@ -193,15 +302,21 @@ export default function AddressesPage() {
           errorMessage = responseText || errorMessage;
         }
         console.log("14. 최종 오류 메시지:", errorMessage);
-        alert(`배송지 등록에 실패했습니다: ${errorMessage}`);
+        showModal(
+          "등록 실패",
+          `배송지 등록에 실패했습니다: ${errorMessage}`,
+          "error"
+        );
       }
     } catch (error) {
       console.log("15. 네트워크 오류 발생:", error);
       console.log("16. 오류 타입:", error.constructor.name);
       console.log("17. 오류 메시지:", error.message);
       console.log("18. 오류 스택:", error.stack);
-      alert(
-        "서버 연결에 실패했습니다. 백엔드 서버가 실행 중인지 확인해주세요."
+      showModal(
+        "연결 오류",
+        "서버 연결에 실패했습니다. 백엔드 서버가 실행 중인지 확인해주세요.",
+        "error"
       );
     } finally {
       setSaving(false);
@@ -231,7 +346,7 @@ export default function AddressesPage() {
         console.log("Access Token:", accessToken.substring(0, 20) + "...");
 
         const response = await fetch(
-          "http://localhost:8888/api/register/user/me/addresses",
+          "http://localhost:8888/api/user/me/addresses",
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -266,16 +381,29 @@ export default function AddressesPage() {
           }
 
           if (response.status === 401) {
-            alert("로그인이 만료되었습니다. 다시 로그인해주세요.");
+            showModal(
+              "로그인 만료",
+              "로그인이 만료되었습니다. 다시 로그인해주세요.",
+              "error"
+            );
           } else {
             console.error("배송지 목록 조회 실패:", errorMessage);
+            showModal(
+              "조회 실패",
+              `배송지 목록 조회에 실패했습니다: ${errorMessage}`,
+              "error"
+            );
           }
         }
       } catch (error) {
         console.error("배송지 조회 네트워크 오류:", error);
         console.error("오류 상세:", error.message);
         console.error("오류 스택:", error.stack);
-        // 네트워크 오류는 조용히 처리 (백엔드 서버가 실행되지 않았을 수 있음)
+        showModal(
+          "연결 오류",
+          "서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.",
+          "error"
+        );
       } finally {
         setLoading(false);
       }
@@ -286,21 +414,29 @@ export default function AddressesPage() {
 
   // ✅ 배송지 삭제
   const handleDelete = async (addressId) => {
-    if (!confirm("정말로 이 배송지를 삭제하시겠습니까?")) {
-      return;
-    }
+    showConfirmModal(
+      "배송지 삭제",
+      "정말로 이 배송지를 삭제하시겠습니까?",
+      addressId
+    );
+  };
+
+  // 실제 삭제 처리
+  const confirmDelete = async () => {
+    const addressId = confirmModal.addressId;
+    if (!addressId) return;
 
     try {
       const accessToken = sessionStorage.getItem("accessToken");
       if (!accessToken) {
-        alert("로그인이 필요합니다.");
+        showModal("로그인 필요", "로그인이 필요합니다.", "error");
         return;
       }
 
       console.log("배송지 삭제 요청:", addressId);
 
       const response = await fetch(
-        `http://localhost:8888/api/register/user/me/addresses/${addressId}`,
+        `http://localhost:8888/api/user/me/addresses/${addressId}`,
         {
           method: "DELETE",
           headers: {
@@ -314,19 +450,27 @@ export default function AddressesPage() {
       if (response.ok) {
         console.log("배송지 삭제 성공");
         setAddresses(addresses.filter((addr) => addr.id !== addressId));
-        alert("배송지가 삭제되었습니다.");
+        showModal(
+          "삭제 완료",
+          "배송지가 성공적으로 삭제되었습니다.",
+          "success"
+        );
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error("배송지 삭제 실패:", errorData);
-        alert(
+        showModal(
+          "삭제 실패",
           `배송지 삭제에 실패했습니다: ${
             errorData.message || response.statusText
-          }`
+          }`,
+          "error"
         );
       }
     } catch (error) {
       console.error("배송지 삭제 오류:", error);
-      alert("서버 연결에 실패했습니다.");
+      showModal("연결 오류", "서버 연결에 실패했습니다.", "error");
+    } finally {
+      hideConfirmModal();
     }
   };
 
@@ -348,19 +492,11 @@ export default function AddressesPage() {
       </div>
       <div className="mysettings-profile-table-row-wrapper">
         {/* 배송지 메인 영역 */}
-        <div style={{ flex: 1 }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 24,
-            }}
-          >
-            <div style={{ fontWeight: 700, fontSize: 16 }}>등록된 배송지</div>
+        <div className="addresses-main-area">
+          <div className="addresses-header">
+            <div className="addresses-title">등록된 배송지</div>
             <button
-              className="mysettings-edit-btn"
-              style={{ fontWeight: 700, fontSize: 15, padding: "4px 18px" }}
+              className="mysettings-edit-btn addresses-add-btn"
               onClick={() => setShowForm(true)}
               disabled={saving}
             >
@@ -370,20 +506,8 @@ export default function AddressesPage() {
 
           {/* 로딩 상태 */}
           {loading && (
-            <div
-              style={{
-                border: "1.5px solid #ececec",
-                borderRadius: 8,
-                minHeight: 180,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "#fafafa",
-                marginBottom: 0,
-              }}
-            >
-              <div style={{ fontSize: 16, color: "#888" }}>
+            <div className="addresses-loading">
+              <div className="addresses-loading-text">
                 배송지 목록을 불러오는 중...
               </div>
             </div>
@@ -391,85 +515,39 @@ export default function AddressesPage() {
 
           {/* 배송지 목록 */}
           {!loading && addresses.length === 0 && !showForm && (
-            <div
-              style={{
-                border: "1.5px solid #ececec",
-                borderRadius: 8,
-                minHeight: 180,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "#fafafa",
-                marginBottom: 0,
-              }}
-            >
-              <div style={{ fontSize: 48, color: "#bbb", marginBottom: 8 }}>
-                &#33;
-              </div>
-              <div
-                style={{
-                  color: "#888",
-                  fontSize: 16,
-                  fontWeight: 500,
-                  marginBottom: 4,
-                }}
-              >
+            <div className="addresses-empty">
+              <div className="addresses-empty-icon">&#33;</div>
+              <div className="addresses-empty-title">
                 등록된 배송지가 없습니다.
               </div>
-              <div style={{ color: "#bbb", fontSize: 15 }}>
+              <div className="addresses-empty-subtitle">
                 배송지를 추가해주세요.
               </div>
             </div>
           )}
           {!loading && addresses.length > 0 && (
-            <ul style={{ margin: 0, padding: 0 }}>
+            <ul className="addresses-list">
               {addresses.map((addr, idx) => (
-                <li
-                  key={addr.id || idx}
-                  style={{
-                    border: "1.5px solid #ececec",
-                    borderRadius: 8,
-                    marginBottom: 12,
-                    padding: 16,
-                    position: "relative",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <div>
-                      <b>{addr.name}</b> ({addr.phone})<br />[{addr.zipcode}]{" "}
-                      {addr.address} {addr.detail}
+                <li key={addr.id || idx} className="addresses-item">
+                  <div className="addresses-item-header">
+                    <div className="addresses-item-info">
+                      <span className="addresses-item-name">{addr.name}</span>{" "}
+                      <span className="addresses-item-phone">
+                        ({addr.phone})
+                      </span>
+                      <br />
+                      <span className="addresses-item-address">
+                        [{addr.zipcode}] {addr.address} {addr.detail}
+                      </span>
                       {addr.isDefault && (
-                        <span
-                          style={{
-                            marginLeft: 8,
-                            padding: "2px 6px",
-                            backgroundColor: "#1976d2",
-                            color: "white",
-                            borderRadius: 4,
-                            fontSize: 12,
-                          }}
-                        >
+                        <span className="addresses-item-default-badge">
                           기본
                         </span>
                       )}
                     </div>
                     <button
+                      className="addresses-delete-btn"
                       onClick={() => handleDelete(addr.id)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "#dc3545",
-                        cursor: "pointer",
-                        fontSize: 12,
-                        padding: "4px 8px",
-                      }}
                       disabled={saving}
                     >
                       삭제
@@ -482,22 +560,14 @@ export default function AddressesPage() {
 
           {/* 추가 폼 */}
           {showForm && (
-            <div
-              style={{
-                border: "1.5px solid #ececec",
-                borderRadius: 8,
-                padding: 24,
-                marginTop: 16,
-                background: "#fff",
-              }}
-            >
-              <div style={{ marginBottom: 12 }}>
+            <div className="addresses-form">
+              <div className="addresses-form-row">
                 <input
                   name="name"
                   placeholder="이름"
                   value={form.name}
                   onChange={handleChange}
-                  style={{ marginRight: 8 }}
+                  className="addresses-form-input"
                   disabled={saving}
                 />
                 <input
@@ -505,23 +575,22 @@ export default function AddressesPage() {
                   placeholder="연락처"
                   value={form.phone}
                   onChange={handleChange}
-                  style={{ marginRight: 8 }}
+                  className="addresses-form-input"
                   disabled={saving}
                 />
               </div>
-              <div style={{ marginBottom: 12 }}>
+              <div className="addresses-form-row">
                 <input
                   name="zipcode"
                   placeholder="우편번호"
                   value={form.zipcode}
                   readOnly
-                  style={{ marginRight: 8, width: 120 }}
+                  className="addresses-form-input addresses-zipcode-input"
                 />
                 <button
                   type="button"
-                  className="mysettings-edit-btn"
+                  className="mysettings-edit-btn addresses-search-btn"
                   onClick={handleAddressSearch}
-                  style={{ marginRight: 8 }}
                   disabled={saving}
                 >
                   주소검색
@@ -531,34 +600,35 @@ export default function AddressesPage() {
                   placeholder="기본주소"
                   value={form.address}
                   readOnly
-                  style={{ marginRight: 8, width: 240 }}
+                  className="addresses-form-input addresses-address-input"
                 />
                 <input
                   name="detail"
                   placeholder="상세주소"
                   value={form.detail}
                   onChange={handleChange}
-                  style={{ width: 180 }}
+                  className="addresses-form-input addresses-detail-input"
                   disabled={saving}
                 />
               </div>
-              <button
-                className="mysettings-save-btn"
-                type="button"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? "저장 중..." : "저장"}
-              </button>
-              <button
-                className="mysettings-cancel-btn"
-                type="button"
-                onClick={handleCancel}
-                style={{ marginLeft: 8 }}
-                disabled={saving}
-              >
-                취소
-              </button>
+              <div className="addresses-form-actions">
+                <button
+                  className="mysettings-save-btn addresses-save-btn"
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saving}
+                >
+                  {saving ? "저장 중..." : "저장"}
+                </button>
+                <button
+                  className="mysettings-cancel-btn"
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={saving}
+                >
+                  취소
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -574,7 +644,7 @@ export default function AddressesPage() {
             이런 변경을 원하시면 후원함(마이페이지)에서 변경해주세요.
             <br />
             <a
-              href="/seokgeun/dropdownmenu/sponsoredprojects"
+              href="/pledges"
               style={{
                 color: "#1976d2",
                 textDecoration: "underline",
@@ -586,6 +656,23 @@ export default function AddressesPage() {
           </div>
         </div>
       </div>
+
+      {/* 모달 컴포넌트들 */}
+      <Modal
+        isOpen={modal.isOpen}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+        onClose={hideModal}
+      />
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        onClose={hideConfirmModal}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }
