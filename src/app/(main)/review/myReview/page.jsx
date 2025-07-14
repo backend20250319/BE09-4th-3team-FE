@@ -300,8 +300,11 @@ const Page = () => {
                         />
                         <div className={styles.projectInfo}>
                           <div className={styles.meta}>
-                            {/* 후원 결제일 날짜 */}
-                            <span>
+                            <span style={{ color: "#666", fontWeight: "400" }}>
+                              {project.creatorName
+                                ? project.creatorName
+                                : "창작자 정보 없음"}
+                              {" | "}
                               {project.pledgedAt
                                 ? `후원 결제일 ${project.pledgedAt.slice(
                                     0,
@@ -402,6 +405,15 @@ const Page = () => {
                           }}
                         >
                           <div>
+                            <div
+                              style={{
+                                fontSize: "13px",
+                                color: "#666",
+                                marginBottom: "2px",
+                              }}
+                            >
+                              {review.creatorName}
+                            </div>
                             <div
                               style={{
                                 fontSize: "15px",
