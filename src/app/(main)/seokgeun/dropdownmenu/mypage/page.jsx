@@ -5,6 +5,10 @@ import Link from "next/link";
 import "./page.css";
 import { useRouter } from "next/navigation";
 
+// 석근: API BASE URL 추가
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8888";
+
 const TAB_LIST = [
   { key: "profile", label: "프로필" },
   { key: "review", label: "작성한 후기" },
@@ -40,50 +44,90 @@ export default function MyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("profile");
-  // Header와 동일하게 프로필 이미지 상태 관리
-  // const [profileImg, setProfileImg] = useState(
-  //   "/images/default_login_icon.png"
-  // );
+  const [bio, setBio] = useState(""); // 소개 정보 상태 추가
   const router = useRouter();
 
-  // useEffect(() => {
-  //   const updateProfileImg = () => {
-  //     const savedImg = sessionStorage.getItem("profileImg");
-  //     setProfileImg(savedImg || "/images/default_login_icon.png");
-  //   };
-  //   updateProfileImg();
-  //   window.addEventListener("storage", updateProfileImg);
-  //   return () => window.removeEventListener("storage", updateProfileImg);
-  // }, []);
-
+  // 석근: URL 파라미터에서 토큰 처리 (OAuth 로그인 후 리다이렉트)
   useEffect(() => {
-    const accessToken = sessionStorage.getItem("accessToken");
-    if (!accessToken) {
-      alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
-      router.replace("/seokgeun/login");
-      return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get("accessToken");
+    const refreshToken = urlParams.get("refreshToken");
+
+    if (accessToken) {
+      sessionStorage.setItem("accessToken", accessToken);
+      // URL에서 토큰 파라미터 제거
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
     }
-    fetch("/api/register/user/me", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("유저 정보 없음");
-        return res.json();
-      })
-      .then((data) => {
+    if (refreshToken) {
+      sessionStorage.setItem("refreshToken", refreshToken);
+    }
+  }, []);
+
+  // 석근: sessionStorage에서 bio 정보 동기화
+  useEffect(() => {
+    const updateBio = () => {
+      const savedBio = sessionStorage.getItem("bio");
+      if (savedBio !== null) setBio(savedBio);
+    };
+    updateBio();
+    window.addEventListener("storage", updateBio);
+    return () => window.removeEventListener("storage", updateBio);
+  }, []);
+
+  // 석근: 사용자 정보 가져오기 - 실제 백엔드 API 사용
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const accessToken = sessionStorage.getItem("accessToken");
+      if (!accessToken) {
+        alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
+        router.replace("/seokgeun/login");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError("");
+
+        // 석근: 실제 백엔드 API 호출
+        const response = await fetch(`${API_BASE_URL}/api/user/me`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("인증 실패");
+          } else if (response.status === 404) {
+            throw new Error("사용자 정보 없음");
+          } else {
+            throw new Error(`서버 오류: ${response.status}`);
+          }
+        }
+
+        const data = await response.json();
+        console.log("석근: 사용자 정보 로드 성공:", data);
         setUser(data);
         setLoading(false);
-      })
-      .catch((err) => {
-        if (err.message === "유저 정보 없음") {
+      } catch (err) {
+        console.error("석근: 사용자 정보 로드 실패:", err);
+
+        if (err.message === "인증 실패" || err.message === "사용자 정보 없음") {
           alert("로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
           router.replace("/seokgeun/login");
         } else {
-          setError("유저 정보를 불러올 수 없습니다.");
+          setError(
+            "사용자 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요."
+          );
           setLoading(false);
         }
-      });
-  }, []);
+      }
+    };
+
+    fetchUserInfo();
+  }, [router]);
 
   if (loading)
     return <div style={{ padding: 40, textAlign: "center" }}>로딩 중...</div>;
@@ -94,10 +138,39 @@ export default function MyPage() {
       </div>
     );
 
-  // 탭별 내용
+  // 석근: 탭별 내용
   let tabContent = null;
   if (activeTab === "profile") {
-    tabContent = <div className="mypage-desc">등록된 소개가 없습니다.</div>;
+    tabContent = (
+      <div className="mypage-desc">
+        {bio ? (
+          <div>
+            <p style={{ whiteSpace: "pre-wrap", lineHeight: "1.6" }}>{bio}</p>
+          </div>
+        ) : (
+          <div>
+            <p>등록된 소개가 없습니다.</p>
+            <div style={{ marginTop: "20px" }}>
+              <Link href="/seokgeun/dropdownmenu/mysettings/profile">
+                <button
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "#f86453",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                  }}
+                >
+                  소개 작성하기
+                </button>
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+    );
   } else if (activeTab === "review") {
     tabContent = <div className="mypage-desc">작성한 후기가 없습니다.</div>;
   } else if (activeTab === "contribution") {
@@ -123,6 +196,7 @@ export default function MyPage() {
           />
         </div>
         <div className="mypage-profile-info">
+          {/* 석근: 사용자 정보 표시 */}
           <div className="mypage-nickname">{user?.nickname || "-"}</div>
           <div className="mypage-profile-stats-block-row">
             {PROFILE_STATS.map((stat) => (
