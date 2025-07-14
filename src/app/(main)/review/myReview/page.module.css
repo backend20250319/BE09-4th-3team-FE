@@ -119,6 +119,7 @@
 }
 
 .projectSubtitle {
+  white-space: pre-line;
   font-size: 0.875rem;
   color: #4b5563;
   margin-bottom: 0.5rem;
@@ -126,16 +127,19 @@
 
 .priceInfo {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.2rem;
   font-size: 0.875rem;
 }
 
 .price {
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1rem;
   color: #111827;
 }
 
 .delivery {
+  display: block;
   color: #2563eb;
 }
 

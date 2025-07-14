@@ -325,9 +325,9 @@ const Page = () => {
                                 ? `${project.totalAmount.toLocaleString()}원`
                                 : "가격 정보 없음"}
                             </span>
-                            <span className={styles.delivery}>
-                              마감일: {project.deadLine}
-                            </span>
+                            <div className={styles.delivery}>
+                              마감일 {project.deadLine}
+                            </div>
                           </div>
                         </div>
                         <button
