@@ -404,7 +404,7 @@ export default function Header() {
                 </li>
               )}
               <li className="p-4">
-                <Link href="/notification">
+                <Link href="/notification" className="relative inline-block">
                   <Bell />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] min-w-[16px] h-[16px] px-[4px] rounded-full flex items-center justify-center leading-none">
