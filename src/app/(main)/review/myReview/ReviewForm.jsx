@@ -1,6 +1,5 @@
 "use client";
 
-import axios from "axios";
 import { useState } from "react";
 import { X, Upload } from "lucide-react";
 import styles from "./reviewForm.module.css";

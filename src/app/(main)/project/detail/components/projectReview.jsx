@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import ReviewComponent from "../../../nayeon/review/review-component";
+import ReviewComponent from "../../../review/projectReviews/review-component";
 
 export default function ProjectReview({ project }) {
   return (
