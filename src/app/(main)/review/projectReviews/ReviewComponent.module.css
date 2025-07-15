@@ -74,6 +74,14 @@
   margin-bottom: 16px;
 }
 
+.noReviews {
+  width: 100%;
+  text-align: center;
+  color: #888;
+  font-size: 16px;
+  margin: 40px 0;
+}
+
 .authorInfo {
   display: flex;
   align-items: flex-start;

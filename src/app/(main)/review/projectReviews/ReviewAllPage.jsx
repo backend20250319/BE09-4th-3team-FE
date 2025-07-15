@@ -219,27 +219,30 @@ export default function ReviewAllPage({ onBack, projectNo }) {
     <div className={styles.container}>
       {/* 헤더 */}
       <div className={styles.header}>
-        <button onClick={onBack} className={styles.backButton}>
-          ← 돌아가기
-        </button>
+        <div className={styles.headerTop}>
+          <button onClick={onBack} className={styles.backButton}>
+            ← 돌아가기
+          </button>
+          <div className={styles.sortContainer}>
+            <select
+              className={styles.sortSelect}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="latest">최신순</option>
+              <option value="satisfaction">만족도순</option>
+            </select>
+          </div>
+        </div>
+
         <h2 className={styles.title}>전체 리뷰</h2>
         <p className={styles.subtitle}>총 {allReviews?.length ?? 0}개의 리뷰</p>
-        <div className={styles.sortContainer}>
-          <select
-            className={styles.sortSelect}
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-          >
-            <option value="latest">최신순</option>
-            <option value="satisfaction">만족도순</option>
-          </select>
-        </div>
       </div>
 
       {/* 리뷰 목록 */}
       <div className={styles.reviewList}>
         {allReviews?.length === 0 ? (
-          <div>리뷰가 없습니다.</div>
+          <div className={styles.noReviews}>리뷰가 없습니다.</div>
         ) : (
           allReviews?.map((review) => (
             <div key={review?.reviewNo} className={styles.reviewCard}>

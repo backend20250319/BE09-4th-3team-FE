@@ -8,13 +8,19 @@
 
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 16px;
-  background: white;
+  flex-direction: column;
   padding: 24px;
+  background: white;
   border-radius: 8px;
   border: 1px solid #f0f0f0;
+  margin-bottom: 16px;
+}
+
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%; /* 👉 이것 필수! */
 }
 
 .headerContent {
@@ -66,6 +72,14 @@
 .sortSelect:focus {
   outline: none;
   border-color: #ff6b35;
+}
+
+.noReviews {
+  width: 100%;
+  text-align: center;
+  color: #888;
+  font-size: 16px;
+  margin: 40px 0;
 }
 
 .pageInfo {
