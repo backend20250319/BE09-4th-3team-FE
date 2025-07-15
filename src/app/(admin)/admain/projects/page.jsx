@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import "./projects.css";
-import { Eye, ChevronLeft, ChevronRight, ExternalLink, X } from "lucide-react";
+import { Eye, ExternalLink, X } from "lucide-react";
 import Pagination from "@/components/pagination/pagination";
 
 export default function ProjectsPage() {
@@ -26,9 +26,9 @@ export default function ProjectsPage() {
         fetchProjects();
     }, [currentPage]);
 
-useEffect(() => {
-    fetchProjectCounts(); // 최초 마운트 시 1회 실행
-}, []);
+    useEffect(() => {
+        fetchProjectCounts(); // 최초 마운트 시 1회 실행
+    }, []);
 
     const fetchProjects = async () => {
         try {
@@ -47,7 +47,7 @@ useEffect(() => {
 
             const mappedProjects = data.content.map((item) => ({
                 name: item.title,
-                description: item.description.replace(/<[^>]+>/g, ""),
+                description: item.description,
                 creator: item.userId,
                 category: item.categoryName,
                 goal: item.goalAmount.toLocaleString("ko-KR", {
@@ -66,7 +66,7 @@ useEffect(() => {
         }
     };
 
-// ✅ 새로운 통계용 API 호출 함수
+    // ✅ 새로운 통계용 API 호출 함수
     const fetchProjectCounts = async () => {
         try {
             const token = sessionStorage.getItem("accessToken"); // ✅ 선언 추가
@@ -92,7 +92,6 @@ useEffect(() => {
         }
     };
 
-
     const convertStatus = (statusCode) => {
         switch (statusCode) {
             case "WAITING_APPROVAL":
@@ -101,12 +100,12 @@ useEffect(() => {
                 return "APPROVED";
             case "REJECTED":
                 return "REJECTED";
-            case "IN_PROGRESS" :
+            case "IN_PROGRESS":
                 return "IN_PROGRESS";
-            case "COMPLETED" :
-                return "COMPLETED"
-            case "FAILED" :
-                return "FAILED"
+            case "COMPLETED":
+                return "COMPLETED";
+            case "FAILED":
+                return "FAILED";
             default:
                 return "unknown";
         }
@@ -163,21 +162,15 @@ useEffect(() => {
                     <p>전체 프로젝트</p>
                 </div>
                 <div className="projects-card">
-                    <p className="projects-card-number text-yellow-500">
-                        {statusCounts.pending}
-                    </p>
+                    <p className="projects-card-number text-yellow-500">{statusCounts.pending}</p>
                     <p>대기중인 프로젝트</p>
                 </div>
                 <div className="projects-card">
-                    <p className="projects-card-number text-green-600">
-                        {statusCounts.approved}
-                    </p>
+                    <p className="projects-card-number text-green-600">{statusCounts.approved}</p>
                     <p>승인된 프로젝트</p>
                 </div>
                 <div className="projects-card">
-                    <p className="projects-card-number text-red-500">
-                        {statusCounts.rejected}
-                    </p>
+                    <p className="projects-card-number text-red-500">{statusCounts.rejected}</p>
                     <p>거절한 프로젝트</p>
                 </div>
             </div>
@@ -207,9 +200,13 @@ useEffect(() => {
                                     <div className="text-sm text-gray-500">{project.description.slice(0, 40)}...</div>
                                 </td>
                                 <td>{project.creator}</td>
-                                <td><span className="badge">{project.category}</span></td>
+                                <td>
+                                    <span className="badge">{project.category}</span>
+                                </td>
                                 <td>{project.goal}</td>
-                                <td><span className={`status-badge status-${project.status}`}>{project.status}</span></td>
+                                <td>
+                                    <span className={`status-badge status-${project.status}`}>{project.status}</span>
+                                </td>
                                 <td>{project.date}</td>
                                 <td>
                                     <div className="flex gap-2">
@@ -232,11 +229,7 @@ useEffect(() => {
             </div>
 
             {/* 페이징 버튼 */}
-            <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={(page) => setCurrentPage(page)}
-            />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={(page) => setCurrentPage(page)} />
 
             {/* 🔹 상세 보기 모달 */}
             {showModal && selectedProject && (
@@ -263,14 +256,14 @@ useEffect(() => {
                         <p className="text-sm mb-1">
                             <strong>신청 날짜:</strong> {selectedProject.date}
                         </p>
-                        <p className="text-sm mt-4">
-                            <strong>설명:</strong><br />
-                            {selectedProject.description}
+                        <p className="text-sm mt-4 h-[300px] overflow-auto">
+                            <strong>설명:</strong>
+                            <br />
+                            <span className="" dangerouslySetInnerHTML={{ __html: selectedProject.description }} />
                         </p>
                     </div>
                 </div>
             )}
-
         </main>
     );
 }

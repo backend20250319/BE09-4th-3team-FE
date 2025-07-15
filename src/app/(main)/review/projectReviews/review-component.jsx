@@ -10,6 +10,20 @@ import {
 } from "lucide-react";
 import styles from "./ReviewComponent.module.css";
 import ReviewAllPage from "./ReviewAllPage";
+import ReviewForm from "../myReviews/ReviewForm";
+
+function getUserIdFromAccessToken() {
+  const token = sessionStorage.getItem("accessToken");
+  if (!token) return null;
+  try {
+    const base64Payload = token.split(".")[1];
+    const payload = JSON.parse(atob(base64Payload));
+    return payload.sub || payload.userId || payload.id || null;
+  } catch (e) {
+    console.error("토큰 디코딩 실패:", e);
+    return null;
+  }
+}
 
 export default function ReviewComponent({ projectNo }) {
   const [reviews, setReviews] = useState([]);
@@ -18,6 +32,21 @@ export default function ReviewComponent({ projectNo }) {
   const [sortBy, setSortBy] = useState("latest");
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
+
+  // 수정 모달 열림 상태, 선택된 리뷰 관리
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedReview, setSelectedReview] = useState(null);
+
+  // 삭제 확인 모달 상태 관리
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // 리뷰 작성/수정 폼 열림 상태
+  const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
+  // 선택된 프로젝트 (리뷰 작성 시 필요)
+  const [selectedProject, setSelectedProject] = useState(null);
+  // 수정 모드 구분
+  const [isEditing, setIsEditing] = useState(false);
 
   // 토큰이 있을 경우 요청 헤더에 넣기 위한 함수
   const getAuthHeaders = () => {
@@ -26,25 +55,40 @@ export default function ReviewComponent({ projectNo }) {
   };
 
   useEffect(() => {
-    if (!projectNo) return; // 프로젝트 번호 없으면 요청 안 함
-    setLoading(true);
-    const fetchReviews = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8888/reviews/project/${projectNo}?page=0&size=5&sort=${sortBy}`,
-          { headers: getAuthHeaders() }
-        );
-        setReviews(response.data.content);
-        setLoading(false);
-      } catch (err) {
-        console.error("리뷰 불러오기 실패:", err);
-        setError("리뷰를 불러오는 데 실패했습니다.");
-        setLoading(false);
-      }
-    };
+    const id = getUserIdFromAccessToken();
+    setCurrentUserId(id);
+  }, []);
 
+  const fetchReviews = async () => {
+    if (!projectNo) return;
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/project/${projectNo}?page=0&size=5&sort=${sortBy}`,
+        { headers: getAuthHeaders() }
+      );
+      setReviews(response.data.content);
+    } catch (err) {
+      setError("리뷰를 불러오는 데 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchReviews();
   }, [projectNo, sortBy]);
+
+  if (showAllReviews)
+    return (
+      <ReviewAllPage
+        projectNo={projectNo}
+        onBack={() => {
+          fetchReviews(); // 👈 리뷰 다시 가져오기
+          setShowAllReviews(false); // 👈 페이지 닫기
+        }}
+      />
+    );
 
   const toggleDropdown = (reviewId) => {
     setActiveDropdown(activeDropdown === reviewId ? null : reviewId);
@@ -56,6 +100,110 @@ export default function ReviewComponent({ projectNo }) {
 
   const handleBackToSummary = () => {
     setShowAllReviews(false);
+  };
+
+  // 수정 클릭 시 리뷰 선택, 수정 모드 활성화, 폼 열기
+  const handleEditClick = (review) => {
+    setSelectedReview(review);
+    setSelectedProject({
+      projectNo: review.projectNo,
+      title: review.projectTitle,
+      thumbnailUrl: review.projectThumbnailUrl,
+      creatorName: review.creatorName,
+    });
+    setIsEditing(true);
+    setIsReviewFormOpen(true);
+    setActiveDropdown(null);
+  };
+
+  // *** 추가된 함수: 리뷰 작성 버튼 클릭 시
+  const handleWriteReviewClick = (project) => {
+    setSelectedProject(project);
+    setSelectedReview(null);
+    setIsEditing(false);
+    setIsReviewFormOpen(true);
+  };
+
+  // 추가된 함수: 리뷰 작성/수정 폼 닫기
+  const handleReviewFormClose = () => {
+    setIsReviewFormOpen(false);
+    setSelectedReview(null);
+    setSelectedProject(null);
+    setIsEditing(false);
+  };
+
+  // 추가된 함수: 리뷰 작성/수정 폼 제출 핸들러
+  const handleReviewSubmit = async (reviewData) => {
+    try {
+      if (isEditing && selectedReview) {
+        // 수정 API 호출
+        const response = await axios.put(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/${selectedReview.reviewNo}`,
+          reviewData,
+          { headers: getAuthHeaders() }
+        );
+        console.log("수정 응답 데이터:", response.data);
+        setReviews((prev) =>
+          prev.map((r) =>
+            r.reviewNo === selectedReview.reviewNo
+              ? {
+                  ...r,
+                  ...response.data.after,
+                  rewardStatus: Number(response.data.after.rewardStatus),
+                  planStatus: Number(response.data.after.planStatus),
+                  commStatus: Number(response.data.after.commStatus),
+                }
+              : r
+          )
+        );
+      } else {
+        // 새 리뷰 작성 API 호출
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews`,
+          reviewData,
+          { headers: getAuthHeaders() }
+        );
+        console.log("새 리뷰 응답 데이터:", response.data);
+        setReviews((prev) => [response.data, ...prev]);
+      }
+      handleReviewFormClose();
+    } catch (err) {
+      alert(
+        isEditing ? "리뷰 수정에 실패했습니다." : "리뷰 작성에 실패했습니다."
+      );
+      console.error(err);
+    }
+  };
+
+  const handleDeleteClick = (review) => {
+    setSelectedReview(review);
+    setIsDeleteModalOpen(true);
+    setActiveDropdown(null);
+  };
+
+  // 삭제 확인 모달 닫기
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setSelectedReview(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await axios.delete(
+        `http://localhost:8888/reviews/${selectedReview.reviewNo}`,
+        { headers: getAuthHeaders() }
+      );
+
+      // 삭제된 리뷰를 리스트에서 제거
+      setReviews((prev) =>
+        prev.filter((r) => r.reviewNo !== selectedReview.reviewNo)
+      );
+
+      closeDeleteModal();
+    } catch (err) {
+      alert("리뷰 삭제에 실패했습니다.");
+      console.error(err);
+    }
   };
 
   // 상태 텍스트 매핑 객체
@@ -109,74 +257,144 @@ export default function ReviewComponent({ projectNo }) {
 
       {/* 리뷰 목록 */}
       <div className={styles.reviewList}>
-        {reviews.map((review) => (
-          <div key={review.reviewNo} className={styles.reviewCard}>
-            <div className={styles.reviewHeader}>
-              <div className={styles.authorInfo}>
-                {/* 아바타 이미지 영역 - 필요 없으면 주석 처리 */}
-                {/* 
-                <div className={styles.avatar}>
-                  <img
-                    src={review.author?.avatar || "/placeholder.svg"}
-                    alt="프로필"
-                  />
+        {reviews.map((review) => {
+          return (
+            <div key={review.reviewNo} className={styles.reviewCard}>
+              <div className={styles.reviewHeader}>
+                <div className={styles.authorInfo}>
+                  {/* 아바타 이미지 영역 */}
+                  {/* 
+            <div className={styles.avatar}>
+              <img
+                src={review.author?.avatar || "/placeholder.svg"}
+                alt="프로필"
+              />
+            </div>
+            */}
+                  <div className={styles.authorDetails}>
+                    <span className={styles.authorName}>
+                      {review.userNickname || "익명"}
+                    </span>
+                    <span className={styles.reviewDate}>
+                      {new Date(review.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
-                */}
-                <div className={styles.authorDetails}>
-                  <span className={styles.authorName}>
-                    {review.userNickname || "익명"}
-                  </span>
-                  <span className={styles.reviewDate}>
-                    {new Date(review.createdAt).toLocaleDateString()}
-                  </span>
+
+                <div className={styles.moreMenu}>
+                  {/* 본인 리뷰일 때만 드롭다운 버튼 노출 */}
+                  {String(currentUserId).trim() ===
+                    String(review.userId).trim() && (
+                    <button
+                      className={styles.moreButton}
+                      onClick={() => {
+                        console.log("토글 드롭다운 클릭:", review.reviewNo);
+                        toggleDropdown(review.reviewNo);
+                      }}
+                    >
+                      <MoreHorizontal size={16} />
+                    </button>
+                  )}
+
+                  {activeDropdown === review.reviewNo &&
+                    String(currentUserId).trim() ===
+                      String(review.userId).trim() && (
+                      <ul
+                        style={{
+                          position: "absolute",
+                          top: "24px",
+                          right: 0,
+                          background: "white",
+                          border: "1px solid #ddd",
+                          borderRadius: "4px",
+                          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                          padding: "8px 0",
+                          listStyle: "none",
+                          margin: 0,
+                          width: "120px",
+                          zIndex: 1000,
+                        }}
+                      >
+                        {[
+                          {
+                            key: "edit",
+                            text: "수정",
+                            onClick: () => handleEditClick(review),
+                            style: {
+                              padding: "8px 16px",
+                              cursor: "pointer",
+                              fontSize: "14px",
+                              color: "#333",
+                              borderBottom: "1px solid #eee",
+                            },
+                          },
+                          {
+                            key: "delete",
+                            text: "삭제",
+                            onClick: () => handleDeleteClick(review),
+                            style: {
+                              padding: "8px 16px",
+                              cursor: "pointer",
+                              fontSize: "14px",
+                              color: "red",
+                            },
+                          },
+                        ].map((item) => (
+                          <li
+                            key={item.key}
+                            onClick={item.onClick}
+                            style={item.style}
+                          >
+                            {item.text}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                 </div>
               </div>
-              <div className={styles.moreMenu}>
-                <button
-                  className={styles.moreButton}
-                  onClick={() => toggleDropdown(review.reviewNo)}
-                >
-                  <MoreHorizontal size={16} />
-                </button>
-                {activeDropdown === review.reviewNo && (
-                  <div className={styles.dropdown}>
-                    <button className={styles.dropdownItem}>신고하기</button>
+              <div className={styles.reviewContent}>
+                {/* 상태 텍스트 태그 */}
+                <div className={styles.statusTags}>
+                  <span className={styles.statusTag}>
+                    {getStatusText("rewardStatus", review.rewardStatus)}
+                  </span>
+                  <span className={styles.statusTag}>
+                    {getStatusText("planStatus", review.planStatus)}
+                  </span>
+                  <span className={styles.statusTag}>
+                    {getStatusText("commStatus", review.commStatus)}
+                  </span>
+                </div>
+
+                <p className={styles.reviewText}>{review.content}</p>
+                {review.images?.length > 0 && (
+                  <div className={styles.imageContainer}>
+                    {review.images.map((img, i) => (
+                      <img
+                        key={i}
+                        src={img}
+                        alt={`리뷰 이미지 ${i + 1}`}
+                        className={styles.reviewImage}
+                      />
+                    ))}
                   </div>
                 )}
               </div>
             </div>
-
-            <div className={styles.reviewContent}>
-              {/* 상태 텍스트 태그 */}
-              <div className={styles.statusTags}>
-                <span className={styles.statusTag}>
-                  {getStatusText("rewardStatus", review.rewardStatus)}
-                </span>
-                <span className={styles.statusTag}>
-                  {getStatusText("planStatus", review.planStatus)}
-                </span>
-                <span className={styles.statusTag}>
-                  {getStatusText("commStatus", review.commStatus)}
-                </span>
-              </div>
-
-              <p className={styles.reviewText}>{review.content}</p>
-              {review.images?.length > 0 && (
-                <div className={styles.imageContainer}>
-                  {review.images.map((img, i) => (
-                    <img
-                      key={i}
-                      src={img}
-                      alt={`리뷰 이미지 ${i + 1}`}
-                      className={styles.reviewImage}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
+
+      {/* 수정 모달(수정/작성 폼) *** 💧 */}
+      {isReviewFormOpen && (selectedProject || selectedReview) && (
+        <ReviewForm
+          project={selectedProject || {}}
+          review={isEditing ? selectedReview || {} : null}
+          onClose={handleReviewFormClose} // 💧
+          onSubmit={handleReviewSubmit} // 💧
+          isEditing={isEditing}
+        />
+      )}
 
       <div className={styles.loadMoreContainer}>
         <button
@@ -186,6 +404,100 @@ export default function ReviewComponent({ projectNo }) {
           리뷰 전체보기
         </button>
       </div>
+
+      {isDeleteModalOpen && selectedReview && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+          onClick={closeDeleteModal} // 모달 바깥 클릭 시 닫기
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: "8px",
+              padding: 0,
+              maxWidth: "400px",
+              width: "90%",
+            }}
+            onClick={(e) => e.stopPropagation()} // 내부 클릭 시 모달 닫히지 않도록
+          >
+            <div
+              style={{
+                padding: "24px",
+                textAlign: "center",
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "16px",
+                  lineHeight: 1.5,
+                  margin: "0 0 20px 0",
+                  color: "#333",
+                }}
+              >
+                해당 후기를 삭제하시겠습니까?
+              </p>
+              <button
+                onClick={handleDeleteConfirm}
+                style={{
+                  backgroundColor: "#ff6b35",
+                  color: "white",
+                  border: "none",
+                  padding: "12px 24px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  boxShadow: "0 2px 8px rgb(255 107 53 / 0.3)",
+                  marginRight: "8px",
+                  transition: "background-color 0.3s ease",
+                }}
+                onMouseOver={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#f03e00")
+                }
+                onMouseOut={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#ff6b35")
+                }
+              >
+                삭제
+              </button>
+              <button
+                onClick={closeDeleteModal}
+                style={{
+                  backgroundColor: "#ddd",
+                  color: "#666",
+                  border: "none",
+                  padding: "12px 24px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  boxShadow: "0 2px 8px rgb(0 0 0 / 0.1)",
+                  transition: "background-color 0.3s ease",
+                }}
+                onMouseOver={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#ccc")
+                }
+                onMouseOut={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#ddd")
+                }
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
