@@ -16,13 +16,25 @@ export default function LoginPage() {
     console.warn("API_BASE_URL 환경 변수가 정의되지 않았습니다.");
   }
 
+  // 모달 상태
+  const [showModal, setShowModal] = useState(false);
+
+  // 모달 표시/숨김 함수
+  const showModalMessage = () => {
+    setShowModal(true);
+  };
+
+  const hideModal = () => {
+    setShowModal(false);
+  };
+
   // 로그인 핸들러
   const handleKakaoLogin = () => {
-    window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao`;
+    showModalMessage();
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
+    showModalMessage();
   };
 
   return (
@@ -52,10 +64,7 @@ export default function LoginPage() {
 
           <div className={styles.signup}>
             아직 펀디 계정이 없으신가요?{" "}
-            <a
-              href="/users/register"
-              style={{ textDecoration: "underline" }}
-            >
+            <a href="/users/register" style={{ textDecoration: "underline" }}>
               회원가입
             </a>
           </div>
@@ -76,6 +85,20 @@ export default function LoginPage() {
           backgroundImage: 'url("/login_register/login_register_image_1.png")',
         }}
       />
+
+      {/* 모달 */}
+      {showModal && (
+        <div className={styles.modalOverlay} onClick={hideModal}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalContent}>
+              <p>기능 구현 준비중입니다</p>
+              <button className={styles.modalButton} onClick={hideModal}>
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

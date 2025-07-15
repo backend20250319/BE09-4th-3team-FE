@@ -28,6 +28,7 @@ export default function LoginPage() {
   const [modalMsg, setModalMsg] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [modalReload, setModalReload] = useState(false); // 새로고침 여부
+  const [showFeatureModal, setShowFeatureModal] = useState(false); // 기능 구현 준비중 모달
 
   // 컴포넌트 마운트 시 URL 파라미터 확인
   useEffect(() => {
@@ -142,10 +143,10 @@ export default function LoginPage() {
 
   // 소셜 로그인 핸들러
   const handleKakaoLogin = () => {
-    window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao`;
+    setShowFeatureModal(true);
   };
   const handleGoogleLogin = () => {
-    window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
+    setShowFeatureModal(true);
   };
 
   return (
@@ -262,6 +263,23 @@ export default function LoginPage() {
                   setLoading(false); // 모달 닫을 때 로딩 해제
                   if (modalReload) window.location.reload();
                 }}
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 기능 구현 준비중 모달 */}
+      {showFeatureModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowFeatureModal(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalContent}>
+              <p>기능 구현 준비중입니다</p>
+              <button
+                className={styles.modalButton}
+                onClick={() => setShowFeatureModal(false)}
               >
                 확인
               </button>
