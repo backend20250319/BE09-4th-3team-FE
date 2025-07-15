@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 
 import Section01 from "./components/section01";
@@ -36,10 +36,6 @@ export default function Page() {
   const [creatorInfo, setCreatorInfo] = usePersistedState("project_creatorInfo", "");
 
   const router = useRouter();
-
-  const clearSessionStorage = () => {
-    sessionStorage.removeItem("accessToken");
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -99,7 +95,6 @@ export default function Page() {
       });
 
       alert("프로젝트가 성공적으로 등록되었습니다!");
-      clearSessionStorage();
       router.push("/project/list");
     } catch (err) {
       console.error("프로젝트 등록 실패", err);
