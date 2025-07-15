@@ -418,7 +418,7 @@ export default function Header() {
                   className="flex cursor-pointer items-center border-1 ml-[10px] p-4 border-[#dfdfdf] rounded-[4px] min-w-[30px] max-h-[44px]"
                   onClick={handleNicknameClick}
                 >
-                  <Link href="/users/dropdownmenu/mypage">
+                  <Link href="/">
                     <Image
                       src={"/images/default_login_icon.png"}
                       width={24}
@@ -441,7 +441,7 @@ export default function Header() {
                     <ul>
                       <li>
                         <Link
-                          href="/users/dropdownmenu/mypage"
+                          href="/"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           프로필
@@ -457,7 +457,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/review/myReview"
+                          href="/review/myReviews"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           내 후기

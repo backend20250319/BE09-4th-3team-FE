@@ -75,7 +75,7 @@ export default function NotificationPage() {
     try {
       const token = sessionStorage.getItem("accessToken"); // 변경
       const response = await fetch(
-        `http://localhost:8888/notifications/mark-all-read?userId=${userId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/notifications/mark-all-read?userId=${userId}`,
         {
           method: "PATCH",
           headers: {

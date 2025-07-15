@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ReviewForm from "./ReviewForm";
 import styles from "./page.module.css";
@@ -58,6 +59,8 @@ function isToday(dateStr) {
 }
 
 const Page = () => {
+  const router = useRouter();
+
   const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("write");
   const [projects, setProjects] = useState([]);
@@ -74,6 +77,10 @@ const Page = () => {
   const [userId, setUserId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
+  const handleProjectClick = (projectNo) => {
+    router.push(`/project/detail/${projectNo}`);
+  };
+
   // 토큰 헤더 설정 함수
   const getAuthHeaders = () => {
     const token = sessionStorage.getItem("accessToken");
@@ -86,7 +93,7 @@ const Page = () => {
 
     try {
       const writableRes = await axios.get(
-        `http://localhost:8888/reviews/writable`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/writable`,
         { headers: getAuthHeaders() }
       );
 
@@ -103,7 +110,7 @@ const Page = () => {
 
     try {
       const response = await axios.get(
-        `http://localhost:8888/reviews/written`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/written`,
         {
           headers: getAuthHeaders(),
         }
@@ -177,7 +184,7 @@ const Page = () => {
     try {
       if (isEditing && selectedReview) {
         const response = await axios.put(
-          `http://localhost:8888/reviews/${selectedReview.reviewNo}`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/${selectedReview.reviewNo}`,
           processedReviewData,
           { headers: getAuthHeaders() }
         );
@@ -189,7 +196,7 @@ const Page = () => {
         );
       } else {
         const response = await axios.post(
-          `http://localhost:8888/reviews/create`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/create`,
           processedReviewData,
           { headers: getAuthHeaders() }
         );
@@ -253,7 +260,7 @@ const Page = () => {
   const handleDeleteConfirm = async () => {
     try {
       await axios.delete(
-        `http://localhost:8888/reviews/${selectedReview.reviewNo}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/${selectedReview.reviewNo}`,
         { headers: getAuthHeaders() }
       );
 
@@ -353,6 +360,7 @@ const Page = () => {
                           }
                           alt={project?.title || "Project"}
                           className={styles.projectImage}
+                          onClick={() => handleProjectClick(project.projectNo)}
                         />
                         <div className={styles.projectInfo}>
                           <div className={styles.meta}>
@@ -459,6 +467,9 @@ const Page = () => {
                             objectFit: "cover",
                             flexShrink: 0,
                           }}
+                          onClick={() =>
+                            router.push(`/project/detail/${review.projectNo}`)
+                          }
                         />
                         <div style={{ flex: 1 }}>
                           <div

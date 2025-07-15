@@ -59,24 +59,36 @@ export default function ReviewComponent({ projectNo }) {
     setCurrentUserId(id);
   }, []);
 
-  useEffect(() => {
+  const fetchReviews = async () => {
     if (!projectNo) return;
     setLoading(true);
-    const fetchReviews = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8888/reviews/project/${projectNo}?page=0&size=5&sort=${sortBy}`,
-          { headers: getAuthHeaders() }
-        );
-        setReviews(response.data.content);
-        setLoading(false);
-      } catch (err) {
-        setError("리뷰를 불러오는 데 실패했습니다.");
-        setLoading(false);
-      }
-    };
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/project/${projectNo}?page=0&size=5&sort=${sortBy}`,
+        { headers: getAuthHeaders() }
+      );
+      setReviews(response.data.content);
+    } catch (err) {
+      setError("리뷰를 불러오는 데 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchReviews();
   }, [projectNo, sortBy]);
+
+  if (showAllReviews)
+    return (
+      <ReviewAllPage
+        projectNo={projectNo}
+        onBack={() => {
+          fetchReviews(); // 👈 리뷰 다시 가져오기
+          setShowAllReviews(false); // 👈 페이지 닫기
+        }}
+      />
+    );
 
   const toggleDropdown = (reviewId) => {
     setActiveDropdown(activeDropdown === reviewId ? null : reviewId);
@@ -126,7 +138,7 @@ export default function ReviewComponent({ projectNo }) {
       if (isEditing && selectedReview) {
         // 수정 API 호출
         const response = await axios.put(
-          `http://localhost:8888/reviews/${selectedReview.reviewNo}`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/${selectedReview.reviewNo}`,
           reviewData,
           { headers: getAuthHeaders() }
         );
@@ -147,7 +159,7 @@ export default function ReviewComponent({ projectNo }) {
       } else {
         // 새 리뷰 작성 API 호출
         const response = await axios.post(
-          `http://localhost:8888/reviews`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews`,
           reviewData,
           { headers: getAuthHeaders() }
         );
