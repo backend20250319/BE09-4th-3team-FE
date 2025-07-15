@@ -6,12 +6,11 @@ import styles from "./reviewForm.module.css";
 
 const satisfactionMap = {
   bad: 1,
-  neutral: 2,
-  good: 3,
+  neutral: 3,
+  good: 5,
 };
 
 const ReviewForm = ({ project, onClose, onSubmit }) => {
-  console.log("Received project prop:", project);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [ratings, setRatings] = useState({
@@ -185,7 +184,7 @@ const ReviewForm = ({ project, onClose, onSubmit }) => {
               />
               <div>
                 <div className={styles.projectCreator}>
-                  {project.creator_name}
+                  {project.creatorName}
                 </div>
                 <div className={styles.projectTitle}>{project.title}</div>
               </div>
