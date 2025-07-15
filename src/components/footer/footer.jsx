@@ -1,12 +1,11 @@
 "use client";
 import Link from "next/link";
-import React from "react";
 import FooterLink from "./footerLink";
 import Image from "next/image";
 
 export default function Footer() {
   return (
-    <footer className="relative w-full border-t border-[#efefef] z-50">
+    <footer className="relative w-full border-t border-[#efefef] z-40">
       <div className="relative overflow-hidden flex w-full items-center justify-center flex-col bg-white">
         {/* 첫번째 푸터 */}
         <section className="w-[1160px] flex flex-row justify-between max-h-[220px] min-h-[178px] ">
