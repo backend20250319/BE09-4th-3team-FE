@@ -97,7 +97,7 @@ export default function FundingPage() {
                             <td className="px-4 py-3 text-center">
                                 <button
                                     onClick={() => setSelectedFunding(f)}
-                                    className="border px-2 py-1 rounded text-gray-600 hover:bg-gray-100"
+                                    className="border px-2 py-1 rounded text-gray-600 hover:bg-gray-100 cursor-pointer"
                                 >
                                     <Eye className="w-4 h-4" />
                                 </button>
