@@ -1,6 +1,5 @@
 "use client";
-import React, { useState } from "react";
-import usePersistedState from "../hooks/usePersistedState";
+import { useEffect, useState } from "react";
 import { getDday } from "@/components/utils/dday";
 import { Asterisk, CircleAlert, CircleQuestionMark } from "lucide-react";
 import { numberWithCommas } from "@/components/utils/number";
@@ -35,6 +34,15 @@ export default function Section02({
   setValidationMessage,
 }) {
   const { pgFee, platformFee, totalFee, estimatedReceive } = getFees(goalAmount);
+  const [duration, setDuration] = useState("날짜를 선택해 주세요.");
+
+  useEffect(() => {
+    if (startLine && deadLine) {
+      setDuration(`${getDday(startLine, deadLine)}`);
+    } else {
+      setDuration("날짜를 선택해 주세요.");
+    }
+  }, [startLine, deadLine]);
 
   const handleGoalAmountChange = (e) => {
     let rawValue = e.target.value.replace(/[^0-9]/g, ""); // 숫자만 추출
@@ -176,7 +184,7 @@ export default function Section02({
             <li className="flex gap-5 pb-[38px] pl-[18px] relative before:content-[''] before:absolute before:top-[4px] before:left-0 before:z-[1] before:block before:w-[9px] before:h-[9px] before:rounded-[4px] before:bg-white before:border-[3px] before:border-black after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:h-full after:border-l after:border-[#e4e4e4] flex-col">
               <p className="text-[12px] font-semibold text-[#3d3d3d]">프로젝트 기간</p>
               <span className="text-xs text-gray-500">
-                {startLine && deadLine ? `${getDday(startLine, deadLine)}일` : "날짜를 선택해 주세요."}
+                {startLine && deadLine ? `${duration}일` : "날짜를 선택해 주세요."}
               </span>
             </li>
             <li className="flex flex-col gap-5 pb-[38px] pl-[18px] relative before:content-[''] before:absolute before:top-[4px] before:left-0 before:z-[1] before:block before:w-[9px] before:h-[9px] before:rounded-[4px] before:bg-white before:border-[3px] before:border-black after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:h-full after:border-l after:border-[#e4e4e4]">
