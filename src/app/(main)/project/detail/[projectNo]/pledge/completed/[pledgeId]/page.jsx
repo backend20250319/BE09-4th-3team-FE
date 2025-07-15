@@ -2,158 +2,160 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Package } from "lucide-react";
+import { Heart } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import PledgeHeader from "@/components/header/PledgeHeader";
 import axios from "axios";
-import { requireAccessTokenOrRedirect } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 
-export default function MyPledgesPage() {
-  const [pledges, setPledges] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const router = useRouter;
+export default function PledgeSuccessPage() {
+  const { projectNo, pledgeId } = useParams();
+  const [showFollowModal, setShowFollowModal] = useState(true);
+  const [supporterNumber, setSupporterNumber] = useState(null);
 
   useEffect(() => {
-    async function fetchPledges() {
-      setLoading(true);
-      setError(null);
-
-      const token = requireAccessTokenOrRedirect();
-      if (!token) return;
-
+    const fetchSupporterNumber = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/pledge/my`, {
+        const token = sessionStorage.getItem("accessToken");
+        if (!token) return;
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/pledge/${pledgeId}/order`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-
-        // API 응답이 배열로 직접 반환되는 경우
-        if (Array.isArray(response.data)) {
-          setPledges(response.data);
-        } else {
-          setError("후원 내역을 불러올 수 없습니다.");
-        }
-      } catch (err) {
-        console.error("후원 내역 조회 실패:", err);
-        if (err.response?.status === 401) {
-          setError("로그인이 만료되었습니다.");
-        } else {
-          setError("후원 내역을 불러오는 중 오류가 발생했습니다.");
-        }
-      } finally {
-        setLoading(false);
+        setSupporterNumber(response.data);
+      } catch (error) {
+        console.error("supporterNumber 불러오기 실패:", error);
       }
-    }
-    fetchPledges();
-  }, []);
+    };
+    if (pledgeId) fetchSupporterNumber();
+  }, [pledgeId]);
+
+  const recommendedProjects = [
+    {
+      id: 1,
+      title: "에그컵바스에서 온 카페바 굿즈",
+      category: "CoPlan",
+      fundingRate: 28,
+      timeLeft: "3일 마감",
+      image: "/placeholder.svg?height=200&width=300",
+    },
+    {
+      id: 2,
+      title: "지수 당의보로 장식한 자고리 블라우스",
+      category: "서울",
+      fundingRate: 404,
+      timeLeft: "3일 마감",
+      price: "2000원+",
+      image: "/placeholder.svg?height=200&width=300",
+    },
+    {
+      id: 3,
+      title: "나를 위한 실전 연애정복 프로젝트",
+      category: "커뮤니케이션 컨설팅 회사 글로벌",
+      fundingRate: 139,
+      timeLeft: "3일 마감",
+      image: "/placeholder.svg?height=200&width=300",
+    },
+    {
+      id: 4,
+      title: "안성희원 : 2025 S/S 오피스룩",
+      category: "뮤즈시티",
+      fundingRate: 401,
+      timeLeft: "3일 마감",
+      price: "2000원+",
+      image: "/placeholder.svg?height=200&width=300",
+    },
+    {
+      id: 5,
+      title: "우니디로즈컬러 해석 가이드",
+      category: "서울 타로",
+      fundingRate: 68,
+      timeLeft: "3일 마감",
+      image: "/placeholder.svg?height=200&width=300",
+    },
+    {
+      id: 6,
+      title: "MOAISE 모아세",
+      category: "",
+      fundingRate: 0,
+      timeLeft: "",
+      image: "/placeholder.svg?height=200&width=300",
+    },
+  ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Page Title */}
-      <h1 className="text-2xl font-bold text-gray-800 mb-8">후원한 프로젝트</h1>
+    <div className="min-h-screen bg-gray-50">
+      <PledgeHeader />
 
-      {/* Summary */}
-      <p className="text-gray-600 mb-6">
-        <span className="text-red-500 font-medium">{pledges.length}건</span>의 후원 내역이 있습니다.
-      </p>
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        {/* Success Message */}
+        <div className="text-center mb-16">
+          <h1 className="text-4xl font-bold mb-4">
+            <span className="text-red-500">축하합니다. {supporterNumber ? `${supporterNumber} 번째` : ""}</span>
+            <br />
+            <span className="text-gray-800">공식 후원자가 되셨습니다!</span>
+          </h1>
+          <p className="text-gray-600 mb-8">
+            * 후원 내역 변경은{" "}
+            <Link href={`/pledges/${pledgeId}`}>
+              <span className="text-blue-500 underline cursor-pointer">후원 상세</span>
+            </Link>
+            에서 하실 수 있습니다.
+          </p>
 
-      {loading && (
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mr-3"></div>
-          <span className="text-gray-500">불러오는 중...</span>
+          {/* Social Share Buttons */}
+          <div className="flex justify-center gap-4">
+            <button className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center hover:bg-yellow-500 transition-colors">
+              <div className="w-6 h-6 bg-black rounded-full"></div>
+            </button>
+            <button className="w-12 h-12 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
+              <span className="text-white font-bold">X</span>
+            </button>
+            <button className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
+              <span className="text-white font-bold">f</span>
+            </button>
+          </div>
         </div>
-      )}
 
-      {error && (
-        <div className="text-center py-8">
-          <div className="text-red-500 mb-4">{error}</div>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-          >
-            다시 시도
-          </button>
-        </div>
-      )}
+        {/* Recommended Projects */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-800">이런 프로젝트도 좋아하실 거예요</h2>
+            <button className="text-gray-600 hover:text-gray-800">전체보기</button>
+          </div>
 
-      {/* Pledge List */}
-      <div className="space-y-4">
-        {pledges
-          .slice() // 원본 배열 변형 방지
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // 최근 순서로 정렬
-          .map((pledge) => (
-            <Link key={pledge.pledgeNo} href={`/pledges/${pledge.pledgeNo}`}>
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex gap-4">
-                    <div className="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
-                      <Image
-                        src={pledge.project?.thumbnailUrl || "/placeholder.svg"}
-                        alt={pledge.project?.title || "프로젝트 이미지"}
-                        width={96}
-                        height={96}
-                        className="w-full h-full object-cover"
-                      />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {recommendedProjects.map((project) => (
+              <Card key={project.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+                <div className="relative">
+                  <Image
+                    src={project.image || "/placeholder.svg"}
+                    alt={project.title}
+                    width={300}
+                    height={200}
+                    className="w-full h-48 object-cover"
+                  />
+                  <button className="absolute top-3 right-3 w-8 h-8 bg-white bg-opacity-80 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-all">
+                    <Heart className="w-4 h-4 text-gray-600" />
+                  </button>
+                </div>
+                <CardContent className="p-4">
+                  <div className="text-xs text-gray-500 mb-1">{project.category}</div>
+                  <h3 className="font-medium text-sm mb-2 line-clamp-2">{project.title}</h3>
+                  {project.fundingRate > 0 && (
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-red-500 font-bold">{project.fundingRate}% 달성</span>
+                      <span className="text-gray-500">{project.timeLeft}</span>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="text-xs text-gray-500">
-                          후원일 {pledge.createdAt ? new Date(pledge.createdAt).toLocaleDateString("ko-KR") : "-"} |
-                          후원번호 {pledge.pledgeNo}
-                        </div>
-                      </div>
-                      <h3 className="font-bold text-gray-800 mb-1">{pledge.project?.title || "제목 없음"}</h3>
-                      <div className="text-sm text-gray-600 mb-2">
-                        <div className="flex items-start gap-2">
-                          <Package className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                          <div className="space-y-1">
-                            {pledge.rewards && pledge.rewards.length > 0 ? (
-                              pledge.rewards.map((reward, index) => (
-                                <div key={reward.rewardNo} className="text-gray-600">
-                                  {reward.rewardTitle} (x{reward.quantity})
-                                </div>
-                              ))
-                            ) : (
-                              <div className="text-gray-600">리워드 없음</div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <span className="font-bold text-gray-800">{pledge.totalAmount?.toLocaleString()}원</span>
-                        {pledge.additionalAmount > 0 && (
-                          <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                            +{pledge.additionalAmount.toLocaleString()}원 추가 후원
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  )}
+                  {project.price && <div className="text-xs text-gray-600 mt-1">{project.price}</div>}
                 </CardContent>
               </Card>
-            </Link>
-          ))}
-        <div className="flex justify-center mt-5">
-          <Button onClick={() => (window.location.href = "/")} className={"w-[156px] h-14 cursor-pointer"}>
-            메인으로 돌아가기
-          </Button>
-        </div>
-
-        {!loading && !error && pledges.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-500 mb-4">아직 후원한 프로젝트가 없습니다.</div>
-            <Link
-              href="/project/list"
-              className="inline-block px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-            >
-              프로젝트 둘러보기
-            </Link>
+            ))}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
