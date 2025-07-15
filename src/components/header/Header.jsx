@@ -7,14 +7,20 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 // 석근: API BASE URL 추가
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8888";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8888";
 console.log("석근: 헤더 API_BASE_URL:", API_BASE_URL);
 
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const [roleType, setRoleType] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = () => {
+    if (searchQuery.trim() === "") return;
+    router.push(`/project/search?query=${encodeURIComponent(searchQuery.trim())}`);
+    setSearchQuery("");
+  };
 
   const hiddenPaths = [
     /^\/users\/login$/,
@@ -151,14 +157,11 @@ export default function Header() {
       return;
     }
     try {
-      const res = await fetch(
-        "http://localhost:8888/notifications/unread-count",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await fetch("http://localhost:8888/notifications/unread-count", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!res.ok) return;
       const data = await res.json();
       setUnreadCount(data);
@@ -362,29 +365,18 @@ export default function Header() {
   ];
 
   return (
-    <div
-      className={`mx-auto h-[116px] ${
-        isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"
-      }`}
-    >
+    <div className={`mx-auto h-[116px] ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"}`}>
       {/* 1번째 헤더 */}
       <div className="max-w-[1160px] w-full mx-auto flex justify-between items-center h-[60px] mt-[10px]">
         <div className="w-[132px] h-[60px] flex items-center">
           <Link href={"/"}>
-            <Image
-              src="/images/tumblbug_logo.png"
-              alt="텀블벅 로고"
-              width={132}
-              height={36}
-            />
+            <Image src="/images/tumblbug_logo.png" alt="텀블벅 로고" width={132} height={36} />
           </Link>
         </div>
         <ul className="flex items-center">
           <li className="p-4">
             <Link href={"/project/intro"}>
-              <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">
-                프로젝트 올리기
-              </span>
+              <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">프로젝트 올리기</span>
             </Link>
           </li>
           {isLogin ? (
@@ -429,9 +421,7 @@ export default function Header() {
                       }}
                     />
                   </Link>
-                  <div className="font-bold text-[12px] ml-[10px]">
-                    {nickname}
-                  </div>
+                  <div className="font-bold text-[12px] ml-[10px]">{nickname}</div>
                 </button>
                 {dropdownOpen && (
                   <div
@@ -440,26 +430,17 @@ export default function Header() {
                   >
                     <ul>
                       <li>
-                        <Link
-                          href="/"
-                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        >
+                        <Link href="/" className="block px-4 py-2 hover:bg-gray-100 cursor-pointer">
                           프로필
                         </Link>
                       </li>
                       <li>
-                        <Link
-                          href="/pledges"
-                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        >
+                        <Link href="/pledges" className="block px-4 py-2 hover:bg-gray-100 cursor-pointer">
                           후원한 프로젝트
                         </Link>
                       </li>
                       <li>
-                        <Link
-                          href="/review/myReviews"
-                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        >
+                        <Link href="/review/myReviews" className="block px-4 py-2 hover:bg-gray-100 cursor-pointer">
                           내 후기
                         </Link>
                       </li>
@@ -480,10 +461,7 @@ export default function Header() {
                         </Link>
                       </li>
                       <li>
-                        <Link
-                          href="/notification"
-                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        >
+                        <Link href="/notification" className="block px-4 py-2 hover:bg-gray-100 cursor-pointer">
                           알림
                         </Link>
                       </li>
@@ -511,10 +489,7 @@ export default function Header() {
                           설정
                         </Link>
                       </li>
-                      <li
-                        className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        onClick={handleLogout}
-                      >
+                      <li className="block px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={handleLogout}>
                         로그아웃
                       </li>
                     </ul>
@@ -529,9 +504,7 @@ export default function Header() {
                 href={"/users"}
               >
                 <User className="bg-[#ddd] rounded-3xl" color="#fff" />
-                <div className="font-bold text-[12px] ml-[10px]">
-                  로그인/회원가입
-                </div>
+                <div className="font-bold text-[12px] ml-[10px]">로그인/회원가입</div>
               </Link>
             </li>
           )}
@@ -541,11 +514,7 @@ export default function Header() {
       {/* 2번째 헤더 */}
       <div
         className={`w-full bg-white ${
-          isScrolled
-            ? `fixed top-0 left-0 z-50 ${
-                isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"
-              }`
-            : ""
+          isScrolled ? `fixed top-0 left-0 z-50 ${isCategoryOpen ? "" : "shadow-[0px_1px_6px_rgba(0,0,0,0.08)]"}` : ""
         }`}
         style={{ overflow: "visible" }}
       >
@@ -557,9 +526,7 @@ export default function Header() {
               onMouseLeave={() => setIsCategoryOpen(false)}
             >
               <Menu className="mr-[8px] group-hover:text-[#FF5757] transition-all duration-300" />
-              <span className="pt-[1px] px-[6px] group-hover:text-[#FF5757] transition-all duration-300">
-                카테고리
-              </span>
+              <span className="pt-[1px] px-[6px] group-hover:text-[#FF5757] transition-all duration-300">카테고리</span>
               {/* 카테고리 메뉴 전체 */}
               {isCategoryOpen && (
                 <div
@@ -569,10 +536,7 @@ export default function Header() {
                 >
                   <div className="w-[1160px] mx-auto relative flex justify-between mt-[16px] px-[10px] after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:shadow-[0_6px_7px_rgba(0,0,0,0.08)] after:pointer-events-none">
                     {categoryData.map((column, colIndex) => (
-                      <div
-                        key={colIndex}
-                        className="flex-grow flex-shrink-0 basis-[20%]"
-                      >
+                      <div key={colIndex} className="flex-grow flex-shrink-0 basis-[20%]">
                         {column.map((item, itemIndex) => (
                           <div
                             key={itemIndex}
@@ -608,26 +572,17 @@ export default function Header() {
               )}
             </li>
             <li>
-              <Link
-                href={"/"}
-                className="hover:text-[#FF5757] transition-all duration-300"
-              >
+              <Link href={"/"} className="hover:text-[#FF5757] transition-all duration-300">
                 <span className="pt-[1px] px-[6px]">홈</span>
               </Link>
             </li>
             <li>
-              <Link
-                href={"/project/list"}
-                className="hover:text-[#FF5757] transition-all duration-300"
-              >
+              <Link href={"/project/list"} className="hover:text-[#FF5757] transition-all duration-300">
                 <span className="pt-[1px] px-[6px]">인기</span>
               </Link>
             </li>
             <li>
-              <Link
-                href={"/project/list"}
-                className="hover:text-[#FF5757] transition-all duration-300"
-              >
+              <Link href={"/project/list"} className="hover:text-[#FF5757] transition-all duration-300">
                 <span className="pt-[1px] px-[6px]">신규</span>
               </Link>
             </li>
@@ -636,9 +591,19 @@ export default function Header() {
             <input
               type="text"
               placeholder="검색어를 입력해주세요."
-              className="border-none text-[12px] leading-[28px] tracking-[0.02em] bg-[#f3f3f3] text-[#333333] appearance-none outline-none"
+              className="border-none text-[12px] leading-[28px] tracking-[0.02em] bg-[#f3f3f3] text-[#333333] appearance-none outline-none w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSearch();
+                }
+              }}
             />
-            <div className="absolute right-[10px] inline-flex w-[20px] h-[20px] items-center justify-center">
+            <div
+              className="absolute right-[10px] inline-flex w-[20px] h-[20px] items-center justify-center cursor-pointer"
+              onClick={handleSearch}
+            >
               <Search color="#000" />
             </div>
           </div>
