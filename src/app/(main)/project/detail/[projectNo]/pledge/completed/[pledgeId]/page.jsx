@@ -104,7 +104,6 @@ export default function PledgeSuccessPage() {
             </Link>
             에서 하실 수 있습니다.
           </p>
-
           {/* Social Share Buttons */}
           <div className="flex justify-center gap-4">
             <button className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center hover:bg-yellow-500 transition-colors">
@@ -118,7 +117,6 @@ export default function PledgeSuccessPage() {
             </button>
           </div>
         </div>
-
         {/* Recommended Projects */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-6">
