@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import ReviewComponent from "../../../review/projectReviews/reviewComponent";
 
 export default function ProjectReview({ project }) {
