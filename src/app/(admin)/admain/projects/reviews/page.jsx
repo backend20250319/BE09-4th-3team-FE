@@ -48,7 +48,7 @@ export default function ProjectReviewPage() {
                             currency: "KRW",
                         }),
                         date: new Date(item.createdAt).toLocaleDateString("ko-KR"),
-                        description: item.description.replace(/<[^>]+>/g, ""),
+                        description: item.description,
                     }));
 
                 setProjects(waitingProjects);
@@ -204,7 +204,11 @@ export default function ProjectReviewPage() {
                         <p className="text-sm mb-2"><strong>카테고리:</strong> {selectedProject.category}</p>
                         <p className="text-sm mb-2"><strong>목표 금액:</strong> {selectedProject.goal}</p>
                         <p className="text-sm mb-2"><strong>신청 날짜:</strong> {selectedProject.date}</p>
-                        <p className="text-sm mb-4"><strong>설명:</strong> {selectedProject.description}</p>
+                        <p className="text-sm mt-4 h-[300px] overflow-auto">
+                            <strong>설명:</strong>
+                            <br />
+                            <span className="" dangerouslySetInnerHTML={{ __html: selectedProject.description }} />
+                        </p>
                     </div>
                 </div>
             )}
