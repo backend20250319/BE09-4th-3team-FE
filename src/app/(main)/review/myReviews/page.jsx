@@ -19,28 +19,29 @@ function getUserIdFromAccessToken() {
   }
 }
 
-// 평가 상태를 한글로 변환하는 함수 (숫자 1,2,3 기준)
+// 평가 상태를 한글로 변환하는 함수
 function getRatingLabel(category, value) {
+  const validValues = [1, 3, 5];
+  const numValue = Number(value);
+  if (!validValues.includes(numValue)) return "";
+
   const labels = {
     quality: {
       1: "아쉬워요",
-      2: "보통이에요",
-      3: "만족해요",
+      3: "보통이에요",
+      5: "만족해요",
     },
     plan: {
       1: "계획 준수 아쉬워요",
-      2: "계획 준수 보통이에요",
-      3: "계획 준수 잘 지켰어요",
+      3: "계획 준수 보통이에요",
+      5: "계획 준수 잘 지켰어요",
     },
     communication: {
       1: "소통 아쉬워요",
-      2: "소통 보통이에요",
-      3: "소통 친절했어요",
+      3: "소통 보통이에요",
+      5: "소통 친절했어요",
     },
   };
-
-  const numValue = Number(value);
-  if (!numValue || numValue < 1) return "";
 
   return labels[category]?.[numValue] || "";
 }
@@ -126,11 +127,58 @@ const Page = () => {
 
   // 후기 작성 또는 수정 제출 핸들러
   const handleReviewSubmit = async (reviewData) => {
+    // 디버깅용 로그 추가
+    console.log("reviewData 전체:", reviewData);
+    console.log(
+      "rewardStatus:",
+      reviewData.rewardStatus,
+      typeof reviewData.rewardStatus
+    );
+    console.log(
+      "planStatus:",
+      reviewData.planStatus,
+      typeof reviewData.planStatus
+    );
+    console.log(
+      "commStatus:",
+      reviewData.commStatus,
+      typeof reviewData.commStatus
+    );
+
+    const validValues = [1, 3, 5];
+
+    // 숫자로 변환하여 체크
+    const rewardStatus = Number(reviewData.rewardStatus);
+    const planStatus = Number(reviewData.planStatus);
+    const commStatus = Number(reviewData.commStatus);
+
+    console.log("변환된 값들:", { rewardStatus, planStatus, commStatus });
+
+    if (
+      !validValues.includes(rewardStatus) ||
+      !validValues.includes(planStatus) ||
+      !validValues.includes(commStatus)
+    ) {
+      alert("평가 점수는 1, 3, 5 중 하나여야 합니다.");
+      return;
+    }
+
+    // 숫자로 변환된 값으로 전송
+    const processedReviewData = {
+      ...reviewData,
+      rewardStatus,
+      planStatus,
+      commStatus,
+    };
+
+    console.log("서버로 보내는 processedReviewData:", processedReviewData);
+    console.log("서버로 보내는 reviewData:", reviewData);
+
     try {
       if (isEditing && selectedReview) {
         const response = await axios.put(
           `http://localhost:8888/reviews/${selectedReview.reviewNo}`,
-          reviewData,
+          processedReviewData,
           { headers: getAuthHeaders() }
         );
 
@@ -142,7 +190,7 @@ const Page = () => {
       } else {
         const response = await axios.post(
           `http://localhost:8888/reviews/create`,
-          reviewData,
+          processedReviewData,
           { headers: getAuthHeaders() }
         );
         setWrittenReviews((prev) => [response.data, ...prev]);

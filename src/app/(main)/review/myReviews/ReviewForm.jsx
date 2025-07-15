@@ -6,8 +6,8 @@ import styles from "./reviewForm.module.css";
 
 const satisfactionMap = {
   bad: 1,
-  neutral: 2,
-  good: 3,
+  neutral: 3,
+  good: 5,
 };
 
 const ReviewForm = ({ project, onClose, onSubmit }) => {
