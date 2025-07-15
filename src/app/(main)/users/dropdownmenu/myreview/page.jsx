@@ -17,11 +17,9 @@ export default function MyReviewPage() {
       router.replace("/users/login");
       return;
     }
-    // TODO: 실제 API 연동 시 fetch/axios 등으로 데이터 받아오기
-    // 예시: fetch('/api/myreview').then(...)
+
     setLoading(true);
     setTimeout(() => {
-      // 임시: 빈 배열(후기 없음)
       setReviews([]);
       setLoading(false);
     }, 500);

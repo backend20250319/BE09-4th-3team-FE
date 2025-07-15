@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ReviewForm from "./ReviewForm";
 import styles from "./page.module.css";
@@ -19,28 +20,29 @@ function getUserIdFromAccessToken() {
   }
 }
 
-// 평가 상태를 한글로 변환하는 함수 (숫자 1,2,3 기준)
+// 평가 상태를 한글로 변환하는 함수
 function getRatingLabel(category, value) {
+  const validValues = [1, 3, 5];
+  const numValue = Number(value);
+  if (!validValues.includes(numValue)) return "";
+
   const labels = {
     quality: {
       1: "아쉬워요",
-      2: "보통이에요",
-      3: "만족해요",
+      3: "보통이에요",
+      5: "만족해요",
     },
     plan: {
       1: "계획 준수 아쉬워요",
-      2: "계획 준수 보통이에요",
-      3: "계획 준수 잘 지켰어요",
+      3: "계획 준수 보통이에요",
+      5: "계획 준수 잘 지켰어요",
     },
     communication: {
       1: "소통 아쉬워요",
-      2: "소통 보통이에요",
-      3: "소통 친절했어요",
+      3: "소통 보통이에요",
+      5: "소통 친절했어요",
     },
   };
-
-  const numValue = Number(value);
-  if (!numValue || numValue < 1) return "";
 
   return labels[category]?.[numValue] || "";
 }
@@ -57,6 +59,8 @@ function isToday(dateStr) {
 }
 
 const Page = () => {
+  const router = useRouter();
+
   const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("write");
   const [projects, setProjects] = useState([]);
@@ -73,6 +77,10 @@ const Page = () => {
   const [userId, setUserId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
+  const handleProjectClick = (projectNo) => {
+    router.push(`/project/detail/${projectNo}`);
+  };
+
   // 토큰 헤더 설정 함수
   const getAuthHeaders = () => {
     const token = sessionStorage.getItem("accessToken");
@@ -85,10 +93,11 @@ const Page = () => {
 
     try {
       const writableRes = await axios.get(
-        `http://localhost:8888/reviews/writable`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/writable`,
         { headers: getAuthHeaders() }
       );
 
+      console.log("fetchProjects - 받은 프로젝트 데이터:", writableRes.data); // 수정
       setProjects(writableRes.data);
     } catch (err) {
       console.error("리뷰 작성 가능 프로젝트 불러오기 실패", err);
@@ -101,7 +110,7 @@ const Page = () => {
 
     try {
       const response = await axios.get(
-        `http://localhost:8888/reviews/written`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/written`,
         {
           headers: getAuthHeaders(),
         }
@@ -125,24 +134,70 @@ const Page = () => {
 
   // 후기 작성 또는 수정 제출 핸들러
   const handleReviewSubmit = async (reviewData) => {
+    // 디버깅용 로그 추가
+    console.log("reviewData 전체:", reviewData);
+    console.log(
+      "rewardStatus:",
+      reviewData.rewardStatus,
+      typeof reviewData.rewardStatus
+    );
+    console.log(
+      "planStatus:",
+      reviewData.planStatus,
+      typeof reviewData.planStatus
+    );
+    console.log(
+      "commStatus:",
+      reviewData.commStatus,
+      typeof reviewData.commStatus
+    );
+
+    const validValues = [1, 3, 5];
+
+    // 숫자로 변환하여 체크
+    const rewardStatus = Number(reviewData.rewardStatus);
+    const planStatus = Number(reviewData.planStatus);
+    const commStatus = Number(reviewData.commStatus);
+
+    console.log("변환된 값들:", { rewardStatus, planStatus, commStatus });
+
+    if (
+      !validValues.includes(rewardStatus) ||
+      !validValues.includes(planStatus) ||
+      !validValues.includes(commStatus)
+    ) {
+      alert("평가 점수는 1, 3, 5 중 하나여야 합니다.");
+      return;
+    }
+
+    // 숫자로 변환된 값으로 전송
+    const processedReviewData = {
+      ...reviewData,
+      rewardStatus,
+      planStatus,
+      commStatus,
+    };
+
+    console.log("서버로 보내는 processedReviewData:", processedReviewData);
+    console.log("서버로 보내는 reviewData:", reviewData);
+
     try {
       if (isEditing && selectedReview) {
         const response = await axios.put(
-          `http://localhost:8888/reviews/${selectedReview.reviewNo}`,
-          reviewData,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/${selectedReview.reviewNo}`,
+          processedReviewData,
           { headers: getAuthHeaders() }
         );
+
         setWrittenReviews((prev) =>
           prev.map((r) =>
-            r.reviewNo === selectedReview.reviewNo
-              ? response.data.afterUpdate
-              : r
+            r.reviewNo === selectedReview.reviewNo ? response.data.after : r
           )
         );
       } else {
         const response = await axios.post(
-          `http://localhost:8888/reviews`,
-          reviewData,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/create`,
+          processedReviewData,
           { headers: getAuthHeaders() }
         );
         setWrittenReviews((prev) => [response.data, ...prev]);
@@ -175,6 +230,10 @@ const Page = () => {
     setSelectedProject({
       projectNo: review.projectNo,
       title: review.projectTitle,
+      projectNo: review.projectNo,
+      title: review.projectTitle,
+      creatorName: review.creatorName,
+      thumbnailUrl: review.projectThumbnailUrl,
     });
     setIsEditing(true);
     setIsReviewFormOpen(true);
@@ -201,7 +260,7 @@ const Page = () => {
   const handleDeleteConfirm = async () => {
     try {
       await axios.delete(
-        `http://localhost:8888/reviews/${selectedReview.reviewNo}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/${selectedReview.reviewNo}`,
         { headers: getAuthHeaders() }
       );
 
@@ -294,14 +353,22 @@ const Page = () => {
                       <div className={styles.projectContent}>
                         {/* 프로젝트 썸네일 */}
                         <img
-                          src={project.thumbnailUrl || "/placeholder.svg"}
-                          alt={project.title}
+                          src={
+                            project && project.thumbnailUrl
+                              ? project.thumbnailUrl
+                              : "/placeholder.svg"
+                          }
+                          alt={project?.title || "Project"}
                           className={styles.projectImage}
+                          onClick={() => handleProjectClick(project.projectNo)}
                         />
                         <div className={styles.projectInfo}>
                           <div className={styles.meta}>
-                            {/* 후원 결제일 날짜 */}
-                            <span>
+                            <span style={{ color: "#666", fontWeight: "400" }}>
+                              {project.creatorName
+                                ? project.creatorName
+                                : "창작자 정보 없음"}
+                              {" | "}
                               {project.pledgedAt
                                 ? `후원 결제일 ${project.pledgedAt.slice(
                                     0,
@@ -325,9 +392,9 @@ const Page = () => {
                                 ? `${project.totalAmount.toLocaleString()}원`
                                 : "가격 정보 없음"}
                             </span>
-                            <span className={styles.delivery}>
-                              마감일: {project.deadLine}
-                            </span>
+                            <div className={styles.delivery}>
+                              마감일 {project.deadLine}
+                            </div>
                           </div>
                         </div>
                         <button
@@ -363,195 +430,230 @@ const Page = () => {
                 >
                   {writtenReviews.length}개의 후기
                 </div>
-                {writtenReviews.map((review) => (
-                  <div
-                    key={review.reviewNo}
-                    style={{
-                      background: "white",
-                      border: "1px solid #f0f0f0",
-                      borderRadius: "8px",
-                      padding: "20px",
-                      marginBottom: "12px",
-                    }}
-                  >
+                {writtenReviews
+                  .filter(
+                    (review) =>
+                      review?.reviewNo !== undefined &&
+                      review?.reviewNo !== null
+                  )
+                  .map((review) => (
                     <div
+                      key={review.reviewNo}
                       style={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: "12px",
+                        background: "white",
+                        border: "1px solid #f0f0f0",
+                        borderRadius: "8px",
+                        padding: "20px",
+                        marginBottom: "12px",
                       }}
                     >
-                      <img
-                        src={review.projectThumbnailUrl || "/placeholder.svg"}
-                        alt="프로젝트 이미지"
+                      <div
                         style={{
-                          width: "60px",
-                          height: "60px",
-                          borderRadius: "8px",
-                          objectFit: "cover",
-                          flexShrink: 0,
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: "12px",
                         }}
-                      />
-                      <div style={{ flex: 1 }}>
-                        <div
+                      >
+                        <img
+                          src={
+                            review?.projectThumbnailUrl ||
+                            "/images/tumblbug_logo.png"
+                          }
+                          alt="프로젝트 이미지"
                           style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "flex-start",
-                            marginBottom: "8px",
+                            width: "60px",
+                            height: "60px",
+                            borderRadius: "8px",
+                            objectFit: "cover",
+                            flexShrink: 0,
                           }}
-                        >
-                          <div>
-                            <div
-                              style={{
-                                fontSize: "15px",
-                                fontWeight: "700",
-                                color: "#333",
-                                marginBottom: "4px",
-                              }}
-                            >
-                              {review.projectTitle}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "12px",
-                                color: "#999",
-                                marginBottom: "4px",
-                              }}
-                            >
-                              {review.createdAt.slice(0, 10)}{" "}
-                              {isToday(review.createdAt) ? "(오늘 작성됨)" : ""}
-                            </div>
-                          </div>
-                          <div style={{ position: "relative" }}>
-                            <button
-                              onClick={() => toggleDropdown(review.reviewNo)}
-                              style={{
-                                background: "transparent",
-                                border: "none",
-                                cursor: "pointer",
-                                padding: 0,
-                                margin: 0,
-                              }}
-                            >
-                              <MoreHorizontal size={20} />
-                            </button>
-                            {activeDropdown === review.reviewNo && (
-                              <ul
-                                style={{
-                                  position: "absolute",
-                                  top: "24px",
-                                  right: 0,
-                                  background: "white",
-                                  border: "1px solid #ddd",
-                                  borderRadius: "4px",
-                                  boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                                  padding: "8px 0",
-                                  listStyle: "none",
-                                  margin: 0,
-                                  width: "120px",
-                                  zIndex: 100,
-                                }}
-                              >
-                                <li
-                                  onClick={() => handleEditClick(review)}
-                                  style={{
-                                    padding: "8px 16px",
-                                    cursor: "pointer",
-                                    fontSize: "14px",
-                                    color: "#333",
-                                    borderBottom: "1px solid #eee",
-                                  }}
-                                >
-                                  수정
-                                </li>
-                                <li
-                                  onClick={() => handleDeleteClick(review)}
-                                  style={{
-                                    padding: "8px 16px",
-                                    cursor: "pointer",
-                                    fontSize: "14px",
-                                    color: "red",
-                                  }}
-                                >
-                                  삭제
-                                </li>
-                              </ul>
-                            )}
-                          </div>
-                        </div>
-                        <div
-                          style={{
-                            fontSize: "14px",
-                            color: "#555",
-                            whiteSpace: "pre-wrap",
-                            marginBottom: "12px",
-                          }}
-                        >
-                          {review.content}
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "12px",
-                            fontSize: "12px",
-                            color: "#666",
-                          }}
-                        >
+                          onClick={() =>
+                            router.push(`/project/detail/${review.projectNo}`)
+                          }
+                        />
+                        <div style={{ flex: 1 }}>
                           <div
                             style={{
                               display: "flex",
-                              gap: "6px",
-                              marginBottom: "12px",
-                              flexWrap: "wrap",
+                              justifyContent: "space-between",
+                              alignItems: "flex-start",
+                              marginBottom: "8px",
                             }}
                           >
-                            <span
-                              style={{
-                                fontSize: "12px",
-                                color: "#666",
-                                background: "#f8f9fa",
-                                padding: "4px 8px",
-                                borderRadius: "12px",
-                                border: "1px solid #e9ecef",
-                              }}
-                            >
-                              프로젝트{" "}
-                              {getRatingLabel("quality", review.rewardStatus)}
-                            </span>
-                            <span
-                              style={{
-                                fontSize: "12px",
-                                color: "#666",
-                                background: "#f8f9fa",
-                                padding: "4px 8px",
-                                borderRadius: "12px",
-                                border: "1px solid #e9ecef",
-                              }}
-                            >
-                              {getRatingLabel("plan", review.planStatus)}
-                            </span>
-                            <span
-                              style={{
-                                fontSize: "12px",
-                                color: "#666",
-                                background: "#f8f9fa",
-                                padding: "4px 8px",
-                                borderRadius: "12px",
-                                border: "1px solid #e9ecef",
-                              }}
-                            >
-                              {getRatingLabel(
-                                "communication",
-                                review.commStatus
+                            <div>
+                              <div>
+                                <div
+                                  style={{
+                                    fontSize: "13px",
+                                    color: "#666",
+                                    marginBottom: "2px",
+                                  }}
+                                >
+                                  {review?.creatorName || "작성자 정보 없음"}
+                                </div>
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: "15px",
+                                  fontWeight: "700",
+                                  color: "#333",
+                                  marginBottom: "4px",
+                                }}
+                              >
+                                {review?.projectTitle || "프로젝트 제목 없음"}
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: "12px",
+                                  color: "#999",
+                                  marginBottom: "4px",
+                                }}
+                              >
+                                {review?.createdAt ? (
+                                  <>
+                                    {review.createdAt.slice(0, 10)}{" "}
+                                    {isToday(review.createdAt)
+                                      ? "(오늘 작성됨)"
+                                      : ""}
+                                  </>
+                                ) : (
+                                  "날짜 정보 없음"
+                                )}
+                              </div>
+                            </div>
+                            <div style={{ position: "relative" }}>
+                              <button
+                                onClick={() => toggleDropdown(review?.reviewNo)}
+                                style={{
+                                  background: "transparent",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  padding: 0,
+                                  margin: 0,
+                                }}
+                              >
+                                <MoreHorizontal size={20} />
+                              </button>
+
+                              {activeDropdown === review?.reviewNo && (
+                                <ul
+                                  style={{
+                                    position: "absolute",
+                                    top: "24px",
+                                    right: 0,
+                                    background: "white",
+                                    border: "1px solid #ddd",
+                                    borderRadius: "4px",
+                                    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                                    padding: "8px 0",
+                                    listStyle: "none",
+                                    margin: 0,
+                                    width: "120px",
+                                    zIndex: 100,
+                                  }}
+                                >
+                                  <li
+                                    onClick={() => handleEditClick(review)}
+                                    style={{
+                                      padding: "8px 16px",
+                                      cursor: "pointer",
+                                      fontSize: "14px",
+                                      color: "#333",
+                                      borderBottom: "1px solid #eee",
+                                    }}
+                                  >
+                                    수정
+                                  </li>
+                                  <li
+                                    onClick={() => handleDeleteClick(review)}
+                                    style={{
+                                      padding: "8px 16px",
+                                      cursor: "pointer",
+                                      fontSize: "14px",
+                                      color: "red",
+                                    }}
+                                  >
+                                    삭제
+                                  </li>
+                                </ul>
                               )}
-                            </span>
+                            </div>
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "14px",
+                              color: "#555",
+                              whiteSpace: "pre-wrap",
+                              marginBottom: "12px",
+                            }}
+                          >
+                            {review?.content || "내용 없음"}
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "12px",
+                              fontSize: "12px",
+                              color: "#666",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: "6px",
+                                marginBottom: "12px",
+                                flexWrap: "wrap",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontSize: "12px",
+                                  color: "#666",
+                                  background: "#f8f9fa",
+                                  padding: "4px 8px",
+                                  borderRadius: "12px",
+                                  border: "1px solid #e9ecef",
+                                }}
+                              >
+                                프로젝트{" "}
+                                {getRatingLabel(
+                                  "quality",
+                                  review?.rewardStatus
+                                )}
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: "12px",
+                                  color: "#666",
+                                  background: "#f8f9fa",
+                                  padding: "4px 8px",
+                                  borderRadius: "12px",
+                                  border: "1px solid #e9ecef",
+                                }}
+                              >
+                                {getRatingLabel("plan", review?.planStatus)}
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: "12px",
+                                  color: "#666",
+                                  background: "#f8f9fa",
+                                  padding: "4px 8px",
+                                  borderRadius: "12px",
+                                  border: "1px solid #e9ecef",
+                                }}
+                              >
+                                {getRatingLabel(
+                                  "communication",
+                                  review?.commStatus
+                                )}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </div>
