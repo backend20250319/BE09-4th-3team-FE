@@ -11,6 +11,8 @@ export default function PieChart() {
         PENDING: 0,
         APPROVED: 0,
         REJECTED: 0,
+        IN_PROGRESS: 0,
+        COMPLETED: 0,
     })
 
     useEffect(() => {
@@ -32,23 +34,31 @@ export default function PieChart() {
     }, [])
 
     const chartData = {
-        labels: ['대기중', '승인됨', '거절됨'],
+        labels: ['대기중', '승인됨', '거절됨', '진행중', '완료됨'],
         datasets: [
             {
                 data: [
                     statusData.PENDING,
                     statusData.APPROVED,
                     statusData.REJECTED,
+                    statusData.IN_PROGRESS,
+                    statusData.COMPLETED,
                 ],
-                backgroundColor: ['#FFCE56', '#36A2EB', '#FF6384'],
+                backgroundColor: [
+                    '#FFCE56', // 대기중 - 노랑
+                    '#4CAF50', // 승인됨 - 초록
+                    '#FF6384', // 거절됨 - 빨강
+                    '#36A2EB', // 진행중 - 파랑
+                    '#9C27B0', // 완료됨 - 보라
+                ],
                 borderWidth: 1,
             },
         ],
     }
 
     return (
-        <div style={{ width: '100%', maxWidth: '400px', margin: '2rem auto' }}>
-            <h3 className="text-center mb-4">프로젝트 상태 분포</h3>
+        <div style={{ width: '100%', maxWidth: '450px', margin: '2rem auto' }}>
+            <h3 className="text-center text-lg font-semibold mb-4">프로젝트 상태 분포</h3>
             <Pie data={chartData} />
         </div>
     )

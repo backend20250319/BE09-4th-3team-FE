@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Eye, X, Search } from "lucide-react";
+import { Eye, X } from "lucide-react";
 import Pagination from "@/components/pagination/pagination";
 
 export default function FundingPage() {
     const [fundings, setFundings] = useState([]);
+    const [summary, setSummary] = useState(null);
     const [selectedFunding, setSelectedFunding] = useState(null);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
@@ -15,13 +16,17 @@ export default function FundingPage() {
         fetchFundings(page, searchTerm);
     }, [page, searchTerm]);
 
+    useEffect(() => {
+        fetchSummary();
+    }, []);
+
     const fetchFundings = async (page, keyword) => {
         try {
             const token = sessionStorage.getItem("accessToken");
             const query = keyword ? `&keyword=${encodeURIComponent(keyword)}` : "";
 
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/pledge-rewards?page=${page}${query}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/pledges?page=${page}${query}`,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -38,35 +43,72 @@ export default function FundingPage() {
         }
     };
 
-    const totalFundingAmount = fundings.reduce((sum, f) => sum + f.rewardAmount * f.quantity, 0);
+    const fetchSummary = async () => {
+        try {
+            const token = sessionStorage.getItem("accessToken");
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/pledges/summary`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            const data = await res.json();
+            setSummary(data);
+        } catch (err) {
+            console.error("요약 정보 불러오기 실패:", err);
+        }
+    };
+
+    const totalFundingAmount = fundings.reduce(
+        (sum, f) => sum + (f.totalAmount || 0),
+        0
+    );
 
     return (
         <div className="p-6 space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white shadow rounded-lg p-4">
-                    <div className="text-2xl font-bold">{fundings.length}</div>
-                    <div className="text-sm text-gray-500">현재 페이지 펀딩 수</div>
+                    <div className="text-2xl font-bold text-blue-600">
+                        {summary?.totalPledgeCount?.toLocaleString() ?? "-"}
+                    </div>
+                    <div className="text-sm text-gray-500">전체 펀딩 수</div>
                 </div>
                 <div className="bg-white shadow rounded-lg p-4">
-                    <div className="text-2xl font-bold">
-                        {totalFundingAmount.toLocaleString("ko-KR", {
+                    <div className="text-2xl font-bold text-green-600">
+                        {summary?.totalPledgedAmount?.toLocaleString("ko-KR", {
                             style: "currency",
                             currency: "KRW",
-                        })}
+                        }) ?? "-"}
                     </div>
-                    <div className="text-sm text-gray-500">현재 페이지 총 금액</div>
+                    <div className="text-sm text-gray-500">총 펀딩 금액</div>
                 </div>
-                <div className="col-span-2">
-                    <input
-                        className="w-full border p-2 rounded shadow-sm"
-                        placeholder="후원자, 프로젝트명으로 검색"
-                        value={searchTerm}
-                        onChange={(e) => {
-                            setSearchTerm(e.target.value);
-                            setPage(0);
-                        }}
-                    />
+                <div className="bg-white shadow rounded-lg p-4">
+                    <div className="text-2xl font-bold text-red-500">
+                        {summary?.todayPledgeCount?.toLocaleString() ?? "-"}
+                    </div>
+                    <div className="text-sm text-gray-500">오늘 후원 건수</div>
                 </div>
+                <div className="bg-white shadow rounded-lg p-4">
+                    <div className="text-2xl font-bold text-purple-500">
+                        {summary?.totalBackerCount?.toLocaleString() ?? "-"}
+                    </div>
+                    <div className="text-sm text-gray-500">전체 후원자 수</div>
+                </div>
+            </div>
+
+            <div className="mt-4">
+                <input
+                    className="w-full border p-2 rounded shadow-sm"
+                    placeholder="후원자, 프로젝트명으로 검색"
+                    value={searchTerm}
+                    onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setPage(0);
+                    }}
+                />
             </div>
 
             <div className="bg-white rounded-lg shadow overflow-auto">
@@ -75,25 +117,27 @@ export default function FundingPage() {
                     <tr>
                         <th className="px-4 py-3">후원자</th>
                         <th className="px-4 py-3">프로젝트</th>
-                        <th className="px-4 py-3">리워드</th>
-                        <th className="px-4 py-3">수량</th>
-                        <th className="px-4 py-3">금액</th>
+                        <th className="px-4 py-3">총 금액</th>
+                        <th className="px-4 py-3">추가 금액</th>
+                        <th className="px-4 py-3">후원일</th>
                         <th className="px-4 py-3">작업</th>
                     </tr>
                     </thead>
                     <tbody>
                     {fundings.map((f) => (
-                        <tr key={f.pledgeRewardNo} className="border-t hover:bg-gray-50">
+                        <tr key={f.pledgeNo} className="border-t hover:bg-gray-50">
                             <td className="px-4 py-3">
                                 <div className="font-medium">{f.userName}</div>
                                 <div className="text-xs text-gray-400">{f.userEmail}</div>
                             </td>
                             <td className="px-4 py-3">{f.projectTitle}</td>
-                            <td className="px-4 py-3">{f.rewardTitle}</td>
-                            <td className="px-4 py-3">{f.quantity}</td>
                             <td className="px-4 py-3">
-                                ₩{(f.rewardAmount * f.quantity).toLocaleString()}
+                                ₩{f.totalAmount?.toLocaleString()}
                             </td>
+                            <td className="px-4 py-3">
+                                ₩{f.additionalAmount?.toLocaleString()}
+                            </td>
+                            <td className="px-4 py-3">{f.createdAt}</td>
                             <td className="px-4 py-3 text-center">
                                 <button
                                     onClick={() => setSelectedFunding(f)}
@@ -129,18 +173,32 @@ export default function FundingPage() {
                                 <div>{selectedFunding.projectTitle}</div>
                             </div>
                             <div>
-                                <div className="font-semibold">리워드</div>
-                                <div>{selectedFunding.rewardTitle}</div>
-                            </div>
-                            <div>
-                                <div className="font-semibold">수량</div>
-                                <div>{selectedFunding.quantity}</div>
-                            </div>
-                            <div>
-                                <div className="font-semibold">총 금액</div>
+                                <div className="font-semibold">총 후원금</div>
                                 <div className="text-green-600 font-bold">
-                                    ₩{(selectedFunding.rewardAmount * selectedFunding.quantity).toLocaleString()}
+                                    ₩{selectedFunding.totalAmount?.toLocaleString()}
                                 </div>
+                            </div>
+                            <div>
+                                <div className="font-semibold">추가 후원금</div>
+                                <div>
+                                    ₩{selectedFunding.additionalAmount?.toLocaleString()}
+                                </div>
+                            </div>
+                            <div className="col-span-2">
+                                <div className="font-semibold">후원일</div>
+                                <div>{selectedFunding.createdAt}</div>
+                            </div>
+                            <div className="col-span-2">
+                                <div className="font-semibold">수령인</div>
+                                <div>{selectedFunding.recipientName}</div>
+                            </div>
+                            <div className="col-span-2">
+                                <div className="font-semibold">배송지</div>
+                                <div>{selectedFunding.deliveryAddress}</div>
+                            </div>
+                            <div className="col-span-2">
+                                <div className="font-semibold">연락처</div>
+                                <div>{selectedFunding.deliveryPhone}</div>
                             </div>
                         </div>
                     </div>
