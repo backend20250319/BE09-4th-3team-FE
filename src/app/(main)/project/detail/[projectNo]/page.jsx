@@ -214,7 +214,7 @@ export default function Page() {
                 후기
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="section01" className="flex gap-[38px]">
+            <TabsContent value="section01" className="flex gap-[38px] pb-8">
               <ProjectPlan project={project} />
               <ProjectInfo
                 project={project}
@@ -226,13 +226,13 @@ export default function Page() {
                 selectedRewardsTotal={selectedRewardsTotal}
               />
             </TabsContent>
-            <TabsContent value="section02" className="w-[1040px]">
+            <TabsContent value="section02" className="w-[1040px] pb-8">
               <ProjectUpdate project={project} />
             </TabsContent>
-            <TabsContent value="section03" className="w-[1040px]">
+            <TabsContent value="section03" className="w-[1040px] pb-8">
               <ProjectCommunity project={project} />
             </TabsContent>
-            <TabsContent value="section04" className="flex gap-[38px]">
+            <TabsContent value="section04" className="flex gap-[38px] pb-8">
               <ProjectReview project={project} />
               <ProjectInfo
                 project={project}

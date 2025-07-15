@@ -1,10 +1,10 @@
 // "use client";
 
-// import React, { useEffect, useState } from "react"; // 개선점: useEffect, useState 추가
+// import { useEffect, useState } from "react";
 // import { useRouter } from "next/navigation";
 
 // export default function HomePage() {
-//   // 개선점: 사용자 정보 상태 관리 추가
+//   const [accessToken, setAccessToken] = useState(null);
 //   const [userInfo, setUserInfo] = useState(null);
 //   const [loading, setLoading] = useState(true);
 //   const router = useRouter();
@@ -189,7 +189,6 @@
 //           >
 //             메인 페이지로
 //           </button>
-
 //           <button
 //             onClick={handleLogout}
 //             style={{

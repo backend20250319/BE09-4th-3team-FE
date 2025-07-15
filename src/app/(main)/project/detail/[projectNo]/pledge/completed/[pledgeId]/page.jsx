@@ -1,33 +1,32 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Heart, X } from "lucide-react"
-import Image from "next/image"
-import PledgeHeader from "@/components/header/PledgeHeader"
-import axios from "axios"
-import { useParams } from "next/navigation"
-import Link from "next/link"
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Heart } from "lucide-react";
+import Image from "next/image";
+import PledgeHeader from "@/components/header/PledgeHeader";
+import axios from "axios";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 
 export default function PledgeSuccessPage() {
   const { projectNo, pledgeId } = useParams();
-  const [showFollowModal, setShowFollowModal] = useState(true)
-  const [supporterNumber, setSupporterNumber] = useState(null)
+  const [showFollowModal, setShowFollowModal] = useState(true);
+  const [supporterNumber, setSupporterNumber] = useState(null);
 
   useEffect(() => {
     const fetchSupporterNumber = async () => {
       try {
-        const token = sessionStorage.getItem('accessToken');
+        const token = sessionStorage.getItem("accessToken");
         if (!token) return;
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/pledge/${pledgeId}/order`, {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         setSupporterNumber(response.data);
       } catch (error) {
-        console.error('supporterNumber 불러오기 실패:', error);
+        console.error("supporterNumber 불러오기 실패:", error);
       }
     };
     if (pledgeId) fetchSupporterNumber();
@@ -84,7 +83,7 @@ export default function PledgeSuccessPage() {
       timeLeft: "",
       image: "/placeholder.svg?height=200&width=300",
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -94,15 +93,17 @@ export default function PledgeSuccessPage() {
         {/* Success Message */}
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold mb-4">
-            <span className="text-red-500">축하합니다. {supporterNumber ? `${supporterNumber} 번째` : ''}</span>
+            <span className="text-red-500">축하합니다. {supporterNumber ? `${supporterNumber} 번째` : ""}</span>
             <br />
             <span className="text-gray-800">공식 후원자가 되셨습니다!</span>
           </h1>
           <p className="text-gray-600 mb-8">
-            * 후원 내역 변경은 <Link href={`/pledges/${pledgeId}`}><span className="text-blue-500 underline cursor-pointer">후원 상세</span></Link>에서 하실 수
-            있습니다.
+            * 후원 내역 변경은{" "}
+            <Link href={`/pledges/${pledgeId}`}>
+              <span className="text-blue-500 underline cursor-pointer">후원 상세</span>
+            </Link>
+            에서 하실 수 있습니다.
           </p>
-
           {/* Social Share Buttons */}
           <div className="flex justify-center gap-4">
             <button className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center hover:bg-yellow-500 transition-colors">
@@ -116,7 +117,6 @@ export default function PledgeSuccessPage() {
             </button>
           </div>
         </div>
-
         {/* Recommended Projects */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-6">
@@ -156,5 +156,5 @@ export default function PledgeSuccessPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
