@@ -257,132 +257,84 @@ export default function ReviewComponent({ projectNo }) {
 
       {/* 리뷰 목록 */}
       <div className={styles.reviewList}>
-        {reviews.map((review) => {
-          return (
-            <div key={review.reviewNo} className={styles.reviewCard}>
-              <div className={styles.reviewHeader}>
-                <div className={styles.authorInfo}>
-                  {/* 아바타 이미지 영역 */}
-                  {/* 
-            <div className={styles.avatar}>
-              <img
-                src={review.author?.avatar || "/placeholder.svg"}
-                alt="프로필"
-              />
-            </div>
-            */}
-                  <div className={styles.authorDetails}>
-                    <span className={styles.authorName}>
-                      {review.userNickname || "익명"}
-                    </span>
-                    <span className={styles.reviewDate}>
-                      {new Date(review.createdAt).toLocaleDateString()}
-                    </span>
+        {reviews.length === 0 ? (
+          <div className={styles.noReviews}>리뷰가 없습니다.</div>
+        ) : (
+          reviews.map((review) => {
+            return (
+              <div key={review.reviewNo} className={styles.reviewCard}>
+                <div className={styles.reviewHeader}>
+                  <div className={styles.authorInfo}>
+                    {/* 아바타 이미지 영역 */}
+                    <div className={styles.authorDetails}>
+                      <span className={styles.authorName}>
+                        {review.userNickname || "익명"}
+                      </span>
+                      <span className={styles.reviewDate}>
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                <div className={styles.moreMenu}>
-                  {/* 본인 리뷰일 때만 드롭다운 버튼 노출 */}
-                  {String(currentUserId).trim() ===
-                    String(review.userId).trim() && (
-                    <button
-                      className={styles.moreButton}
-                      onClick={() => {
-                        console.log("토글 드롭다운 클릭:", review.reviewNo);
-                        toggleDropdown(review.reviewNo);
-                      }}
-                    >
-                      <MoreHorizontal size={16} />
-                    </button>
-                  )}
-
-                  {activeDropdown === review.reviewNo &&
-                    String(currentUserId).trim() ===
+                  <div className={styles.moreMenu}>
+                    {String(currentUserId).trim() ===
                       String(review.userId).trim() && (
-                      <ul
-                        style={{
-                          position: "absolute",
-                          top: "24px",
-                          right: 0,
-                          background: "white",
-                          border: "1px solid #ddd",
-                          borderRadius: "4px",
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                          padding: "8px 0",
-                          listStyle: "none",
-                          margin: 0,
-                          width: "120px",
-                          zIndex: 1000,
-                        }}
+                      <button
+                        className={styles.moreButton}
+                        onClick={() => toggleDropdown(review.reviewNo)}
                       >
-                        {[
-                          {
-                            key: "edit",
-                            text: "수정",
-                            onClick: () => handleEditClick(review),
-                            style: {
-                              padding: "8px 16px",
-                              cursor: "pointer",
-                              fontSize: "14px",
-                              color: "#333",
-                              borderBottom: "1px solid #eee",
-                            },
-                          },
-                          {
-                            key: "delete",
-                            text: "삭제",
-                            onClick: () => handleDeleteClick(review),
-                            style: {
-                              padding: "8px 16px",
-                              cursor: "pointer",
-                              fontSize: "14px",
-                              color: "red",
-                            },
-                          },
-                        ].map((item) => (
-                          <li
-                            key={item.key}
-                            onClick={item.onClick}
-                            style={item.style}
-                          >
-                            {item.text}
-                          </li>
-                        ))}
-                      </ul>
+                        <MoreHorizontal size={16} />
+                      </button>
                     )}
-                </div>
-              </div>
-              <div className={styles.reviewContent}>
-                {/* 상태 텍스트 태그 */}
-                <div className={styles.statusTags}>
-                  <span className={styles.statusTag}>
-                    {getStatusText("rewardStatus", review.rewardStatus)}
-                  </span>
-                  <span className={styles.statusTag}>
-                    {getStatusText("planStatus", review.planStatus)}
-                  </span>
-                  <span className={styles.statusTag}>
-                    {getStatusText("commStatus", review.commStatus)}
-                  </span>
+
+                    {activeDropdown === review.reviewNo &&
+                      String(currentUserId).trim() ===
+                        String(review.userId).trim() && (
+                        <ul
+                          style={
+                            {
+                              /* 생략 */
+                            }
+                          }
+                        >
+                          {/* 수정, 삭제 메뉴 */}
+                        </ul>
+                      )}
+                  </div>
                 </div>
 
-                <p className={styles.reviewText}>{review.content}</p>
-                {review.images?.length > 0 && (
-                  <div className={styles.imageContainer}>
-                    {review.images.map((img, i) => (
-                      <img
-                        key={i}
-                        src={img}
-                        alt={`리뷰 이미지 ${i + 1}`}
-                        className={styles.reviewImage}
-                      />
-                    ))}
+                <div className={styles.reviewContent}>
+                  <div className={styles.statusTags}>
+                    <span className={styles.statusTag}>
+                      {getStatusText("rewardStatus", review.rewardStatus)}
+                    </span>
+                    <span className={styles.statusTag}>
+                      {getStatusText("planStatus", review.planStatus)}
+                    </span>
+                    <span className={styles.statusTag}>
+                      {getStatusText("commStatus", review.commStatus)}
+                    </span>
                   </div>
-                )}
+
+                  <p className={styles.reviewText}>{review.content}</p>
+
+                  {review.images?.length > 0 && (
+                    <div className={styles.imageContainer}>
+                      {review.images.map((img, i) => (
+                        <img
+                          key={i}
+                          src={img}
+                          alt={`리뷰 이미지 ${i + 1}`}
+                          className={styles.reviewImage}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
 
       {/* 수정 모달(수정/작성 폼) *** 💧 */}
