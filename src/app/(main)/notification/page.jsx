@@ -123,7 +123,9 @@ export default function NotificationPage() {
 
     setIsLoading(true);
     const token = sessionStorage.getItem("accessToken"); // 변경
-    const url = `http://localhost:8888/notifications?${buildQueryParams()}`;
+    const url = `${
+      process.env.NEXT_PUBLIC_API_BASE_URL
+    }/notifications?${buildQueryParams()}`;
 
     fetch(url, {
       headers: {

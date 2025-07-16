@@ -217,21 +217,38 @@ export default function ProjectInfo({
                       onClick={() => setOpen(true)}
                       className="w-full h-[48px] cursor-pointer py-[14px] px-5 rounded-[8px] gap-1 flex items-center justify-center border-0 text-base bg-[#1c1c1c] text-white hover:bg-[#6d6d6d] transition-colors"
                     >
-                      마감
+
+                      {new Date(project.startLine) > new Date()
+                        ? "공개 예정"
+                        : "마감안내"}
                     </button>
                   </DialogTrigger>
                   <DialogContent className="w-[400px] flex justify-center items-center flex-col">
                     <DialogHeader>
-                      <DialogTitle>마감 안내</DialogTitle>
+                      <DialogTitle>
+                        {new Date(project.startLine) > new Date()
+                          ? "공개 예정"
+                          : "마감 안내"}
+                      </DialogTitle>
                     </DialogHeader>
                     <div className="flex flex-col gap-2 items-center">
-                      <p className="mt-4 text-sm text-gray-700 font-medium">
-                        이 프로젝트는{" "}
-                        <span className="text-purple-600 font-semibold">
-                          {project.deadline}
-                        </span>
-                        에 마감되었습니다.
-                      </p>
+                      {new Date(project.startLine) > new Date() ? (
+                        <p className="mt-4 text-sm text-gray-700 font-medium">
+                          이 프로젝트는{" "}
+                          <span className="text-blue-600 font-semibold">
+                            {project.startLine}
+                          </span>
+                          에 공개될 예정입니다.
+                        </p>
+                      ) : (
+                        <p className="mt-4 text-sm text-gray-700 font-medium">
+                          이 프로젝트는{" "}
+                          <span className="text-red-600 font-semibold">
+                            {project.deadline}
+                          </span>
+                          에 마감되었습니다.
+                        </p>
+                      )}
                     </div>
                   </DialogContent>
                 </Dialog>
