@@ -193,7 +193,7 @@ export default function ReviewComponent({ projectNo }) {
   const handleDeleteConfirm = async () => {
     try {
       await axios.delete(
-        `http://localhost:8888/reviews/${selectedReview.reviewNo}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/${selectedReview.reviewNo}`,
         { headers: getAuthHeaders() }
       );
 
