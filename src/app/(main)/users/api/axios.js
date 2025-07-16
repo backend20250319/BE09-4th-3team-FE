@@ -1,9 +1,7 @@
-// seokgeun/api/axios.js
 // HTTP 클라이언트 설정 및 인터셉터 관리 (JWT 전용, 불필요한 코드 제거)
 
 import axios from "axios";
 
-// 환경변수를 통한 baseURL 관리
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8888";
 
 // axios 인스턴스 생성 - 공통 설정 적용
@@ -47,8 +45,7 @@ api.interceptors.response.use(
         currentPath
       )}`;
 
-      // 3. logout API 호출은 하지 않는다! (JWT라면 프론트에서 토큰만 삭제하면 됨)
-      return; // 추가적인 Promise.reject 방지
+      return; 
     }
 
     // 네트워크 에러 처리

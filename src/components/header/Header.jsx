@@ -395,7 +395,7 @@ export default function Header() {
                   </Link>
                 </li>
               )}
-              <li className="p-4">
+              <li className="p-4 h-[56px]">
                 <Link href="/notification" className="relative inline-block">
                   <Bell />
                   {unreadCount > 0 && (
@@ -430,7 +430,7 @@ export default function Header() {
                   >
                     <ul>
                       <li>
-                        <Link href="/" className="block px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                        <Link href="/users/dropdownmenu/mysettings/profile" className="block px-4 py-2 hover:bg-gray-100 cursor-pointer">
                           프로필
                         </Link>
                       </li>
@@ -483,7 +483,7 @@ export default function Header() {
                       </li>
                       <li>
                         <Link
-                          href="/users/dropdownmenu/mysettings/profile"
+                          href="/users/dropdownmenu/mysettings/account"
                           className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
                           설정
