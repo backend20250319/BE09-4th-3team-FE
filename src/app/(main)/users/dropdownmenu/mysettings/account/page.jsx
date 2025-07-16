@@ -58,7 +58,7 @@ export default function AccountPage() {
       return;
     }
     // 이메일/연락처 불러오기
-    fetchWithAuth("/api/user/me")
+    fetchWithAuth("/api/register/user/me")
       .then((res) => (res && res.ok ? res.json() : null))
       .then((data) => {
         if (data && data.email) setEmail(data.email);
@@ -209,12 +209,12 @@ export default function AccountPage() {
     }
     try {
       // 현재 사용자 정보 가져오기
-      const userRes = await fetchWithAuth("/api/user/me");
+      const userRes = await fetchWithAuth("/api/register/user/me");
       if (!userRes) return;
       const user = await userRes.json();
 
       // 석근 : PATCH만 시도 (PUT, /email 엔드포인트는 사용하지 않음)
-      const res = await fetchWithAuth("/api/user/me/profile", {
+      const res = await fetchWithAuth("/api/register/user/me/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -270,7 +270,7 @@ export default function AccountPage() {
     // 2. API 요청
     try {
       const accessToken = sessionStorage.getItem("accessToken");
-      const res = await fetch("/api/user/me/password_update", {
+      const res = await fetch("/api/register/user/me/password_update", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -318,7 +318,7 @@ export default function AccountPage() {
     // DB 저장
     try {
       const accessToken = sessionStorage.getItem("accessToken");
-      const res = await fetch("/api/user/me/profile", {
+      const res = await fetch("/api/register/user/me/profile", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -349,7 +349,7 @@ export default function AccountPage() {
     try {
       const accessToken = sessionStorage.getItem("accessToken");
       // 기존 사용자 정보 불러오기
-      const userRes = await fetch("/api/user/me", {
+      const userRes = await fetch("/api/register/user/me", {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (!userRes.ok) {
@@ -358,7 +358,7 @@ export default function AccountPage() {
       }
       const user = await userRes.json();
       // PATCH 요청에 모든 필수 필드 포함
-      const res = await fetch("/api/user/me/profile", {
+      const res = await fetch("/api/register/user/me/profile", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -402,7 +402,7 @@ export default function AccountPage() {
       return;
     const accessToken = sessionStorage.getItem("accessToken");
     try {
-      const res = await fetch("/api/user/me_quit", {
+      const res = await fetch("/api/register/user/me_quit", {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${accessToken}`,

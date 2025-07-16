@@ -199,7 +199,7 @@ export default function AddressesPage() {
 
       // 직접 fetch 대신 중앙화된 API 인스턴스 사용
       console.log("API 호출 시작...");
-      const response = await api.post("/api/user/me/addresses", requestData);
+      const response = await api.post("/api/register/user/me/addresses", requestData);
 
       console.log("성공 응답:", response.data);
       setAddresses([...addresses, response.data]);
@@ -328,7 +328,7 @@ export default function AddressesPage() {
     const fetchAddresses = async () => {
       setLoading(true);
       try {
-        const response = await api.get("/api/user/me/addresses");
+        const response = await api.get("/api/register/user/me/addresses");
         console.log("배송지 목록 조회 성공:", response.data);
         setAddresses(response.data);
       } catch (error) {
@@ -372,7 +372,7 @@ export default function AddressesPage() {
     try {
       console.log("배송지 삭제 요청:", addressId);
 
-      await api.delete(`/api/user/me/addresses/${addressId}`);
+      await api.delete(`/api/register/user/me/addresses/${addressId}`);
 
       console.log("배송지 삭제 성공");
       setAddresses(addresses.filter((addr) => addr.id !== addressId));
