@@ -349,18 +349,29 @@ const Page = () => {
                   console.log("개별 project 데이터:", project);
 
                   return (
-                    <div key={project.projectNo} className={styles.projectCard}>
+                    <div
+                      key={project.projectNo}
+                      className={styles.projectCard}
+                      onClick={() =>
+                        router.push(`/project/detail/${project.projectNo}`)
+                      }
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#f0f8ff")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor = "white")
+                      }
+                    >
                       <div className={styles.projectContent}>
                         {/* 프로젝트 썸네일 */}
                         <img
                           src={
                             project && project.thumbnailUrl
                               ? project.thumbnailUrl
-                              : "/placeholder.svg"
+                              : "/images/umblbug_logo.png"
                           }
                           alt={project?.title || "Project"}
                           className={styles.projectImage}
-                          onClick={() => handleProjectClick(project.projectNo)}
                         />
                         <div className={styles.projectInfo}>
                           <div className={styles.meta}>
@@ -398,7 +409,10 @@ const Page = () => {
                           </div>
                         </div>
                         <button
-                          onClick={() => handleWriteReviewClick(project)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleWriteReviewClick(project);
+                          }}
                           className={styles.reviewButton}
                         >
                           후기 작성
@@ -445,7 +459,17 @@ const Page = () => {
                         borderRadius: "8px",
                         padding: "20px",
                         marginBottom: "12px",
+                        cursor: "pointer",
                       }}
+                      onClick={() =>
+                        router.push(`/project/detail/${review.projectNo}`)
+                      }
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#f0f8ff")
+                      } // 연한 파랑 예시
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor = "white")
+                      }
                     >
                       <div
                         style={{
@@ -467,9 +491,6 @@ const Page = () => {
                             objectFit: "cover",
                             flexShrink: 0,
                           }}
-                          onClick={() =>
-                            router.push(`/project/detail/${review.projectNo}`)
-                          }
                         />
                         <div style={{ flex: 1 }}>
                           <div
@@ -523,7 +544,10 @@ const Page = () => {
                             </div>
                             <div style={{ position: "relative" }}>
                               <button
-                                onClick={() => toggleDropdown(review?.reviewNo)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleDropdown(review?.reviewNo);
+                                }}
                                 style={{
                                   background: "transparent",
                                   border: "none",
@@ -553,7 +577,10 @@ const Page = () => {
                                   }}
                                 >
                                   <li
-                                    onClick={() => handleEditClick(review)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleEditClick(review);
+                                    }}
                                     style={{
                                       padding: "8px 16px",
                                       cursor: "pointer",
@@ -565,7 +592,10 @@ const Page = () => {
                                     수정
                                   </li>
                                   <li
-                                    onClick={() => handleDeleteClick(review)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteClick(review);
+                                    }}
                                     style={{
                                       padding: "8px 16px",
                                       cursor: "pointer",
