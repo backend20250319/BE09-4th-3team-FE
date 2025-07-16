@@ -395,7 +395,7 @@ export default function Header() {
                   </Link>
                 </li>
               )}
-              <li className="p-4">
+              <li className="p-4 h-[56px]">
                 <Link href="/notification" className="relative inline-block">
                   <Bell />
                   {unreadCount > 0 && (
