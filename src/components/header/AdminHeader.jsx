@@ -15,6 +15,7 @@ export default function AdminHeader() {
                 <Link href="/admain/users" className="dashboard-link">회원 관리</Link>
                 <Link href="/admain/fundings" className="dashboard-link">펀딩 관리</Link>
                 <Link href="/admain/review" className="dashboard-link">리뷰 관리</Link>
+                <Link href="/" className="dashboard-link">메인 페이지</Link>
             </nav>
 
             {/* 모바일 햄버거 메뉴 */}
