@@ -42,7 +42,9 @@ export default function ReviewAllPage({ onBack, projectNo }) {
   // 프로젝트 정보 상태 추가
   const [selectedProject, setSelectedProject] = useState(null);
 
-  const reviewsPerPage = 10; // 필요하면 페이징 기능 추가 가능
+  const reviewsPerPage = 10;
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   // 상태 텍스트 매핑
   const statusTextMap = {
@@ -87,12 +89,12 @@ export default function ReviewAllPage({ onBack, projectNo }) {
       setError(null);
       try {
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/project/${projectNo}?page=0&size=${reviewsPerPage}&sort=${sortBy}`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/project/${projectNo}?page=${page}&size=${reviewsPerPage}&sort=${sortBy}`,
           { headers: getAuthHeaders() }
         );
         setAllReviews(response.data.content);
+        setTotalPages(response.data.totalPages); // totalPages 받아오기
       } catch (err) {
-        console.error("전체 리뷰 불러오기 실패:", err);
         setError("리뷰를 불러오는 데 실패했습니다.");
       } finally {
         setLoading(false);
@@ -100,7 +102,7 @@ export default function ReviewAllPage({ onBack, projectNo }) {
     };
 
     fetchReviews();
-  }, [projectNo, sortBy]);
+  }, [projectNo, sortBy, page]);
 
   // 드롭다운 토글 (클릭한 리뷰만 열리고, 다른 건 닫힘)
   const toggleDropdown = (reviewId) => {
@@ -241,8 +243,16 @@ export default function ReviewAllPage({ onBack, projectNo }) {
 
       {/* 리뷰 목록 */}
       <div className={styles.reviewList}>
-        {allReviews?.length === 0 ? (
-          <div className={styles.noReviews}>리뷰가 없습니다.</div>
+        {allReviews.length === 0 ? (
+          <div className={styles.noReviews}>
+            <div className={styles.iconCircle}>
+              <svg viewBox="0 0 48 48" className={styles.icon}>
+                <path d="M42.1181 14.5537C42.1557 14.5161 42.1544 14.454 42.1154 14.415L33.7715 6.07113C33.7325 6.03207 33.6704 6.03085 33.6329 6.06839L29.6905 10.0107C29.653 10.0483 29.6542 10.1103 29.6933 10.1494L38.0371 18.4933C38.0762 18.5323 38.1383 18.5335 38.1758 18.496L42.1181 14.5537Z" />
+                <path d="M36.134 20.5378C36.1715 20.5003 36.1703 20.4382 36.1312 20.3992C36.0922 20.3601 27.7874 12.0553 27.7874 12.0553C27.7483 12.0163 27.6862 12.015 27.6487 12.0526C27.6111 12.0901 9.6289 30.0723 9.6289 30.0723C9.61462 30.0866 9.60538 30.1052 9.6025 30.1255L8.21584 39.856C8.20646 39.9218 8.2647 39.9801 8.33053 39.9707L18.061 38.584C18.0813 38.5811 18.0999 38.5719 18.1142 38.5576C18.1142 38.5576 36.0964 20.5754 36.134 20.5378Z" />
+              </svg>
+            </div>
+            <p className={styles.text}>프로젝트 성공 후 후기를 기대해주세요!</p>
+          </div>
         ) : (
           allReviews?.map((review) => (
             <div key={review?.reviewNo} className={styles.reviewCard}>
@@ -364,6 +374,43 @@ export default function ReviewAllPage({ onBack, projectNo }) {
           ))
         )}
       </div>
+
+      {totalPages >= 1 && (
+        <div className={styles.pagination}>
+          {/* 이전 버튼: 첫 페이지가 아닐 때만 보임 */}
+          {page > 0 && (
+            <button
+              className={styles.pageBtn}
+              onClick={() => setPage((p) => Math.max(p - 1, 0))}
+            >
+              &lt;
+            </button>
+          )}
+
+          {/* 페이지 번호 버튼 */}
+          {[...Array(totalPages).keys()].map((num) => (
+            <button
+              key={num}
+              className={`${styles.pageBtn} ${
+                page === num ? styles.activePageBtn : ""
+              }`}
+              onClick={() => setPage(num)}
+            >
+              {num + 1}
+            </button>
+          ))}
+
+          {/* 다음 버튼: 마지막 페이지가 아닐 때만 보임 */}
+          {page < totalPages - 1 && (
+            <button
+              className={styles.pageBtn}
+              onClick={() => setPage((p) => Math.min(p + 1, totalPages - 1))}
+            >
+              &gt;
+            </button>
+          )}
+        </div>
+      )}
 
       {/* 수정/작성 모달 */}
       {isReviewFormOpen && (selectedProject || selectedReview) && (

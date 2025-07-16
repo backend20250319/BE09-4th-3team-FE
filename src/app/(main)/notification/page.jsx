@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import styles from "./notification.module.css";
 
@@ -39,6 +40,7 @@ function getUserIdFromAccessToken() {
 }
 
 export default function NotificationPage() {
+  const router = useRouter();
   const [currentTab, setCurrentTab] = useState("all");
   const [notifications, setNotifications] = useState([]);
   const [page, setPage] = useState(0);
@@ -207,7 +209,12 @@ export default function NotificationPage() {
           <p className={styles.emptyMessage}>도착한 알림이 없습니다.</p>
         ) : (
           notifications.map((item) => (
-            <div key={item.notificationNo} className={styles.notificationItem}>
+            <div
+              key={item.notificationNo}
+              className={styles.notificationItem}
+              onClick={() => router.push(`/project/detail/${item.projectNo}`)}
+              style={{ cursor: "pointer" }}
+            >
               <div className={styles.notificationContent}>
                 <div className={styles.avatar}>
                   {item.projectThumbnailUrl ? (

@@ -48,6 +48,8 @@ export default function ReviewComponent({ projectNo }) {
   // 수정 모드 구분
   const [isEditing, setIsEditing] = useState(false);
 
+  const [totalReviewsCount, setTotalReviewsCount] = useState(0);
+
   // 토큰이 있을 경우 요청 헤더에 넣기 위한 함수
   const getAuthHeaders = () => {
     const token = sessionStorage.getItem("accessToken");
@@ -68,6 +70,7 @@ export default function ReviewComponent({ projectNo }) {
         { headers: getAuthHeaders() }
       );
       setReviews(response.data.content);
+      setTotalReviewsCount(response.data.totalElements);
     } catch (err) {
       setError("리뷰를 불러오는 데 실패했습니다.");
     } finally {
@@ -238,27 +241,37 @@ export default function ReviewComponent({ projectNo }) {
   return (
     <div className={styles.container}>
       {/* 헤더 */}
-      <div className={styles.header}>
-        <div className={styles.headerContent}>
-          <h2 className={styles.title}>후원자 리뷰</h2>
-          <p className={styles.subtitle}>총 {reviews.length}개의 리뷰</p>
+      {reviews.length > 0 && (
+        <div className={styles.header}>
+          <div className={styles.headerContent}>
+            <h2 className={styles.title}>후원자 리뷰</h2>
+            <p className={styles.subtitle}>총 {totalReviewsCount}개의 리뷰</p>
+          </div>
+          <div className={styles.sortContainer}>
+            <select
+              className={styles.sortSelect}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="latest">최신순</option>
+              <option value="satisfaction">만족도순</option>
+            </select>
+          </div>
         </div>
-        <div className={styles.sortContainer}>
-          <select
-            className={styles.sortSelect}
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-          >
-            <option value="latest">최신순</option>
-            <option value="satisfaction">만족도순</option>
-          </select>
-        </div>
-      </div>
+      )}
 
       {/* 리뷰 목록 */}
       <div className={styles.reviewList}>
         {reviews.length === 0 ? (
-          <div className={styles.noReviews}>리뷰가 없습니다.</div>
+          <div className={styles.noReviews}>
+            <div className={styles.iconCircle}>
+              <svg viewBox="0 0 48 48" className={styles.icon}>
+                <path d="M42.1181 14.5537C42.1557 14.5161 42.1544 14.454 42.1154 14.415L33.7715 6.07113C33.7325 6.03207 33.6704 6.03085 33.6329 6.06839L29.6905 10.0107C29.653 10.0483 29.6542 10.1103 29.6933 10.1494L38.0371 18.4933C38.0762 18.5323 38.1383 18.5335 38.1758 18.496L42.1181 14.5537Z" />
+                <path d="M36.134 20.5378C36.1715 20.5003 36.1703 20.4382 36.1312 20.3992C36.0922 20.3601 27.7874 12.0553 27.7874 12.0553C27.7483 12.0163 27.6862 12.015 27.6487 12.0526C27.6111 12.0901 9.6289 30.0723 9.6289 30.0723C9.61462 30.0866 9.60538 30.1052 9.6025 30.1255L8.21584 39.856C8.20646 39.9218 8.2647 39.9801 8.33053 39.9707L18.061 38.584C18.0813 38.5811 18.0999 38.5719 18.1142 38.5576C18.1142 38.5576 36.0964 20.5754 36.134 20.5378Z" />
+              </svg>
+            </div>
+            <p className={styles.text}>프로젝트 성공 후 후기를 기대해주세요!</p>
+          </div>
         ) : (
           reviews.map((review) => {
             return (
@@ -291,13 +304,54 @@ export default function ReviewComponent({ projectNo }) {
                       String(currentUserId).trim() ===
                         String(review.userId).trim() && (
                         <ul
-                          style={
-                            {
-                              /* 생략 */
-                            }
-                          }
+                          style={{
+                            position: "absolute",
+                            top: "24px",
+                            right: 0,
+                            background: "white",
+                            border: "1px solid #ddd",
+                            borderRadius: "4px",
+                            boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                            padding: "8px 0",
+                            listStyle: "none",
+                            margin: 0,
+                            width: "120px",
+                            zIndex: 1000,
+                          }}
                         >
-                          {/* 수정, 삭제 메뉴 */}
+                          {[
+                            {
+                              key: "edit",
+                              text: "수정",
+                              onClick: () => handleEditClick(review),
+                              style: {
+                                padding: "8px 16px",
+                                cursor: "pointer",
+                                fontSize: "14px",
+                                color: "#333",
+                                borderBottom: "1px solid #eee",
+                              },
+                            },
+                            {
+                              key: "delete",
+                              text: "삭제",
+                              onClick: () => handleDeleteClick(review),
+                              style: {
+                                padding: "8px 16px",
+                                cursor: "pointer",
+                                fontSize: "14px",
+                                color: "red",
+                              },
+                            },
+                          ].map((item) => (
+                            <li
+                              key={item.key}
+                              onClick={item.onClick}
+                              style={item.style}
+                            >
+                              {item.text}
+                            </li>
+                          ))}
                         </ul>
                       )}
                   </div>
@@ -348,14 +402,16 @@ export default function ReviewComponent({ projectNo }) {
         />
       )}
 
-      <div className={styles.loadMoreContainer}>
-        <button
-          className={styles.loadMoreButton}
-          onClick={handleShowAllReviews}
-        >
-          리뷰 전체보기
-        </button>
-      </div>
+      {totalReviewsCount > 5 && (
+        <div className={styles.loadMoreContainer}>
+          <button
+            className={styles.loadMoreButton}
+            onClick={handleShowAllReviews}
+          >
+            리뷰 전체보기
+          </button>
+        </div>
+      )}
 
       {isDeleteModalOpen && selectedReview && (
         <div
