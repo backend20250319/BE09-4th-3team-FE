@@ -304,13 +304,54 @@ export default function ReviewComponent({ projectNo }) {
                       String(currentUserId).trim() ===
                         String(review.userId).trim() && (
                         <ul
-                          style={
-                            {
-                              /* 생략 */
-                            }
-                          }
+                          style={{
+                            position: "absolute",
+                            top: "24px",
+                            right: 0,
+                            background: "white",
+                            border: "1px solid #ddd",
+                            borderRadius: "4px",
+                            boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                            padding: "8px 0",
+                            listStyle: "none",
+                            margin: 0,
+                            width: "120px",
+                            zIndex: 1000,
+                          }}
                         >
-                          {/* 수정, 삭제 메뉴 */}
+                          {[
+                            {
+                              key: "edit",
+                              text: "수정",
+                              onClick: () => handleEditClick(review),
+                              style: {
+                                padding: "8px 16px",
+                                cursor: "pointer",
+                                fontSize: "14px",
+                                color: "#333",
+                                borderBottom: "1px solid #eee",
+                              },
+                            },
+                            {
+                              key: "delete",
+                              text: "삭제",
+                              onClick: () => handleDeleteClick(review),
+                              style: {
+                                padding: "8px 16px",
+                                cursor: "pointer",
+                                fontSize: "14px",
+                                color: "red",
+                              },
+                            },
+                          ].map((item) => (
+                            <li
+                              key={item.key}
+                              onClick={item.onClick}
+                              style={item.style}
+                            >
+                              {item.text}
+                            </li>
+                          ))}
                         </ul>
                       )}
                   </div>
