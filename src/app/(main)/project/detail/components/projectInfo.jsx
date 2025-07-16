@@ -217,6 +217,7 @@ export default function ProjectInfo({
                       onClick={() => setOpen(true)}
                       className="w-full h-[48px] cursor-pointer py-[14px] px-5 rounded-[8px] gap-1 flex items-center justify-center border-0 text-base bg-[#1c1c1c] text-white hover:bg-[#6d6d6d] transition-colors"
                     >
+
                       {new Date(project.startLine) > new Date()
                         ? "공개 예정"
                         : "마감안내"}
