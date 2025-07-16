@@ -73,25 +73,33 @@ export default function Section02({ projects }) {
                             공개예정
                           </div>
                         ) : (
-                          // 시작일이 오늘이거나 지남 → 진행중 + 남은 일수
-                          <div className="flex gap-1">
-                            <div className="bg-[#e0f7e9] w-12 text-[#34a853] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
-                              진행중
-                            </div>
-                            <div className="bg-[#F3F4F6] w-12 text-[#374151] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
-                              {(() => {
-                                const dday = getDday(
-                                  project.startLine,
-                                  project.deadLine
-                                );
-                                return typeof dday === "string"
-                                  ? dday
-                                  : `${dday}일 남음`;
-                              })()}
-                            </div>
-                          </div>
+                          (() => {
+                            const dday = getDday(
+                              project.startLine,
+                              project.deadLine
+                            );
+                            const showProgress =
+                              typeof dday !== "string" && dday > 0;
+
+                            return (
+                              <div className="flex gap-1">
+                                {showProgress && (
+                                  <div className="bg-[#e0f7e9] w-12 text-[#34a853] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                                    진행중
+                                  </div>
+                                )}
+                                <div className="bg-[#F3F4F6] w-12 text-[#374151] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                                  {typeof dday === "string"
+                                    ? dday
+                                    : dday <= 0
+                                    ? "마감"
+                                    : `${dday}일 남음`}
+                                </div>
+                              </div>
+                            );
+                          })()
                         )}
-                        {project.creatorName == "hoya" && (
+                        {project.creatorName === "hoya" && (
                           <div>
                             <Image
                               src={"/main/goodCreator.png"}

@@ -109,24 +109,28 @@ export default function ProjectListClient() {
                       공개예정
                     </div>
                   ) : (
-                    <div className="flex gap-1">
-                      <div className="bg-[#e0f7e9] w-12 text-[#34a853] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
-                        진행중
-                      </div>
-                      <div className="bg-[#F3F4F6] w-12 text-[#374151] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
-                        {(() => {
-                          const dday = getDday(
-                            project.startLine,
-                            project.deadLine
-                          );
-                          if (typeof dday === "string") return dday;
-                          if (dday <= 0) return "마감";
-                          return `${dday}일 남음`;
-                        })()}
-                      </div>
-                    </div>
+                    (() => {
+                      const dday = getDday(project.startLine, project.deadLine);
+                      return (
+                        <div className="flex gap-1">
+                          {/* dday가 숫자면서 1 이상일 때만 진행중 표시 */}
+                          {typeof dday !== "string" && dday > 0 && (
+                            <div className="bg-[#e0f7e9] w-12 text-[#34a853] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                              진행중
+                            </div>
+                          )}
+                          <div className="bg-[#F3F4F6] w-12 text-[#374151] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                            {typeof dday === "string"
+                              ? dday
+                              : dday <= 0
+                              ? "마감"
+                              : `${dday}일 남음`}
+                          </div>
+                        </div>
+                      );
+                    })()
                   )}
-                  {project.creatorName == "hoya" && (
+                  {project.creatorName === "hoya" && (
                     <div>
                       <Image
                         src={"/main/goodCreator.png"}
