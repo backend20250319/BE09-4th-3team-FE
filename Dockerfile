@@ -1,17 +1,19 @@
-# 1단계: Build stage
+# 1단계: Build
 FROM node:lts-alpine AS build
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN if[ ! -d node_modules ]; then npm install; fi
 
 COPY . .
-RUN npm run build # .next 폴더생성
+COPY .env.local .env.local
+RUN npm run build
 
-# 2단계: Production stage
+# 2단계: Serve
 FROM node:lts-alpine
 WORKDIR /app
 
 COPY --from=build /app ./
+RUN npm install --omit=dev
 EXPOSE 3000
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "start"]
