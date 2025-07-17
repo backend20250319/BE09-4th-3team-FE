@@ -54,6 +54,18 @@
 - 메인 페이지, 헤더, 푸터 등은 아직 구현되지 않았습니다.
 - 각자 담당 파트를 나누어 작업을 시작해주세요.
 
+## MSA아키텍쳐 설계도
+![image.png](attachment:85bc5676-963c-40c8-a2bf-59b83c72b92d:image.png)
+| 서비스 이름 | 주요 기능 | 주요 디렉토리 |
+| --- | --- | --- |
+| **Auth Service** | 로그인, JWT 발급, OAuth2 인증 | `register/auth`, `register/security` |
+| **User Service** | 회원가입, 사용자 정보 조회/수정 | `register/controller`, `register/entity` |
+| **Admin Service** | 관리자 통계, 대시보드 API 제공 | `admin/controller`, `admin/service` |
+| **Project Service** | 프로젝트 생성, 승인, 상태 관리, 이미지/보상 관리 | `project/` 전체 |
+| **Pledge Service** | 후원 등록, 후원 통계 조회 | `pledge/` 전체 |
+| **Notification Service** | 알림 발송 및 읽음 처리 | `notification/` 전체 |
+| **Review Service** | 프로젝트 리뷰 등록 및 조회 | `review/` 전체 |
+
 ## 테스트 케이스
 <details>
   <summary>👤 유저 서비스</summary>
