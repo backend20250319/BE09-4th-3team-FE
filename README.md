@@ -49,13 +49,13 @@
 - Axios (Http 통신 라이브러리)
 
 ## 📌 참고사항
-<img width="2047" height="665" alt="image" src="https://github.com/user-attachments/assets/aeded46b-f704-4fb7-88e0-327cfd7254ce" />
 - 현재 프로젝트는 **기본 틀만 구성된 상태**입니다.
 - 메인 페이지, 헤더, 푸터 등은 아직 구현되지 않았습니다.
 - 각자 담당 파트를 나누어 작업을 시작해주세요.
 
 ## MSA아키텍쳐 설계도
 
+<img width="2047" height="665" alt="image" src="https://github.com/user-attachments/assets/aeded46b-f704-4fb7-88e0-327cfd7254ce" />
 | 서비스 이름 | 주요 기능 | 주요 디렉토리 |
 | --- | --- | --- |
 | **Auth Service** | 로그인, JWT 발급, OAuth2 인증 | `register/auth`, `register/security` |
