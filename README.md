@@ -55,7 +55,6 @@
 
 ## MSA아키텍쳐 설계도
 
-<img width="2047" height="665" alt="image" src="https://github.com/user-attachments/assets/aeded46b-f704-4fb7-88e0-327cfd7254ce" />
 | 서비스 이름 | 주요 기능 | 주요 디렉토리 |
 | --- | --- | --- |
 | **Auth Service** | 로그인, JWT 발급, OAuth2 인증 | `register/auth`, `register/security` |
@@ -65,6 +64,8 @@
 | **Pledge Service** | 후원 등록, 후원 통계 조회 | `pledge/` 전체 |
 | **Notification Service** | 알림 발송 및 읽음 처리 | `notification/` 전체 |
 | **Review Service** | 프로젝트 리뷰 등록 및 조회 | `review/` 전체 |
+
+<img width="2047" height="665" alt="image" src="https://github.com/user-attachments/assets/aeded46b-f704-4fb7-88e0-327cfd7254ce" />
 
 ## 테스트 케이스
 <details>
