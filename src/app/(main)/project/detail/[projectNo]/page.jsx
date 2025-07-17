@@ -28,13 +28,17 @@ export default function Page() {
     if (newQuantity < 1) return;
 
     setSelectedRewards((prev) =>
-      prev.map((reward) => (reward.id === rewardId ? { ...reward, quantity: newQuantity } : reward))
+      prev.map((reward) =>
+        reward.id === rewardId ? { ...reward, quantity: newQuantity } : reward
+      )
     );
   };
 
   // 선물 제거
   const removeReward = (rewardId) => {
-    setSelectedRewards((prev) => prev.filter((reward) => reward.id !== rewardId));
+    setSelectedRewards((prev) =>
+      prev.filter((reward) => reward.id !== rewardId)
+    );
   };
 
   // 선물 추가
@@ -65,7 +69,10 @@ export default function Page() {
       return;
     }
     const cartId = uuidv4();
-    sessionStorage.setItem(`selectedRewards_${cartId}`, JSON.stringify(selectedRewards));
+    sessionStorage.setItem(
+      `selectedRewards_${cartId}`,
+      JSON.stringify(selectedRewards)
+    );
     router.push(`/project/detail/${projectNo}/pledge?cartId=${cartId}`);
   };
 
@@ -85,9 +92,11 @@ export default function Page() {
 
   useEffect(() => {
     if (projectNo) {
-      axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/project/${projectNo}`).then((res) => {
-        setProject(res.data.data);
-      });
+      axios
+        .get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/project/${projectNo}`)
+        .then((res) => {
+          setProject(res.data.data);
+        });
     }
   }, [projectNo]);
 
@@ -110,46 +119,73 @@ export default function Page() {
           </div>
           <div className="w-[50%]">
             <div className="flex gap-5 flex-col pb-5 border-b border-[#e4e4e4]">
-              <p className="text-2xl font-bold leading-[120%]">{project.title}</p>
+              <p className="text-2xl font-bold leading-[120%]">
+                {project.title}
+              </p>
               <div className="flex gap-[6px] flex-col leading-[120%]">
                 <p className="text-sm font-normal text-[#545454]">모인금액</p>
                 <p className="text-2xl font-bold leading-[120%]">
                   {numberWithCommas(project.currentAmount)}
                   <span className="text-sm font-normal ml-[2px]">원</span>
-                  <span className="text-lg ml-2 text-[#eb4b38]">{project.percentFunded}%</span>
+                  <span className="text-lg ml-2 text-[#eb4b38]">
+                    {project.percentFunded}%
+                  </span>
                 </p>
               </div>
               <div className="flex gap-[6px] flex-col leading-[120%]">
                 <p className="text-sm font-normal text-[#545454]">남은시간</p>
                 <p className="text-2xl font-bold leading-[120%]">
-                  {getDday(project.startLine, project.deadline)}
-                  <span className="text-sm font-normal ml-[2px]">일</span>
+                  {(() => {
+                    const dday = getDday(project.startLine, project.deadline);
+                    if (typeof dday === "string") return dday; // 마감 or 공개예정
+                    return (
+                      <>
+                        {dday}
+                        <span className="text-sm font-normal ml-[2px]">일</span>
+                      </>
+                    );
+                  })()}
                 </p>
               </div>
             </div>
             <div className="flex gap-5 flex-col py-5">
               <div className="flex gap-4 items-center">
-                <p className="w-[86px] text-[#1c1c1c] text-xs font-semibold ">목표금액</p>
-                <p className="text-[#1c1c1c] text-[13px] font-normal">{numberWithCommas(project.goalAmount)}원</p>
+                <p className="w-[86px] text-[#1c1c1c] text-xs font-semibold ">
+                  목표금액
+                </p>
+                <p className="text-[#1c1c1c] text-[13px] font-normal">
+                  {numberWithCommas(project.goalAmount)}원
+                </p>
               </div>
               <div className="flex gap-4 items-center">
-                <p className="w-[86px] text-[#1c1c1c] text-xs font-semibold ">펀딩 기간</p>
+                <p className="w-[86px] text-[#1c1c1c] text-xs font-semibold ">
+                  펀딩 기간
+                </p>
                 <p className="text-[#1c1c1c] text-[13px] font-normal">
                   {project.startLine} ~ {project.deadline}
                   <span className="text-[10px] font-bold ml-[6px] py-[4px] px-[6px] rounded-[6px] bg-[#fff2f3] text-[#e53c41]">
-                    {getDday(project.startLine, project.deadline)}일 남음
+                    {(() => {
+                      const dday = getDday(project.startLine, project.deadline);
+                      return typeof dday === "string" ? dday : `${dday}일 남음`;
+                    })()}
                   </span>
                 </p>
               </div>
               <div className="flex gap-4 items-center">
-                <p className="w-[86px] text-[#1c1c1c] text-xs font-semibold ">결제</p>
+                <p className="w-[86px] text-[#1c1c1c] text-xs font-semibold ">
+                  결제
+                </p>
                 <p className="text-[#1c1c1c] text-[13px] font-normal">
                   목표 금액 달성 시 {getNextDay(project.deadline)}에 결제 진행
                 </p>
               </div>
               <div className="flex gap-4 items-center">
-                <p className="w-[86px] text-[#1c1c1c] text-xs font-semibold ">예상 발송 시작일</p>
-                <p className="text-[#1c1c1c] text-[13px] font-normal">{getNextWeek(project.deadline)}</p>
+                <p className="w-[86px] text-[#1c1c1c] text-xs font-semibold ">
+                  예상 발송 시작일
+                </p>
+                <p className="text-[#1c1c1c] text-[13px] font-normal">
+                  {getNextWeek(project.deadline)}
+                </p>
               </div>
             </div>
             <button className="w-full h-[44px] cursor-pointer flex items-center justify-center mt-2 mb-5 bg-[#fff7f0] border border-[fff7f0] rounded-[4px] outline-0 text-xs font-semibold leading-[120%] text-[#eb4b38]">
@@ -175,7 +211,9 @@ export default function Page() {
                   onClick={onClickGoPledge}
                   className="w-full h-[48px] cursor-pointer py-[14px] px-5 rounded-[8px] gap-1 flex items-center justify-center border-0 text-base bg-[#1c1c1c] text-white"
                 >
-                  공개예정
+                  {new Date(project.startLine) > new Date()
+                    ? "공개 예정"
+                    : "마감"}
                 </button>
               )}
             </div>

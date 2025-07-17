@@ -24,9 +24,12 @@ export default function ProjectListClient() {
 
   const fetchProjects = async (page = 0, size = 12) => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/project/list`, {
-        params: { page, size },
-      });
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/project/list`,
+        {
+          params: { page, size },
+        }
+      );
       if (response.data.success) {
         setProjects(response.data.data);
         setPagination(response.data.pagination);
@@ -50,13 +53,17 @@ export default function ProjectListClient() {
   return (
     <div className="w-[1160px] mx-auto my-10">
       <div className="text-base leading-[27px] mx-auto pt-4 pr-5 pb-3">
-        <span className="text-[#ff5757]">{approvedCount}</span>개의 프로젝트가 있습니다.
+        <span className="text-[#ff5757]">{approvedCount}</span>개의 프로젝트가
+        있습니다.
       </div>
 
       {/* 썸네일 이미지 */}
       <div className="grid grid-cols-4 gap-4">
         {projects.map((project) => (
-          <Link key={project.projectNo} href={`/project/detail/${project.projectNo}`}>
+          <Link
+            key={project.projectNo}
+            href={`/project/detail/${project.projectNo}`}
+          >
             <div className="rounded-t-[8px] border-b-3 border-[#eb4b38]">
               {project.thumbnailUrl ? (
                 <div className="overflow-hidden rounded-t-[8px]">
@@ -76,13 +83,19 @@ export default function ProjectListClient() {
               {/* 프로젝트 정보 */}
 
               <div className="pt-4 flex flex-col gap-1">
-                <p className="text-xs leading-[120%] text-[#545454]">{project.creatorName}</p>
-                <h2 className="text-base pb-1 text-[#1c1c1c] mb-[6px] border-b ">{project.title}</h2>
+                <p className="text-xs leading-[120%] text-[#545454]">
+                  {project.creatorName}
+                </p>
+                <h2 className="text-base pb-1 text-[#1c1c1c] mb-[6px] border-b ">
+                  {project.title}
+                </h2>
               </div>
               <div className="pb-1 text-sm">
                 <p className="text-[#1c1c1c] mb-[6px] flex gap-2 items-center">
                   목표금액:
-                  <span className="text-[#545454]">{project.goalAmount.toLocaleString()}원</span>
+                  <span className="text-[#545454]">
+                    {project.goalAmount.toLocaleString()}원
+                  </span>
                 </p>
                 <p className="text-[#1c1c1c] mb-[6px] flex gap-2 items-center">
                   마감일:
@@ -96,32 +109,55 @@ export default function ProjectListClient() {
                       공개예정
                     </div>
                   ) : (
-                    // 시작일이 오늘이거나 지남 → 진행중 + 남은 일수
-                    <div className="flex gap-1">
-                      <div className="bg-[#e0f7e9] w-12 text-[#34a853] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
-                        진행중
-                      </div>
-                      <div className="bg-[#F3F4F6] w-12 text-[#374151] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
-                        {getDday(project.startLine, project.deadLine)}일 남음
-                      </div>
-                    </div>
+                    (() => {
+                      const dday = getDday(project.startLine, project.deadLine);
+                      return (
+                        <div className="flex gap-1">
+                          {/* dday가 숫자면서 1 이상일 때만 진행중 표시 */}
+                          {typeof dday !== "string" && dday > 0 && (
+                            <div className="bg-[#e0f7e9] w-12 text-[#34a853] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                              진행중
+                            </div>
+                          )}
+                          <div className="bg-[#F3F4F6] w-12 text-[#374151] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                            {typeof dday === "string"
+                              ? dday
+                              : dday <= 0
+                              ? "마감"
+                              : `${dday}일 남음`}
+                          </div>
+                        </div>
+                      );
+                    })()
                   )}
-                  {project.creatorName == "hoya" && (
+                  {project.creatorName === "hoya" && (
                     <div>
-                      <Image src={"/main/goodCreator.png"} alt="좋은 창작자" width={60} height={17} />
+                      <Image
+                        src={"/main/goodCreator.png"}
+                        alt="좋은 창작자"
+                        width={60}
+                        height={17}
+                      />
                     </div>
                   )}
                 </div>
 
                 <div className="flex justify-between">
                   <div className="flex gap-1">
-                    <p className="text-sm text-[#eb4b38] font-bold">{project.percent}%</p>
+                    <p className="text-sm text-[#eb4b38] font-bold">
+                      {project.percent}%
+                    </p>
                     <span className="text-[#545454] text-sm font-normal">
                       {project.currentAmount.toLocaleString()}원
                     </span>
                   </div>
                   <p className="text-[13px] text-[#545454] mb-[6px] font-bold">
-                    {getDday(project.startLine, project.deadLine)}일 남음
+                    {(() => {
+                      const dday = getDday(project.startLine, project.deadLine);
+                      if (typeof dday === "string") return dday;
+                      if (dday <= 0) return "마감";
+                      return `${dday}일 남음`;
+                    })()}
                   </p>
                 </div>
               </div>
@@ -130,7 +166,11 @@ export default function ProjectListClient() {
         ))}
       </div>
 
-      <Pagination currentPage={pagination.page} totalPages={pagination.totalPages} onPageChange={handlePageChange} />
+      <Pagination
+        currentPage={pagination.page}
+        totalPages={pagination.totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 }

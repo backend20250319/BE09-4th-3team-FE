@@ -5,7 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function Section02({ projects }) {
-  const sectionTitles = ["이런 프로젝트 어때요?", "에디터의 PICK", "내가 본 프로젝트와 비슷해요"];
+  const sectionTitles = [
+    "이런 프로젝트 어때요?",
+    "에디터의 PICK",
+    "내가 본 프로젝트와 비슷해요",
+  ];
 
   return (
     <section className="pt-6">
@@ -23,7 +27,10 @@ export default function Section02({ projects }) {
                 .sort(() => Math.random() - 0.5)
                 .slice(0, 5)
                 .map((project) => (
-                  <Link key={`${i}-${project.projectNo}`} href={`/project/detail/${project.projectNo}`}>
+                  <Link
+                    key={`${i}-${project.projectNo}`}
+                    href={`/project/detail/${project.projectNo}`}
+                  >
                     <div className="rounded-t-[8px]">
                       {project.thumbnailUrl ? (
                         <div className="overflow-hidden rounded-t-[8px] w-[220px] h-[220px]">
@@ -42,14 +49,20 @@ export default function Section02({ projects }) {
                       )}
 
                       <div className="pt-4 mb-[6px] flex flex-col ">
-                        <p className="text-xs leading-[120%] text-[#545454]">{project.creatorName}</p>
-                        <h2 className="text-sm text-[#1c1c1c]">{project.title}</h2>
+                        <p className="text-xs leading-[120%] text-[#545454]">
+                          {project.creatorName}
+                        </p>
+                        <h2 className="text-sm text-[#1c1c1c]">
+                          {project.title}
+                        </h2>
                       </div>
 
                       <div className="pb-1 text-sm mt-[6px]">
                         <div className="flex justify-between">
                           <div className="flex gap-2 items-center">
-                            <p className="text-sm text-[#eb4b38] font-bold">{project.percent}% 달성</p>
+                            <p className="text-sm text-[#eb4b38] font-bold">
+                              {project.percent}% 달성
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -60,19 +73,40 @@ export default function Section02({ projects }) {
                             공개예정
                           </div>
                         ) : (
-                          // 시작일이 오늘이거나 지남 → 진행중 + 남은 일수
-                          <div className="flex gap-1">
-                            <div className="bg-[#e0f7e9] w-12 text-[#34a853] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
-                              진행중
-                            </div>
-                            <div className="bg-[#F3F4F6] w-12 text-[#374151] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
-                              {getDday(project.startLine, project.deadLine)}일 남음
-                            </div>
-                          </div>
+                          (() => {
+                            const dday = getDday(
+                              project.startLine,
+                              project.deadLine
+                            );
+                            const showProgress =
+                              typeof dday !== "string" && dday > 0;
+
+                            return (
+                              <div className="flex gap-1">
+                                {showProgress && (
+                                  <div className="bg-[#e0f7e9] w-12 text-[#34a853] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                                    진행중
+                                  </div>
+                                )}
+                                <div className="bg-[#F3F4F6] w-12 text-[#374151] h-[18px] text-[10px] font-bold justify-center leading-[120%] flex items-center rounded-[2px]">
+                                  {typeof dday === "string"
+                                    ? dday
+                                    : dday <= 0
+                                    ? "마감"
+                                    : `${dday}일 남음`}
+                                </div>
+                              </div>
+                            );
+                          })()
                         )}
-                        {project.creatorName == "hoya" && (
+                        {project.creatorName === "hoya" && (
                           <div>
-                            <Image src={"/main/goodCreator.png"} alt="좋은 창작자" width={60} height={17} />
+                            <Image
+                              src={"/main/goodCreator.png"}
+                              alt="좋은 창작자"
+                              width={60}
+                              height={17}
+                            />
                           </div>
                         )}
                       </div>
