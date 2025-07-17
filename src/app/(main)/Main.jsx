@@ -1,26 +1,62 @@
-import Link from "next/link";
-import React from "react";
+"use client";
+import Section01 from "@/components/main/components/section01";
+import Section02 from "@/components/main/components/section02";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 export default function Main() {
+  const [projects, setProjects] = useState([]);
+  const [pagination, setPagination] = useState({
+    page: 0,
+    size: 12,
+    totalPages: 0,
+    totalElements: 0,
+  });
+
+  // OAuth 로그인 후 토큰 처리
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get("accessToken");
+    const refreshToken = urlParams.get("refreshToken");
+
+    if (accessToken) {
+      sessionStorage.setItem("accessToken", accessToken);
+      // URL에서 토큰 파라미터 제거
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+
+      // 헤더 동기화를 위한 이벤트 발생
+      window.dispatchEvent(new Event("storage"));
+
+      console.log("OAuth 로그인 성공: 토큰이 저장되었습니다.");
+    }
+    if (refreshToken) {
+      sessionStorage.setItem("refreshToken", refreshToken);
+    }
+  }, []);
+
+  const fetchProjects = async (page = 0, size = 12) => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/project/list`, {
+        params: { page, size },
+      });
+      if (response.data.success) {
+        setProjects(response.data.data);
+        setPagination(response.data.pagination);
+      }
+    } catch (error) {
+      console.error("프로젝트 목록 조회 실패:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
   return (
-    <>
-      <ul className="text-3xl flex flex-col gap-5">
-        <li className="hover:text-[#f00]">
-          <Link href="/nayeon">임나연</Link>
-        </li>
-        <li className="hover:text-[#ffbe4f]">
-          <Link href="/seokgeun">조석근</Link>
-        </li>
-        <li className="hover:text-[#65ff4a]">
-          <Link href="/junbem">박준범</Link>
-        </li>
-        <li className="hover:text-[#4fd3ff]">
-          <Link href="/seokjin">이석진</Link>
-        </li>
-        <li className="hover:text-[#8446ff]">
-          <Link href="/jungho">지정호</Link>
-        </li>
-      </ul>
-    </>
+    <main className="bg-white">
+      <Section01 projects={projects} />
+      <Section02 projects={projects} />
+    </main>
   );
 }

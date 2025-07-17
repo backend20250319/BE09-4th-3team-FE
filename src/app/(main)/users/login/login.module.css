@@ -1,0 +1,273 @@
+/* seokgeun/login/login.module.css */
+/* 로그인 페이지 스타일 정의 */
+
+/* 전체 컨테이너 - 화면 전체 높이를 사용하는 플렉스 레이아웃 */
+.container {
+  display: flex; /* 플렉스 레이아웃 사용 */
+  height: 100vh; /* 뷰포트 높이의 100% */
+}
+
+/* 좌측 패널 - 로그인 폼이 위치하는 영역 */
+.leftPanel {
+  flex: 1; /* 남은 공간의 1/2 차지 */
+  padding: 3rem; /* 내부 여백 3rem */
+  display: flex; /* 플렉스 레이아웃 */
+  flex-direction: column; /* 세로 방향 정렬 */
+  justify-content: center; /* 세로 중앙 정렬 */
+  align-items: center; /* 가로 중앙 정렬 */
+  margin-bottom: 10rem; /* 하단 여백 10rem */
+}
+
+/* 로그인 박스 컨테이너 */
+.loginBox {
+  max-width: 320px; /* 최대 너비 제한 */
+  width: 100%; /* 전체 너비 사용 */
+}
+
+/* 설명 텍스트 스타일 */
+.description {
+  font-size: 20px; /* 글자 크기 20px */
+  text-align: center; /* 텍스트 중앙 정렬 */
+  margin-bottom: 1rem; /* 하단 여백 1rem */
+}
+
+/* 입력 필드 공통 스타일 */
+.input {
+  width: 100%; /* 전체 너비 */
+  padding: 0.75rem; /* 내부 여백 */
+  margin-bottom: 1rem; /* 하단 여백 */
+  border-radius: 6px; /* 모서리 둥글게 */
+  border: 1px solid #ccc; /* 회색 테두리 */
+  font-size: 14px; /* 글자 크기 */
+  transition: border-color 0.3s ease; /* 테두리 색상 변화 애니메이션 */
+}
+
+/* 입력 필드 포커스 시 스타일 */
+.input:focus {
+  outline: none; /* 기본 포커스 아웃라인 제거 */
+  border-color: #29d612; /* 포커스 시 초록색 테두리 */
+  box-shadow: 0 0 0 2px rgba(41, 214, 18, 0.2); /* 포커스 시 그림자 효과 */
+}
+
+/* 로그인 버튼 스타일 */
+.kakaoButton {
+  width: 100%; /* 전체 너비 */
+  background-color: #29d612; /* 초록색 배경 */
+  color: #000; /* 검은색 텍스트 */
+  padding: 0.75rem; /* 내부 여백 */
+  font-weight: bold; /* 굵은 글씨 */
+  border: none; /* 테두리 없음 */
+  border-radius: 6px; /* 모서리 둥글게 */
+  margin-bottom: 1rem; /* 하단 여백 */
+  cursor: pointer; /* 마우스 포인터 */
+  font-size: 16px; /* 글자 크기 */
+  transition: background-color 0.3s ease; /* 배경색 변화 애니메이션 */
+}
+
+/* 로그인 버튼 호버 시 스타일 */
+.kakaoButton:hover:not(:disabled) {
+  background-color: #24b30f; /* 호버 시 더 진한 초록색 */
+}
+
+/* 로그인 버튼 비활성화 시 스타일 */
+.kakaoButton:disabled {
+  background-color: #ccc; /* 회색 배경 */
+  cursor: not-allowed; /* 사용 불가 커서 */
+  opacity: 0.7; /* 투명도 */
+}
+
+/* 회원가입 링크 스타일 */
+.signup {
+  text-align: center; /* 텍스트 중앙 정렬 */
+  font-size: 16px; /* 작은 글자 크기 */
+  margin-top: 1rem; /* 상단 여백 */
+  color: #666; /* 회색 텍스트 */
+}
+
+/* 회원가입 링크 내 앵커 태그 스타일 */
+.signup a {
+  color: #29d612; /* 초록색 링크 */
+  text-decoration: none; /* 밑줄 제거 */
+  font-weight: 500; /* 약간 굵은 글씨 */
+  transition: color 0.3s ease; /* 색상 변화 애니메이션 */
+}
+
+/* 회원가입 링크 호버 시 스타일 */
+.signup a:hover {
+  color: #24b30f; /* 호버 시 더 진한 초록색 */
+  text-decoration: underline; /* 호버 시 밑줄 표시 */
+}
+
+/* 우측 패널 - 배경 이미지가 표시되는 영역 */
+.rightPanel {
+  flex: 1; /* 남은 공간의 1/2 차지 */
+  background-size: cover; /* 배경 이미지가 영역을 완전히 덮도록 */
+  background-position: center; /* 배경 이미지 중앙 정렬 */
+  margin-right: 15px; /* 우측 여백 */
+  background-repeat: no-repeat; /* 배경 이미지 반복 없음 */
+}
+
+/* 개선점: 반응형 디자인을 위한 미디어 쿼리 */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column; /* 모바일에서는 세로 배치 */
+  }
+
+  .leftPanel {
+    flex: none; /* 고정 높이 사용 */
+    height: 60vh; /* 뷰포트 높이의 60% */
+    margin-bottom: 0; /* 하단 여백 제거 */
+    padding: 2rem; /* 패딩 축소 */
+  }
+
+  .rightPanel {
+    flex: none; /* 고정 높이 사용 */
+    height: 40vh; /* 뷰포트 높이의 40% */
+    margin-right: 0; /* 우측 여백 제거 */
+  }
+
+  .loginBox {
+    max-width: 100%; /* 전체 너비 사용 */
+  }
+}
+
+/* 개선점: 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .input {
+    background-color: #333; /* 어두운 배경 */
+    color: #fff; /* 흰색 텍스트 */
+    border-color: #555; /* 어두운 테두리 */
+  }
+
+  .input:focus {
+    border-color: #29d612; /* 포커스 시 초록색 유지 */
+  }
+
+  .signup {
+    color: #ccc; /* 밝은 회색 텍스트 */
+  }
+}
+
+/* profile/page.css와 동일한 모달 스타일 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  padding: 32px 24px;
+  min-width: 280px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
+}
+.modalContent {
+  text-align: center;
+}
+.modalContent button {
+  margin-top: 24px;
+  padding: 8px 32px;
+  border-radius: 8px;
+  border: none;
+  background: #d32f2f;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.socialLoginLinks {
+  text-align: center;
+  margin-top: 12px;
+}
+.socialLoginLink {
+  text-decoration: underline;
+  font-weight: 500;
+  font-size: 15px;
+  margin-right: 16px;
+  transition: color 0.2s;
+}
+.socialLoginLink:last-child {
+  margin-right: 0;
+}
+.socialLoginLinksRow {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  margin-top: 12px;
+  width: 100%;
+}
+.socialLoginBtn {
+  flex: 1 1 0;
+  text-align: center;
+  font-weight: 500;
+  font-size: 15px;
+  padding: 12px 0;
+  text-decoration: underline;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.socialLoginGoogle {
+  color: #4285f4;
+  border-right: 1px solid #eee;
+}
+.socialLoginGoogle:hover {
+  background: #e8f0fe;
+  color: #174ea6;
+}
+.socialLoginKakao {
+  color: #fee500;
+}
+.socialLoginKakao:hover {
+  background: #fffbe7;
+  color: #c7b200;
+}
+
+.socialLoginBtnsCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  width: 100%;
+}
+.socialLoginBtnsRow {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  width: 100%;
+}
+.socialLoginBtnBlock {
+  flex: 1 1 0;
+  padding: 16px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  margin: 0;
+  display: block;
+}
+.socialLoginKakaoBlock {
+  background: #fee500;
+  color: #191600;
+}
+.socialLoginKakaoBlock:hover {
+  background: #ffe066;
+}
+.socialLoginGoogleBlock {
+  background: #8ecaff;
+  color: #fff;
+}
+.socialLoginGoogleBlock:hover {
+  background: #5ba6e6;
+}

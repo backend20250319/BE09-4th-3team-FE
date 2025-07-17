@@ -1,0 +1,122 @@
+/* seokgeun/css/main.module.css */
+/* 메인 페이지 스타일 정의 */
+
+/* 전체 컨테이너 - 화면 전체 높이를 사용하는 플렉스 레이아웃 */
+.container {
+  display: flex; /* 플렉스 레이아웃 사용 */
+  height: 100vh; /* 뷰포트 높이의 100% */
+}
+
+/* 좌측 패널 - 로그인 폼이 위치하는 영역 */
+.leftPanel {
+  flex: 1; /* 남은 공간의 1/2 차지 */
+  padding: 3rem; /* 내부 여백 3rem */
+  display: flex; /* 플렉스 레이아웃 */
+  flex-direction: column; /* 세로 방향 정렬 */
+  justify-content: center; /* 세로 중앙 정렬 */
+  align-items: center; /* 가로 중앙 정렬 */
+  margin-bottom: 10rem; /* 하단 여백 10rem */
+}
+
+/* 설명 텍스트 스타일 */
+.description {
+  font-size: 20px; /* 글자 크기 20px */
+  text-align: center; /* 텍스트 중앙 정렬 */
+  margin-bottom: 1rem; /* 하단 여백 1rem */
+}
+
+/* 카카오 로그인 버튼 스타일 */
+.kakaoButton {
+  width: 100%; /* 전체 너비 */
+  background-color: #fee500; /* 카카오 브랜드 색상 */
+  color: #000; /* 검은색 텍스트 */
+  padding: 0.75rem; /* 내부 여백 */
+  font-weight: bold; /* 굵은 글씨 */
+  border: none; /* 테두리 없음 */
+  border-radius: 6px; /* 모서리 둥글게 */
+  margin-bottom: 1rem; /* 하단 여백 */
+  cursor: pointer; /* 마우스 포인터 */
+}
+
+/* 구글 로그인 버튼 스타일 */
+.googleButton {
+  width: 100%; /* 전체 너비 */
+  background-color: #0a89f183; /* 구글 브랜드 색상 (투명도 포함) */
+  color: #fff; /* 흰색 텍스트 */
+  padding: 0.75rem; /* 내부 여백 */
+  font-weight: bold; /* 굵은 글씨 */
+  border: none; /* 테두리 없음 */
+  border-radius: 6px; /* 모서리 둥글게 */
+  margin-bottom: 1rem; /* 하단 여백 */
+  cursor: pointer; /* 마우스 포인터 */
+}
+
+/* 회원가입 링크 스타일 */
+.signup {
+  text-align: center; /* 텍스트 중앙 정렬 */
+  font-size: 13px; /* 작은 글자 크기 */
+  margin-top: 1rem; /* 상단 여백 */
+}
+
+/* 로그인 링크 스타일 */
+.loginLink {
+  text-align: center; /* 텍스트 중앙 정렬 */
+  font-size: 13px; /* 작은 글자 크기 */
+  margin-top: 1rem; /* 상단 여백 */
+}
+
+/* 우측 패널 - 배경 이미지가 표시되는 영역 */
+.rightPanel {
+  flex: 1; /* 남은 공간의 1/2 차지 */
+  background-size: cover; /* 배경 이미지가 영역을 완전히 덮도록 */
+  background-position: center; /* 배경 이미지 중앙 정렬 */
+  margin-right: 15px; /* 우측 여백 */
+}
+
+/* 모달 오버레이 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* 모달 컨테이너 */
+.modal {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+/* 모달 내용 */
+.modalContent p {
+  margin-bottom: 1.5rem;
+  font-size: 16px;
+  color: #333;
+}
+
+/* 모달 버튼 */
+.modalButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.modalButton:hover {
+  background-color: #0056b3;
+}

@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+/* 전체 헤더 영역 */
+.dashboard-header {
+    @apply sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-white px-4 md:px-6 shadow-sm;
+}
+
+/* 좌측 nav 바 */
+.dashboard-nav {
+    @apply hidden md:flex gap-6 text-sm font-medium items-center;
+}
+
+.dashboard-logo {
+    @apply flex items-center gap-2 text-base font-semibold;
+}
+
+.dashboard-link {
+    @apply text-gray-400 hover:text-black;
+}
+
+.dashboard-link-active {
+    @apply text-black;
+}
+
+/* 모바일 햄버거 메뉴 버튼 */
+.mobile-menu-button {
+    @apply p-2 border rounded md:hidden;
+}
+
+/* 우측 검색 및 유저 액션들 */
+.dashboard-actions {
+    @apply flex ml-auto items-center gap-4;
+}
+
+/* 검색창 */
+.search-icon {
+    @apply absolute left-3 top-2.5 h-4 w-4 text-gray-400;
+}
+
+.dashboard-search {
+    @apply pl-8 pr-4 py-1 rounded-md border text-sm w-48 sm:w-72;
+}
+
+/* 알림 버튼 */
+.notification-button {
+    @apply p-2 border rounded-full;
+}
+
+/* 프로필 아바타 */
+.avatar-button {
+    @apply rounded-full overflow-hidden w-8 h-8 border;
+}
