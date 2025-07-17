@@ -92,7 +92,7 @@ export default function Header() {
       return;
     }
     try {
-      const response = await fetch("/api/register/user/me", {
+      const response = await fetch(`${API_BASE_URL}/api/register/user/me`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (!response.ok) throw new Error("not logged in");
@@ -430,7 +430,10 @@ export default function Header() {
                   >
                     <ul>
                       <li>
-                        <Link href="/users/dropdownmenu/mysettings/profile" className="block px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                        <Link
+                          href="/users/dropdownmenu/mysettings/profile"
+                          className="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
                           프로필
                         </Link>
                       </li>

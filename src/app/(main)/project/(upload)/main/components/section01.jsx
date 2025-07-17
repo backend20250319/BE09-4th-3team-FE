@@ -1,7 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import dynamic from "next/dynamic";
-import usePersistedState from "../hooks/usePersistedState";
 import { Asterisk, FileImage, Info, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import axios from "axios";
