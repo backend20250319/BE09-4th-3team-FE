@@ -92,7 +92,7 @@ export default function Header() {
       return;
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/api/register/user/me`, {
+      const response = await fetch(`/api/register/user/me`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (!response.ok) throw new Error("not logged in");
@@ -378,7 +378,7 @@ export default function Header() {
             <Link href={"/project/intro"}>
               <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">프로젝트 올리기</span>
             </Link>
-            <h2>테스트테스트테스트테스트테스트테스트</h2>
+            <h2>테스트</h2>
           </li>
           {isLogin ? (
             <>
