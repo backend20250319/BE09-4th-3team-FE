@@ -377,6 +377,7 @@ export default function Header() {
           <li className="p-4">
             <Link href={"/project/intro"}>
               <span className="text-[#191919] text-[12px] leading-[28px] font-semibold">프로젝트 올리기</span>
+              asdlkjansdlajsndlajsndlajsndlajsndlajsndlajsdnljn
             </Link>
           </li>
           {isLogin ? (
