@@ -3,7 +3,7 @@ FROM node:lts-alpine AS build
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN if[ ! -d node_modules ]; then npm install; fi
 
 COPY . .
 COPY .env.local .env.local
